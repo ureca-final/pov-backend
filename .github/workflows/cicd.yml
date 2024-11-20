@@ -60,7 +60,7 @@ jobs:
         run: |
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_01}} >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/id_ed25519 ubuntu@${{ secrets.EC2_PUBLIC_IP_01}} << 'EOF'
-          cd /home/ubuntu/AWSDeployTest
+          cd /home/ubuntu/pov-backend
           git pull
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
@@ -71,7 +71,7 @@ jobs:
         run: |
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_02}} >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/id_ed25519 ubuntu@${{ secrets.EC2_PUBLIC_IP_02}} << 'EOF'
-          cd /home/ubuntu/AWSDeployTest
+          cd /home/ubuntu/pov-backend
           git pull
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
