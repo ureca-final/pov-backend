@@ -1,9 +1,7 @@
 name: AWS CI/CD TEST
 
 on:
-  push:
-    branches: [ "dev" ]
-  pull_request:
+  merge:
     branches: [ "dev" ]
 
 env:
