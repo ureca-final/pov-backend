@@ -26,13 +26,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Gradle 권한 부여 및 실행
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
       # 환경 변수 등록 테스트
       - name: Test application.yml variables
         run: |
@@ -44,6 +37,13 @@ jobs:
           DB_URL: ${{ secrets.DB_URL }}
           DB_ADMIN_USERNAME: ${{ secrets.DB_ADMIN_USERNAME }}
           DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
+
+      # Gradle 권한 부여 및 실행
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
 
       # 애플리케이션 실행 및 환경 변수 테스트
       - name: Run Application and Test
