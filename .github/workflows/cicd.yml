@@ -3,9 +3,9 @@ name: AWS CI/CD TEST
 # 실행 시점 설정
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "dev" ]
 
 # AWS 변수 설정
 env:
