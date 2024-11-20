@@ -1,8 +1,8 @@
 name: AWS CI/CD TEST
 
 on:
-  merge:
-    branches: [ "dev" ]
+  pull_request:
+    types: [closed]
 
 env:
   AWS_REGION: ap-northeast-2
