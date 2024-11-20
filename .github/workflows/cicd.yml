@@ -24,31 +24,31 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 환경 변수 등록 테스트
-      - name: Test application.yml variables
-        run: |
-          echo "DB_URL=${{ secrets.DB_URL }}"
-          echo "DB_ADMIN_USERNAME=${{ secrets.DB_ADMIN_USERNAME }}"
-          echo "DB_ADMIN_PASSWORD=${{ secrets.DB_ADMIN_PASSWORD }}"
-          cat src/main/resources/application.yml
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_ADMIN_USERNAME: ${{ secrets.DB_ADMIN_USERNAME }}
-          DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
-
-      # Gradle 권한 부여 및 실행
+      # Gradle 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Gradle 빌드 실행
       - name: Build with Gradle
         run: ./gradlew build
 
-      # 애플리케이션 실행 및 환경 변수 테스트
+      # 실행 가능한 JAR 파일 감지
+      - name: Detect Executable JAR File
+        id: detect_jar
+        run: |
+          JAR_FILE=$(ls build/libs/*-SNAPSHOT.jar | head -n 1)
+          if [ -z "$JAR_FILE" ]; then
+            echo "No executable JAR file found."
+            exit 1
+          fi
+          echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV
+
+      # 애플리케이션 실행 및 테스트
       - name: Run Application and Test
         run: |
-          java -jar build/libs/your-app.jar &
+          java -jar ${{ env.JAR_FILE }} &
           sleep 10
-          curl http://localhost:8080/actuator/health
+          curl http://localhost:8080/actuator/health || exit 1
         env:
           DB_URL: ${{ secrets.DB_URL }}
           DB_ADMIN_USERNAME: ${{ secrets.DB_ADMIN_USERNAME }}
@@ -64,4 +64,4 @@ jobs:
 
       # S3 업로드
       - name: Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./build/libs/your-app.jar s3://$AWS_S3_BUCKET/
+        run: aws s3 cp --region ap-northeast-2 ${{ env.JAR_FILE }} s3://$AWS_S3_BUCKET/
