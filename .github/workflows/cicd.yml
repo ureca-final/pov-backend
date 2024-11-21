@@ -67,6 +67,9 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_01 }} >> ~/.ssh/known_hosts
           ssh -i ~/pov-keypair.pem ubuntu@${{ secrets.EC2_PUBLIC_IP_01 }} << 'EOF'
+          export DB_URL="${{ secrets.DB_URL }}"
+          export DB_ADMIN_USERNAME="${{ secrets.DB_ADMIN_USERNAME }}"
+          export DB_ADMIN_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}"
           cd /home/ubuntu/pov-backend
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
@@ -82,6 +85,9 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_02 }} >> ~/.ssh/known_hosts
           ssh -i ~/pov-keypair.pem ubuntu@${{ secrets.EC2_PUBLIC_IP_02 }} << 'EOF'
+          export DB_URL="${{ secrets.DB_URL }}"
+          export DB_ADMIN_USERNAME="${{ secrets.DB_ADMIN_USERNAME }}"
+          export DB_ADMIN_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}"
           cd /home/ubuntu/pov-backend
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
