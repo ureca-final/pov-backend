@@ -64,6 +64,7 @@ jobs:
       # 첫 번째 인스턴스 배포
       - name: Deploy to EC2 Instance 1
         run: |
+          mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_01 }} >> ~/.ssh/known_hosts
           ssh -i ~/pov-keypair.pem ubuntu@${{ secrets.EC2_PUBLIC_IP_01 }} << 'EOF'
           cd /home/ubuntu/pov-backend
@@ -78,6 +79,7 @@ jobs:
       # 두 번째 인스턴스 배포
       - name: Deploy to EC2 Instance 2
         run: |
+          mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_02 }} >> ~/.ssh/known_hosts
           ssh -i ~/pov-keypair.pem ubuntu@${{ secrets.EC2_PUBLIC_IP_02 }} << 'EOF'
           cd /home/ubuntu/pov-backend
