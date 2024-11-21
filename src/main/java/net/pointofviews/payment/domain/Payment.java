@@ -1,7 +1,8 @@
-package net.pointofviews.premiere.domain;
+package net.pointofviews.payment.domain;
 
 import jakarta.persistence.*;
 import net.pointofviews.common.domain.BaseEntity;
+import net.pointofviews.member.domain.Member;
 
 @Entity
 public class Payment extends BaseEntity {
@@ -9,12 +10,10 @@ public class Payment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private PaymentDomain paymentDomain;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    private Entry entry;
+    private Member member;
 
     private String paymentKey;
+    private String vendor;
     private Integer price;
-    private Integer amount;
 }
