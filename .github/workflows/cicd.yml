@@ -55,21 +55,22 @@ jobs:
       - name: Upload to S3
         run: aws s3 cp --region ap-northeast-2 ${{ env.JAR_FILE }} s3://$AWS_S3_BUCKET/
 
-      # SSH 키 설정
-      - name: Configure SSH Key
+      # SSH 등록
+      - name: Add SSH Key
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-        shell: bash
+          echo "${{ secrets.EC2_KEY_PAIR }}" > ~/pov-keypair.pem
+          chmod 600 ~/pov-keypair.pem
+
+      # SSH 디렉터리 생성
+      - name: Create SSH Directory
+        run: mkdir -p ~/.ssh
 
       # 첫 번째 인스턴스 배포
       - name: Deploy to EC2 Instance 1
         run: |
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_01 }} >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_ed25519 ubuntu@${{ secrets.EC2_PUBLIC_IP_01 }} << 'EOF'
+          ssh -i -T ~/pov-keypair.pem ubuntu@${{ secrets.EC2_PUBLIC_IP_01 }} << 'EOF'
           cd /home/ubuntu/pov-backend
-          git pull
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
           EOF
@@ -82,9 +83,8 @@ jobs:
       - name: Deploy to EC2 Instance 2
         run: |
           ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP_02 }} >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_ed25519 ubuntu@${{ secrets.EC2_PUBLIC_IP_02 }} << 'EOF'
+          ssh -i -T ~/pov-keypair.pem ubuntu@${{ secrets.EC2_PUBLIC_IP_02 }} << 'EOF'
           cd /home/ubuntu/pov-backend
-          git pull
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
           EOF
