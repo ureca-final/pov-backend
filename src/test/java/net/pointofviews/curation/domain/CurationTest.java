@@ -18,7 +18,7 @@ class CurationTest {
 	class Constructor {
 
 		@Nested
-		class success {
+		class Success {
 
 			@Test
 			void Curation_객체_생성() {
@@ -30,7 +30,7 @@ class CurationTest {
 				CurationCategory category = ACTOR;
 
 			    // when -- 테스트하고자 하는 행동
-				Curation result = Curation.builder()
+				Curation curation = Curation.builder()
 					.member(member)
 					.title(title)
 					.theme(theme)
@@ -40,11 +40,12 @@ class CurationTest {
 
 			    // then -- 예상되는 변화 및 결과
 				assertSoftly(softly -> {
-					softly.assertThat(result.getMember()).isNotNull();
-					softly.assertThat(result.getTitle()).isEqualTo(title);
-					softly.assertThat(result.getTheme()).isEqualTo(theme);
-					softly.assertThat(result.getDescription()).isEqualTo(description);
-					softly.assertThat(result.getCategory()).isEqualTo(category);
+					softly.assertThat(curation.getMember()).isNotNull();
+					softly.assertThat(curation.getTitle()).isEqualTo(title);
+					softly.assertThat(curation.getTheme()).isEqualTo(theme);
+					softly.assertThat(curation.getDescription()).isEqualTo(description);
+					softly.assertThat(curation.getCategory()).isEqualTo(category);
+					softly.assertThat(curation.getCreatedAt()).isNull();
 				});
 			}
 		}
