@@ -5,6 +5,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.pointofviews.common.domain.BaseEntity;
@@ -23,7 +24,8 @@ public class ClubMovie extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Club club;
 
-    public ClubMovie(Club club, Movie movie) {
+    @Builder
+    private ClubMovie(Club club, Movie movie) {
         this.club = club;
         this.movie = movie;
     }

@@ -2,6 +2,7 @@ package net.pointofviews.club.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +20,8 @@ public class ClubFavorGenre {
     @Column(length = 2)
     private String genreCode;
 
-    public ClubFavorGenre(String genreCode, MemberClub memberClub) {
+    @Builder
+    private ClubFavorGenre(String genreCode, MemberClub memberClub) {
         this.genreCode = genreCode;
         this.memberClub = memberClub;
     }

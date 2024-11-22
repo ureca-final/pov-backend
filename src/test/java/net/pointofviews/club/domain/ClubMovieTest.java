@@ -25,7 +25,10 @@ class ClubMovieTest {
                 Movie movie = mock(Movie.class);
 
                 // when
-                ClubMovie clubMovie = new ClubMovie(club, movie);
+                ClubMovie clubMovie = ClubMovie.builder()
+                        .club(club)
+                        .movie(movie)
+                        .build();
 
                 // then
                 SoftAssertions.assertSoftly(softly -> {

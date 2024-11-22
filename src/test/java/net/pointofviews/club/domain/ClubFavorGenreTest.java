@@ -24,7 +24,10 @@ class ClubFavorGenreTest {
                 MemberClub memberClub = mock(MemberClub.class);
 
                 // when
-                ClubFavorGenre genre = new ClubFavorGenre(genreCode, memberClub);
+                ClubFavorGenre genre = ClubFavorGenre.builder()
+                        .memberClub(memberClub)
+                        .genreCode(genreCode)
+                        .build();
 
                 // then
                 SoftAssertions.assertSoftly(softly -> {
