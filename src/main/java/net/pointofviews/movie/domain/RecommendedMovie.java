@@ -23,7 +23,7 @@ public class RecommendedMovie extends BaseEntity {
     private Movie movie;
 
     @Builder
-    public RecommendedMovie(Member member, Movie movie) {
+    private RecommendedMovie(Member member, Movie movie) {
         this.member = member;
         this.movie = movie;
     }
