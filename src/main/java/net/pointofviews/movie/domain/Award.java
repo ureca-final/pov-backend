@@ -1,8 +1,13 @@
 package net.pointofviews.movie.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Award {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,4 +17,10 @@ public class Award {
     private Movie movie;
 
     private String name;
+
+    @Builder
+    private Award(String name, Movie movie) {
+        this.name = name;
+        this.movie = movie;
+    }
 }
