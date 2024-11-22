@@ -26,4 +26,6 @@ public class Member extends SoftDeleteEntity {
     private String socialType;
 
     private String role;
+
+    private boolean isNoticeActive;
 }
