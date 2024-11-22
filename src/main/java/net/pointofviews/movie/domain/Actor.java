@@ -1,8 +1,15 @@
 package net.pointofviews.movie.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.util.Assert;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Actor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,4 +19,11 @@ public class Actor {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Movie movie;
+
+    @Builder
+    private Actor(String name, Movie movie) {
+        Assert.notNull(name, "name must not be null");
+        this.name = name;
+        this.movie = movie;
+    }
 }
