@@ -18,7 +18,7 @@ class CurationTest {
 	class Constructor {
 
 		@Nested
-		class success {
+		class Success {
 
 			@Test
 			void Curation_객체_생성() {
