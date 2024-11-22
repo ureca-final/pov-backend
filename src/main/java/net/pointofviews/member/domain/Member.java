@@ -33,6 +33,8 @@ public class Member extends SoftDeleteEntity {
 
     private String role;
 
+    private boolean isNoticeActive;
+
     @Builder
     private Member(LocalDate birth, String email, String nickname, String profileImage, String role, String socialType) {
         this.birth = birth;
