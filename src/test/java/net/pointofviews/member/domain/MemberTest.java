@@ -8,8 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(MockitoExtension.class)
 public class MemberTest {
 
@@ -49,6 +47,7 @@ public class MemberTest {
                     softly.assertThat(member.getSocialType()).isEqualTo(socialType);
                     softly.assertThat(member.getRole()).isEqualTo(role);
                     softly.assertThat(member.getProfileImage()).isEqualTo(profileImage);
+                    softly.assertThat(member.isNoticeActive()).isTrue();
                     softly.assertThat(member.getCreatedAt()).isNull();
                     softly.assertThat(member.getDeletedAt()).isNull();
                 });

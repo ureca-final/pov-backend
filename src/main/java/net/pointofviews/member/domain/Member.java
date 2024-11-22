@@ -43,5 +43,6 @@ public class Member extends SoftDeleteEntity {
         this.profileImage = profileImage;
         this.role = role;
         this.socialType = socialType;
+        this.isNoticeActive = true;
     }
 }
