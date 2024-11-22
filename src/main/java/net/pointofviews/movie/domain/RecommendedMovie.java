@@ -1,6 +1,7 @@
 package net.pointofviews.movie.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import org.springframework.util.Assert;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecommendedMovie extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
