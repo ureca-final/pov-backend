@@ -3,7 +3,7 @@ CREATE TABLE common_code_group (
                                    disabled bit not null,
                                    common_code_group_description varchar(255) null,
                                    common_code_group_name varchar(255) null,
-                                   is_active BIT(1) not null,
+                                   is_active bit not null,
                                    group_code varchar(255) not null primary key
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE common_code (
                              common_code_description varchar(255) null,
                              common_code_name varchar(255) null,
                              group_code varchar(255) null,
-                             is_active Bit(1) not null ,
+                             is_active bit not null ,
                              CONSTRAINT FKhkusbmskjw1jk5pjh8sui9cnp FOREIGN KEY (group_code) REFERENCES common_code_group (group_code)
 );
 
@@ -258,11 +258,11 @@ create table notice_receive
     id             bigint auto_increment
         primary key,
     notice_send_id bigint       null,
-    member_id_id   binary(16)   null,
+    member_id   binary(16)   null,
     notice_content text         null,
     notice_title   varchar(255) null,
     constraint FKtqfpe9qomg6roy9o0y3458wcb
-        foreign key (member_id_id) references member (id)
+        foreign key (member_id) references member (id)
 );
 
 create table notice_send
