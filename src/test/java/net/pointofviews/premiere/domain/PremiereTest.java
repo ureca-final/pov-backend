@@ -24,7 +24,7 @@ class PremiereTest {
                 String content = "premiere content";
                 String eventImage = "image.jpg";
                 boolean isPaymentRequired = true;
-                LocalDateTime startAt = LocalDateTime.now().plusDays(1);
+                LocalDateTime startAt = LocalDateTime.of(2024, 11, 22, 14, 30);
 
                 // when
                 Premiere premiere = Premiere.builder()
