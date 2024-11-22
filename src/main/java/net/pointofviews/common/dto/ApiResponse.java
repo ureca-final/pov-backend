@@ -27,4 +27,8 @@ public record ApiResponse<T> (
 	public static <T> ResponseEntity<ApiResponse<T>> badRequest(String message, T data) {
 		return ResponseEntity.badRequest().body(new ApiResponse<T>(message, data));
 	}
+
+	public static <T> ResponseEntity<ApiResponse<T>> internalServerError(String message, T data) {
+		return ResponseEntity.internalServerError().body(new ApiResponse<T>(message, data));
+	}
 }
