@@ -34,4 +34,3 @@ public class Payment extends BaseEntity {
         this.price = price;
     }
 }
-
