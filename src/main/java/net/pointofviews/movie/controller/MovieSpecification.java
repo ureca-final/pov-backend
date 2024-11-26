@@ -16,6 +16,9 @@ import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Tag(name = "Movie", description = "영화 관련 API")
 public interface MovieSpecification {
@@ -185,7 +188,7 @@ public interface MovieSpecification {
     })
     ResponseEntity<?> createImage(
             @PathVariable Long movieId,
-            @RequestBody CreateMovieContentRequest createMovieContentRequest
+            @RequestParam("files") List<MultipartFile> files
     );
 
     // POST - 영상 URL 등록
@@ -237,9 +240,9 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> deleteImage(
+    ResponseEntity<?> deleteImages(
             @PathVariable Long movieId,
-            @PathVariable Long id
+            @RequestBody List<Long> ids
     );
 
     // DELETE - 영상 URL 삭제
