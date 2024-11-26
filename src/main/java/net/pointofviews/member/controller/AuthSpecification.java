@@ -19,13 +19,7 @@ public interface AuthSpecification {
     @Tag(name = "Auth", description = "회원가입 관련 API")
     @Operation(summary = "회원가입", description = "💡새로운 회원을 등록합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "⭕ CREATED",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                    {
-                                      "message": "회원가입이 완료되었습니다."
-                                    }""")
-                    )
+            @ApiResponse(responseCode = "200", description = "⭕ CREATED"
             ),
             @ApiResponse(responseCode = "400", description = "❌ FAIL",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -42,13 +36,7 @@ public interface AuthSpecification {
     @Tag(name = "Auth", description = "로그인 관련 API")
     @Operation(summary = "로그인", description = "💡회원 로그인을 처리합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                {
-                                  "message": "로그인이 완료되었습니다."
-                                }""")
-                    )
+            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
             ),
             @ApiResponse(responseCode = "400", description = "❌ FAIL",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,

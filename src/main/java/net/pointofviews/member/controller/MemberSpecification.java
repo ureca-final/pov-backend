@@ -43,13 +43,7 @@ public interface MemberSpecification {
     @Tag(name = "Member", description = "회원 장르 변경 관련 API")
     @Operation(summary = "회원 장르 변경", description = "💡회원의 선호 장르를 변경합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                {
-                                  "message": "장르 설정이 완료되었습니다."
-                                }""")
-                    )
+            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
             ),
             @ApiResponse(responseCode = "404", description = "❌ FAIL",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -66,13 +60,7 @@ public interface MemberSpecification {
     @Tag(name = "Member", description = "회원 프로필 이미지 변경 관련 API")
     @Operation(summary = "프로필 이미지 변경", description = "💡회원의 프로필 이미지를 변경합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                {
-                                  "message": "프로필 이미지가 변경되었습니다."
-                                }""")
-                    )
+            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
             ),
             @ApiResponse(responseCode = "404", description = "❌ FAIL",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -89,13 +77,7 @@ public interface MemberSpecification {
     @Tag(name = "Member", description = "회원 닉네임 변경 관련 API")
     @Operation(summary = "닉네임 변경", description = "💡회원의 닉네임을 변경합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                {
-                                  "message": "닉네임이 변경되었습니다."
-                                }""")
-                    )
+            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
             ),
             @ApiResponse(responseCode = "404", description = "❌ FAIL",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -112,13 +94,7 @@ public interface MemberSpecification {
     @Tag(name = "Member", description = "회원 알림 설정 변경 관련 API")
     @Operation(summary = "알림 설정 변경", description = "💡회원의 알림 설정을 변경합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                {
-                                  "message": "알림 설정이 변경되었습니다."
-                                }""")
-                    )
+            @ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
             ),
             @ApiResponse(responseCode = "404", description = "❌ FAIL",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
