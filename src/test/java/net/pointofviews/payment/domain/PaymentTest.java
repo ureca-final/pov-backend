@@ -23,14 +23,14 @@ class PaymentTest {
                 Member member = Mockito.mock(Member.class);
                 String paymentKey = "test_payment_key_123";
                 String vendor = "TOSS";
-                Integer price = 10000;
+                Integer amount = 10000;
 
                 // when
                 Payment payment = Payment.builder()
                         .member(member)
                         .paymentKey(paymentKey)
                         .vendor(vendor)
-                        .price(price)
+                        .amount(amount)
                         .build();
 
                 // then
@@ -39,7 +39,7 @@ class PaymentTest {
                     softly.assertThat(payment.getMember()).isEqualTo(member);
                     softly.assertThat(payment.getPaymentKey()).isEqualTo(paymentKey);
                     softly.assertThat(payment.getVendor()).isEqualTo(vendor);
-                    softly.assertThat(payment.getPrice()).isEqualTo(price);
+                    softly.assertThat(payment.getAmount()).isEqualTo(amount);
                 });
             }
         }
@@ -51,13 +51,13 @@ class PaymentTest {
                 // given
                 Member member = Mockito.mock(Member.class);
                 String vendor = "TOSS";
-                Integer price = 10000;
+                Integer amount = 10000;
 
                 // when & then
                 assertThatThrownBy(() -> Payment.builder()
                         .member(member)
                         .vendor(vendor)
-                        .price(price)
+                        .amount(amount)
                         .build())
                         .isInstanceOf(IllegalArgumentException.class)
                         .hasMessageContaining("Payment key must not be null");
