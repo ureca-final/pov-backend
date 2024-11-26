@@ -211,6 +211,7 @@ create table review
     member_id   binary(16)   null,
     contents    text         null,
     title       varchar(255) null,
+    preference  varchar(255) null,
     constraint FKk0ccx5i4ci2wd70vegug074w1
         foreign key (member_id) references member (id)
 );
