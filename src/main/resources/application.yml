@@ -8,6 +8,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    open-in-view: false
 
   flyway:
     enabled: true
@@ -17,7 +18,7 @@ spring:
 
 springdoc:
   swagger-ui:
-    path: /swagger-ui.html
+    path: /api-docs
     groups-order: desc
     operationsSorter: method
     disable-swagger-default-url: true
