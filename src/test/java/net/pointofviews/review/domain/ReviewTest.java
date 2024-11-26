@@ -1,14 +1,15 @@
 package net.pointofviews.review.domain;
 
-import net.pointofviews.member.domain.Member;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
+import net.pointofviews.member.domain.Member;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewTest {
@@ -26,6 +27,7 @@ class ReviewTest {
                 String title = "리뷰 제목";
                 String contents = "리뷰 내용";
                 boolean isSpoiler = true;
+                String preference = "긍정적";
 
                 // when
                 Review review = Review.builder()
@@ -33,6 +35,7 @@ class ReviewTest {
                         .title(title)
                         .contents(contents)
                         .isSpoiler(isSpoiler)
+                        .preference(preference)
                         .build();
 
                 // then
@@ -42,6 +45,7 @@ class ReviewTest {
                     softly.assertThat(review.getTitle()).isEqualTo(title);
                     softly.assertThat(review.getContents()).isEqualTo(contents);
                     softly.assertThat(review.isSpoiler()).isEqualTo(isSpoiler);
+                    softly.assertThat(review.getPreference()).isEqualTo(preference);
                     softly.assertThat(review.isDisabled()).isFalse();
                     softly.assertThat(review.getModifiedAt()).isNull();
                 });
@@ -57,12 +61,14 @@ class ReviewTest {
                 Member member = mock(Member.class);
                 String contents = "리뷰 내용";
                 boolean isSpoiler = false;
+                String preference = "긍정적";
 
                 // when & then
                 assertThatThrownBy(() -> Review.builder()
                         .member(member)
                         .contents(contents)
                         .isSpoiler(isSpoiler)
+                        .preference(preference)
                         .build())
                         .isInstanceOf(IllegalArgumentException.class);
             }
