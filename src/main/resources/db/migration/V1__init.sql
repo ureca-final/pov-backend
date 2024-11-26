@@ -89,8 +89,8 @@ CREATE TABLE member_club (
 CREATE TABLE club_favor_genre (
                                   genre_code varchar(2) null,
                                   id bigint auto_increment primary key,
-                                  member_club_id bigint null,
-                                  CONSTRAINT FKttocr35ybjiteof5xv0ifnit FOREIGN KEY (member_club_id) REFERENCES member_club (id)
+                                  club_id binary(16) null,
+                                  CONSTRAINT FK7oxhernp72286u3dwppqcwk1b FOREIGN KEY (club_id) REFERENCES club (id)
 );
 
 CREATE TABLE club_movie (
