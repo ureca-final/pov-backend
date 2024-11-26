@@ -3,7 +3,7 @@ package net.pointofviews.movie.controller;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.SearchMovieCriteria;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
-import net.pointofviews.movie.dto.request.MovieContentRequest;
+import net.pointofviews.movie.dto.request.CreateMovieContentRequest;
 import net.pointofviews.movie.dto.response.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,31 +44,31 @@ public class MovieController implements MovieSpecification {
 
     @Override
     @PostMapping("/{movieId}/images")
-    public ResponseEntity<BaseResponse<MovieContentResponse>> createImage(Long movieId, MovieContentRequest movieContentRequest) {
+    public ResponseEntity<?> createImage(Long movieId, CreateMovieContentRequest createMovieContentRequest) {
         return null;
     }
 
     @Override
     @PostMapping("/{movieId}/videos")
-    public ResponseEntity<BaseResponse<MovieContentResponse>> createVideo(Long movieId, MovieContentRequest movieContentRequest) {
+    public ResponseEntity<?> createVideo(Long movieId, CreateMovieContentRequest createMovieContentRequest) {
         return null;
     }
 
     @Override
     @DeleteMapping("/{movieId}/images/{id}")
-    public ResponseEntity<BaseResponse<Void>> deleteImage(Long movieId, Long id) {
+    public ResponseEntity<?> deleteImage(Long movieId, Long id) {
         return null;
     }
 
     @Override
     @DeleteMapping("/{movieId}/videos/{id}")
-    public ResponseEntity<BaseResponse<Void>> deleteVideo(Long movieId, Long id) {
+    public ResponseEntity<?> deleteVideo(Long movieId, Long id) {
         return null;
     }
 
     @Override
     @PutMapping("/{movieId}/likes")
-    public ResponseEntity<BaseResponse<MovieLikeResponse>> toggleMovieLike(Long movieId) {
+    public ResponseEntity<?> createMovieLike(Long movieId) {
         return null;
     }
 

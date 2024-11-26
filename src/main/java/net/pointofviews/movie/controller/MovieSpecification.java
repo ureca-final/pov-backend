@@ -8,9 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.movie.dto.request.MovieContentRequest;
-import net.pointofviews.movie.dto.response.MovieContentResponse;
-import net.pointofviews.movie.dto.response.MovieLikeResponse;
+import net.pointofviews.movie.dto.request.CreateMovieContentRequest;
 import net.pointofviews.movie.dto.SearchMovieCriteria;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
@@ -83,11 +81,10 @@ public interface MovieSpecification {
             summary = "영화 상세 조회",
             description = "영화 단건 상세 조회 API"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공"
-            ),
+    @ApiResponses({@ApiResponse(
+            responseCode = "200",
+            description = "조회 성공"
+    ),
             @ApiResponse(
                     responseCode = "404",
                     description = "조회 실패",
@@ -100,6 +97,7 @@ public interface MovieSpecification {
                                     """)
                     )
             )
+
     })
     ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(Long movieId);
 
@@ -164,65 +162,82 @@ public interface MovieSpecification {
             )
             String title);
 
+
+
+
     /** 영화 컨텐츠 이미지/영상 URL 등록,삭제 API **/
 
     // POST - 이미지 URL 등록
     @Operation(summary = "영화 이미지 URL 등록", description = "지정된 영화 ID에 이미지를 등록합니다.")
-    @ApiResponses(value = {
+    @ApiResponses({
             @ApiResponse(
-                    responseCode = "201",
-                    description = "⭕ SUCCESS",
-                    content = @Content(mediaType = "application/json",
+                    responseCode = "200",
+                    description = "이미지 URL 등록 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                        {
-                            "message": "SUCCESS",
-                            "data": {
-                                "id": 101,
-                                "movieId": 1,
-                                "content": "https://<bucketName>.s3.ap-northeast-2.amazonaws.com/<image.jpg>",
-                                "contentType": "IMAGE"
-                            }
-                        }
-                        """))
+                                    {
+                                      "message": "이미지 URL 등록이 성공적으로 완료되었습니다."
+                                    }
+                                    """)
+                    )
             )
     })
-    ResponseEntity<BaseResponse<MovieContentResponse>> createImage(
+    ResponseEntity<?> createImage(
             @PathVariable Long movieId,
-            @RequestBody MovieContentRequest movieContentRequest
+            @RequestBody CreateMovieContentRequest createMovieContentRequest
     );
 
     // POST - 영상 URL 등록
     @Operation(summary = "영화 영상 URL 등록", description = "지정된 영화 ID에 영상을 등록합니다.")
-    @ApiResponses(value = {
+    @ApiResponses({
             @ApiResponse(
-                    responseCode = "201",
-                    description = "⭕ SUCCESS",
-                    content = @Content(mediaType = "application/json",
+                    responseCode = "200",
+                    description = "영상 URL 등록 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                        {
-                            "message": "SUCCESS",
-                            "data": {
-                                "id": 102,
-                                "movieId": 1,
-                                "content": "https://www.youtube.com",
-                                "contentType": "YOUTUBE"
-                            }
-                        }
-                        """))
+                                    {
+                                      "message": "영상 URL 등록이 성공적으로 완료되었습니다."
+                                    }
+                                    """)
+                    )
             )
     })
-    ResponseEntity<BaseResponse<MovieContentResponse>> createVideo(
+    ResponseEntity<?> createVideo(
             @PathVariable Long movieId,
-            @RequestBody MovieContentRequest movieContentRequest
+            @RequestBody CreateMovieContentRequest createMovieContentRequest
     );
 
     // DELETE - 이미지 URL 삭제
     @Operation(summary = "영화 이미지 URL 삭제", description = "지정된 영화 ID의 특정 이미지 URL을 삭제합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "이미지 URL이 성공적으로 삭제되었습니다."),
-            @ApiResponse(responseCode = "404", description = "영화 또는 이미지 ID를 찾을 수 없습니다.")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "삭제 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "이미지 URL이 성공적으로 삭제되었습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "삭제 실패 - 없는 영화 컨텐츠",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "존재하지 않는 이미지 URL입니다."
+                                    }
+                                    """)
+                    )
+            )
     })
-    ResponseEntity<BaseResponse<Void>> deleteImage(
+    ResponseEntity<?> deleteImage(
             @PathVariable Long movieId,
             @PathVariable Long id
     );
@@ -230,13 +245,36 @@ public interface MovieSpecification {
     // DELETE - 영상 URL 삭제
     @Operation(summary = "영화 영상 URL 삭제", description = "지정된 영화 ID의 특정 영상 URL을 삭제합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "영상 URL이 성공적으로 삭제되었습니다."),
-            @ApiResponse(responseCode = "404", description = "영화 또는 영상 ID를 찾을 수 없습니다.")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "삭제 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "영상 URL이 성공적으로 삭제되었습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "삭제 실패 - 없는 영화 컨텐츠",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "존재하지 않는 영상 URL 입니다."
+                                    }
+                                    """)
+                    )
+            )
     })
-    ResponseEntity<BaseResponse<Void>> deleteVideo(
+    ResponseEntity<?> deleteVideo(
             @PathVariable Long movieId,
             @PathVariable Long id
     );
+
 
     /** 영화 좋아요 관련 API **/
     @Operation(
@@ -244,26 +282,45 @@ public interface MovieSpecification {
             description = "영화 ID를 기반으로 사용자의 좋아요 상태를 토글하고, 총 좋아요 수를 반환합니다. " +
                     "좋아요를 누르지 않은 상태에서는 좋아요를 추가하고, 이미 좋아요를 누른 상태에서는 좋아요를 제거합니다."
     )
-    @ApiResponses(value = {
+    @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "⭕ SUCCESS",
-                    content = @Content(mediaType = "application/json",
+                    description = "좋아요 요청 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                        {
-                            "message": "SUCCESS",
-                            "data": {
-                                "movieId": 1,
-                                "isLiked": true,
-                                "likeCount": 10
-                            }
-                        }
-                        """))
+                                    {
+                                      "message": "좋아요 요청이 성공적으로 등록되었습니다."
+                                    }
+                                    """)
+                    )
             ),
-            @ApiResponse(responseCode = "404", description = "영화 또는 사용자를 찾을 수 없습니다."),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.")
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "좋아요 요청 실패 - 없는 영화 또는 사용자",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "영화 또는 사용자를 찾을 수 없습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "좋아요 요청 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
     })
-    ResponseEntity<BaseResponse<MovieLikeResponse>> toggleMovieLike(
+    ResponseEntity<?> createMovieLike(
             @PathVariable Long movieId
     );
 

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import net.pointofviews.curation.domain.CurationCategory;
 
 @Schema(description = "큐레이션 생성 요청 DTO")
-public record CurationRequest(
+public record CreateCurationRequest(
         @NotBlank(message = "테마는 필수 입력 항목입니다.")
         @Schema(description = "큐레이션 주제", example = "Top Action Movies")
         String theme,
