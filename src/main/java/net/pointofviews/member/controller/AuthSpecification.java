@@ -7,12 +7,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.dto.request.*;
 import net.pointofviews.member.dto.response.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 public interface AuthSpecification {
@@ -43,7 +43,7 @@ public interface AuthSpecification {
                     )
             ),
     })
-    ResponseEntity<BaseResponse<CreateMemberResponse>> signup(@Validated @RequestBody CreateMemberRequest request);
+    ResponseEntity<BaseResponse<CreateMemberResponse>> signup(@Valid @RequestBody CreateMemberRequest request);
 
     // 로그인
     @Tag(name = "Auth", description = "로그인 관련 API")
@@ -73,5 +73,5 @@ public interface AuthSpecification {
                     )
             ),
     })
-    ResponseEntity<BaseResponse<LoginMemberResponse>> login(@Validated @RequestBody LoginMemberRequest request);
+    ResponseEntity<BaseResponse<LoginMemberResponse>> login(@Valid @RequestBody LoginMemberRequest request);
 }

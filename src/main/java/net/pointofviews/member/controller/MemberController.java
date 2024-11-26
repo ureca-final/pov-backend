@@ -1,12 +1,12 @@
 package net.pointofviews.member.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.dto.request.*;
 import net.pointofviews.member.dto.response.*;
 import net.pointofviews.member.service.MemberService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,21 +31,21 @@ public class MemberController implements MemberSpecification {
 
     @Override
     @PutMapping("/profiles/image")
-    public ResponseEntity<BaseResponse<PutMemberImageResponse>> putImage(@Validated PutMemberImageRequest request) {
+    public ResponseEntity<BaseResponse<PutMemberImageResponse>> putImage(@Valid PutMemberImageRequest request) {
         PutMemberImageResponse response = memberService.updateImage(request);
         return BaseResponse.ok("프로필 이미지가 변경되었습니다.", response);
     }
 
     @Override
     @PutMapping("/profiles/nickname")
-    public ResponseEntity<BaseResponse<PutMemberNicknameResponse>> putNickname(@Validated PutMemberNicknameRequest request) {
+    public ResponseEntity<BaseResponse<PutMemberNicknameResponse>> putNickname(@Valid PutMemberNicknameRequest request) {
         PutMemberNicknameResponse response = memberService.updateNickname(request);
         return BaseResponse.ok("닉네임이 변경되었습니다.", response);
     }
 
     @Override
     @PutMapping("/notice")
-    public ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Validated PutMemberNoticeRequest request) {
+    public ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Valid PutMemberNoticeRequest request) {
         PutMemberNoticeResponse response = memberService.updateNotice(request);
         return BaseResponse.ok("알림 설정이 변경되었습니다.", response);
     }

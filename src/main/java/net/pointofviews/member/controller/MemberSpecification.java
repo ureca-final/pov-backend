@@ -7,12 +7,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.dto.request.*;
 import net.pointofviews.member.dto.response.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 public interface MemberSpecification {
@@ -93,7 +93,7 @@ public interface MemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<PutMemberImageResponse>> putImage(@Validated @RequestBody PutMemberImageRequest request);
+    ResponseEntity<BaseResponse<PutMemberImageResponse>> putImage(@Valid @RequestBody PutMemberImageRequest request);
 
     // 회원 닉네임 변경
     @Tag(name = "Member", description = "회원 닉네임 변경 관련 API")
@@ -120,7 +120,7 @@ public interface MemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<PutMemberNicknameResponse>> putNickname(@Validated @RequestBody PutMemberNicknameRequest request);
+    ResponseEntity<BaseResponse<PutMemberNicknameResponse>> putNickname(@Valid @RequestBody PutMemberNicknameRequest request);
 
     // 회원 알림 설정 변경
     @Tag(name = "Member", description = "회원 알림 설정 변경 관련 API")
@@ -147,5 +147,5 @@ public interface MemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Validated @RequestBody PutMemberNoticeRequest request);
+    ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Valid @RequestBody PutMemberNoticeRequest request);
 }
