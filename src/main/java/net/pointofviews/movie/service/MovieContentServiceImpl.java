@@ -68,4 +68,29 @@ public class MovieContentServiceImpl implements MovieContentService{
         movieContentRepository.deleteAll(contents);
     }
 
+    @Override
+    public List<String> saveMovieContentVideos(Long movieId, List<String> urls) {
+        // 1. 영화 엔티티 조회
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 영화 ID입니다: " + movieId));
+
+        // 2. URL 저장
+        for(String url : urls) {
+            // MovieContent 엔티티 생성 및 저장
+            MovieContent movieContent = MovieContent.builder()
+                    .movie(movie)
+                    .content(url)
+                    .contentType(MovieContentType.YOUTUBE)
+                    .build();
+            movieContentRepository.save(movieContent);
+        }
+        return urls;
+    }
+
+    @Override
+    public void deleteMovieContentVideos(List<Long> ids) {
+        // ID 리스트로 MovieContent 엔티티 조회
+        List<MovieContent> contents = movieContentRepository.findAllById(ids);
+        movieContentRepository.deleteAll(contents);
+    }
 }

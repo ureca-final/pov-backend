@@ -187,8 +187,7 @@ public interface MovieSpecification {
             )
     })
     ResponseEntity<?> createImage(
-            @PathVariable Long movieId,
-            @RequestParam("files") List<MultipartFile> files
+            @PathVariable Long movieId, @RequestParam("files") List<MultipartFile> files
     );
 
     // POST - 영상 URL 등록
@@ -208,8 +207,7 @@ public interface MovieSpecification {
             )
     })
     ResponseEntity<?> createVideo(
-            @PathVariable Long movieId,
-            @RequestBody CreateMovieContentRequest createMovieContentRequest
+            @PathVariable Long movieId, @RequestParam("urls") List<String> urls
     );
 
     // DELETE - 이미지 URL 삭제
@@ -275,7 +273,7 @@ public interface MovieSpecification {
     })
     ResponseEntity<?> deleteVideo(
             @PathVariable Long movieId,
-            @PathVariable Long id
+            @RequestBody List<Long> ids
     );
 
 

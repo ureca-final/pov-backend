@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.SearchMovieCriteria;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
-import net.pointofviews.movie.dto.request.CreateMovieContentRequest;
 import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.service.MovieContentService;
 import org.springframework.http.ResponseEntity;
@@ -71,8 +70,17 @@ public class MovieController implements MovieSpecification {
 
     @Override
     @PostMapping("/{movieId}/videos")
-    public ResponseEntity<?> createVideo(Long movieId, CreateMovieContentRequest createMovieContentRequest) {
-        return null;
+    public ResponseEntity<BaseResponse<List<String>>> createVideo(@PathVariable Long movieId, @RequestParam("ids") List<String> ids) {
+        try {
+            // 서비스에 요청 전달
+            List<String> videoUrls = movieContentService.saveMovieContentVideos(movieId, ids);
+
+            // 성공 응답
+            return BaseResponse.ok("영상 URL 이 성공적으로 업로드 되었습니다.", videoUrls);
+        } catch (Exception e) {
+            // 실패 응답
+            return BaseResponse.internalServerError("영상 URL 업로드 중 오류가 발생했습니다.", null);
+        }
     }
 
     @Override
@@ -93,9 +101,20 @@ public class MovieController implements MovieSpecification {
     }
 
     @Override
-    @DeleteMapping("/{movieId}/videos/{id}")
-    public ResponseEntity<?> deleteVideo(Long movieId, Long id) {
-        return null;
+    @DeleteMapping("/{movieId}/videos")
+    public ResponseEntity<BaseResponse<Void>> deleteVideo(
+            @PathVariable Long movieId,
+            @RequestBody List<Long> ids) {
+        try {
+            // 서비스 계층 호출
+            movieContentService.deleteMovieContentVideos(ids);
+
+            // 성공 응답 반환
+            return BaseResponse.ok("선택한 영상이 삭제되었습니다.");
+        } catch (Exception e) {
+            // 실패 응답 반환
+            return BaseResponse.internalServerError("영상 삭제 중 오류가 발생했습니다.", null);
+        }
     }
 
     @Override
