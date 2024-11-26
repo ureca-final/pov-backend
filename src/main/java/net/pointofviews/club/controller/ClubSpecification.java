@@ -170,5 +170,5 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadClubMemberListResponse>> getClubMembers(@PathVariable UUID clubId);
+    ResponseEntity<BaseResponse<ReadClubMemberListResponse>> readClubMembers(@PathVariable UUID clubId);
 }
