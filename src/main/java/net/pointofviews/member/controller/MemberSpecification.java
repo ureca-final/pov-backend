@@ -3,7 +3,6 @@ package net.pointofviews.member.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,10 +21,9 @@ public interface MemberSpecification {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BaseResponse.class),
                             examples = @ExampleObject(value = """
                                 {
-                                  "message": "탈퇴가 완료되었습니다.",
+                                  "message": "탈퇴가 완료되었습니다."
                                 }""")
                     )
             ),
@@ -33,7 +31,7 @@ public interface MemberSpecification {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
                                 {
-                                  "message": "탈퇴에 실패했습니다.",
+                                  "message": "탈퇴에 실패했습니다."
                                 }""")
                     )
             )
@@ -47,13 +45,9 @@ public interface MemberSpecification {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BaseResponse.class),
                             examples = @ExampleObject(value = """
                                 {
-                                  "message": "장르 설정이 완료되었습니다.",
-                                  "data": {
-                                    "genres": ["ACTION", "ROMANCE"]
-                                  }
+                                  "message": "장르 설정이 완료되었습니다."
                                 }""")
                     )
             ),
@@ -74,13 +68,9 @@ public interface MemberSpecification {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BaseResponse.class),
                             examples = @ExampleObject(value = """
                                 {
-                                  "message": "프로필 이미지가 변경되었습니다.",
-                                  "data": {
-                                    "profileImage": "https://example.com/image.jpg"
-                                  }
+                                  "message": "프로필 이미지가 변경되었습니다."
                                 }""")
                     )
             ),
@@ -101,13 +91,9 @@ public interface MemberSpecification {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BaseResponse.class),
                             examples = @ExampleObject(value = """
                                 {
-                                  "message": "닉네임이 변경되었습니다.",
-                                  "data": {
-                                    "nickname": "newNickname"
-                                  }
+                                  "message": "닉네임이 변경되었습니다."
                                 }""")
                     )
             ),
@@ -128,13 +114,9 @@ public interface MemberSpecification {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "⭕ SUCCESS",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BaseResponse.class),
                             examples = @ExampleObject(value = """
                                 {
-                                  "message": "알림 설정이 변경되었습니다.",
-                                  "data": {
-                                    "isNoticeActive": true
-                                  }
+                                  "message": "알림 설정이 변경되었습니다."
                                 }""")
                     )
             ),
