@@ -1,5 +1,6 @@
 package net.pointofviews.premiere.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.premiere.dto.request.CreatePremiereRequest;
@@ -32,7 +33,7 @@ public class PremiereController implements PremiereSpecification {
 
     @Override
     @PostMapping
-    public ResponseEntity<BaseResponse<CreatePremiereRequest>> createPremiere(@RequestBody CreatePremiereRequest premiere) {
+    public ResponseEntity<BaseResponse<CreatePremiereRequest>> createPremiere(@RequestBody @Valid CreatePremiereRequest premiere) {
         return null;
     }
 
