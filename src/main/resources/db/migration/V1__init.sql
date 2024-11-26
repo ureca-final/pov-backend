@@ -115,6 +115,7 @@ CREATE TABLE curation (
 
 CREATE TABLE entry (
                        amount int null,
+                       quantity    int         null,
                        created_at datetime(6) null,
                        id bigint auto_increment primary key,
                        premiere_id bigint null,
@@ -163,7 +164,8 @@ CREATE TABLE movie_like_count (
 
 create table payment
 (
-    price       int          null,
+    amount       int          null,
+    approved_at datetime(6)  null,
     created_at  datetime(6)  null,
     id          bigint auto_increment
         primary key,
@@ -176,7 +178,7 @@ create table payment
 
 create table payment_transaction
 (
-    price           int                                   null,
+    amount           int                                  null,
     created_at      datetime(6)                           null,
     id              bigint auto_increment
         primary key,
@@ -188,6 +190,21 @@ create table payment_transaction
         unique (payment_id),
     constraint FKhs69kx826yrnvhanj0m0dcegn
         foreign key (payment_id) references payment (id)
+);
+
+create table temp_payment
+(
+    amount     int             null,
+    created_at datetime(6)     null,
+    id         bigint auto_increment
+        primary key,
+    member_id  binary(16)      null,
+    order_id   varchar(255)    null,
+    type       enum ('NORMAL') null,
+    constraint UKjnp2rmi61sdvkti7ido11w140
+        unique (member_id),
+    constraint FKqupcsmm2a74886you7gwa4fqp
+        foreign key (member_id) references member (id)
 );
 
 CREATE TABLE recommended_movie (
