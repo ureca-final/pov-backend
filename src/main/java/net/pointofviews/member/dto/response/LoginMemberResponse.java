@@ -15,8 +15,5 @@ public record LoginMemberResponse(
         String nickname,
 
         @Schema(description = "회원 권한", example = "USER")
-        String role,
-
-        @Schema(description = "접근 토큰", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-        String accessToken
+        String role
 ) {}
