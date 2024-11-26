@@ -59,8 +59,7 @@ public interface AuthSpecification {
                                     "id": "123e4567-e89b-12d3-a456-426614174000",
                                     "email": "user@example.com",
                                     "nickname": "nickname",
-                                    "role": "USER",
-                                    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                    "role": "USER"
                                   }
                                 }""")
                     )
