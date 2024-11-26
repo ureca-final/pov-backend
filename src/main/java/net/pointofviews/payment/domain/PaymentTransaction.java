@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.pointofviews.common.domain.BaseEntity;
-import net.pointofviews.curation.domain.CurationCategory;
-import net.pointofviews.member.domain.Member;
 import org.springframework.util.Assert;
 
 @Entity
@@ -17,7 +15,7 @@ public class PaymentTransaction extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Payment payment;
 
     private String transactionKey;
@@ -28,16 +26,16 @@ public class PaymentTransaction extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
-    private Integer price;
+    private Integer amount;
 
     @Builder
-    public PaymentTransaction(Payment payment, String transactionKey, PaymentType type, PaymentStatus status, Integer price) {
+    public PaymentTransaction(Payment payment, String transactionKey, PaymentType type, PaymentStatus status, Integer amount) {
         Assert.notNull(transactionKey, "Transaction key must not be null");
 
         this.payment = payment;
         this.transactionKey = transactionKey;
         this.type = type;
         this.status = status;
-        this.price = price;
+        this.amount = amount;
     }
 }

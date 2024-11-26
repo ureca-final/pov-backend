@@ -23,12 +23,14 @@ class EntryTest {
             void Entry_객체_생성() {
                 // given
                 Integer amount = 1;
+                Integer quantity = 1;
                 Member member = mock(Member.class);
                 Premiere premiere = mock(Premiere.class);
 
                 // when
                 Entry entry = Entry.builder()
                         .amount(amount)
+                        .quantity(quantity)
                         .member(member)
                         .premiere(premiere)
                         .build();
@@ -37,6 +39,7 @@ class EntryTest {
                 SoftAssertions.assertSoftly(softly -> {
                     softly.assertThat(entry).isNotNull();
                     softly.assertThat(entry.getAmount()).isEqualTo(amount);
+                    softly.assertThat(entry.getQuantity()).isEqualTo(quantity);
                     softly.assertThat(entry.getMember()).isEqualTo(member);
                     softly.assertThat(entry.getPremiere()).isEqualTo(premiere);
                 });
@@ -54,6 +57,7 @@ class EntryTest {
 
                 // when & then
                 assertThatThrownBy(() -> Entry.builder()
+                        .amount(1)
                         .member(member)
                         .premiere(premiere)
                         .build())
