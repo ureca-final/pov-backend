@@ -15,14 +15,14 @@ public class ClubFavorGenre {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private MemberClub memberClub;
+    private Club club;
 
     @Column(length = 2)
     private String genreCode;
 
     @Builder
-    private ClubFavorGenre(String genreCode, MemberClub memberClub) {
+    private ClubFavorGenre(String genreCode, Club club) {
         this.genreCode = genreCode;
-        this.memberClub = memberClub;
+        this.club = club;
     }
 }

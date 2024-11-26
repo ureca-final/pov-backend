@@ -21,18 +21,18 @@ class ClubFavorGenreTest {
             void ClubFavorGenre_객체_생성() {
                 // given
                 String genreCode = "00";
-                MemberClub memberClub = mock(MemberClub.class);
+                Club club = mock(Club.class);
 
                 // when
                 ClubFavorGenre genre = ClubFavorGenre.builder()
-                        .memberClub(memberClub)
+                        .club(club)
                         .genreCode(genreCode)
                         .build();
 
                 // then
                 SoftAssertions.assertSoftly(softly -> {
                     softly.assertThat(genre.getGenreCode()).isEqualTo(genreCode);
-                    softly.assertThat(genre.getMemberClub()).isEqualTo(memberClub);
+                    softly.assertThat(genre.getClub()).isEqualTo(club);
                 });
             }
         }
