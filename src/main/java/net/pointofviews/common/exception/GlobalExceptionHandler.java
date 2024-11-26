@@ -8,7 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import net.pointofviews.common.dto.ApiResponse;
+import net.pointofviews.common.dto.BaseResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 				error.getDefaultMessage()))
 			.collect(Collectors.toList());
 
-		return ApiResponse.badRequest(ex.getMessage(), errors);
+		return BaseResponse.badRequest(ex.getMessage(), errors);
 	}
 
 	@ExceptionHandler(BusinessException.class)
@@ -36,13 +36,13 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity
 			.status(ex.getStatus())
-			.body(new ApiResponse<>(ex.getMessage(), null));
+			.body(new BaseResponse<>(ex.getMessage(), null));
 	}
 
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<?> handlerRuntimeException(RuntimeException ex) {
 		log.error("[Error] RuntimeException - Message: {}", ex.getMessage());
 
-		return ApiResponse.internalServerError(ex.getMessage(), null);
+		return BaseResponse.internalServerError(ex.getMessage(), null);
 	}
 }
