@@ -83,7 +83,7 @@ public class MovieController implements MovieSpecification {
 
     @Override
     @PostMapping("/{movieId}/videos")
-    public ResponseEntity<BaseResponse<List<String>>> createVideos(@PathVariable Long movieId, @RequestParam("ids") List<String> urls) {
+    public ResponseEntity<BaseResponse<List<String>>> createVideos(@PathVariable Long movieId, @RequestParam("urls") List<String> urls) {
         try {
             // 1. URL 유효성 검사
             for (String url : urls) {
