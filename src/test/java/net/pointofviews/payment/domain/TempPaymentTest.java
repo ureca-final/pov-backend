@@ -4,13 +4,14 @@ import net.pointofviews.member.domain.Member;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class PaymentTest {
-
+@ExtendWith(MockitoExtension.class)
+class TempPaymentTest {
     @Nested
     class Constructor {
 
@@ -18,28 +19,27 @@ class PaymentTest {
         class success {
 
             @Test
-            void Payment_객체_생성() {
+            void TempPayment_객체_생성() {
                 // given
                 Member member = Mockito.mock(Member.class);
-                String paymentKey = "test_payment_key_123";
-                String vendor = "TOSS";
+                String orderId = "order_123";
+                OrderType type = OrderType.NORMAL;
                 Integer amount = 10000;
 
                 // when
-                Payment payment = Payment.builder()
+                TempPayment tempPayment = TempPayment.builder()
                         .member(member)
-                        .paymentKey(paymentKey)
-                        .vendor(vendor)
+                        .orderId(orderId)
+                        .type(type)
                         .amount(amount)
                         .build();
-
                 // then
                 SoftAssertions.assertSoftly(softly -> {
-                    softly.assertThat(payment).isNotNull();
-                    softly.assertThat(payment.getMember()).isEqualTo(member);
-                    softly.assertThat(payment.getPaymentKey()).isEqualTo(paymentKey);
-                    softly.assertThat(payment.getVendor()).isEqualTo(vendor);
-                    softly.assertThat(payment.getAmount()).isEqualTo(amount);
+                    softly.assertThat(tempPayment).isNotNull();
+                    softly.assertThat(tempPayment.getMember()).isEqualTo(member);
+                    softly.assertThat(tempPayment.getOrderId()).isEqualTo(orderId);
+                    softly.assertThat(tempPayment.getType()).isEqualTo(type);
+                    softly.assertThat(tempPayment.getAmount()).isEqualTo(amount);
                 });
             }
         }
@@ -47,20 +47,20 @@ class PaymentTest {
         @Nested
         class failure {
             @Test
-            void 결제키_없음_IllegalArgumentException_예외발생() {
+            void 주문ID_없음_IllegalArgumentException_예외발생() {
                 // given
                 Member member = Mockito.mock(Member.class);
-                String vendor = "TOSS";
+                OrderType type = OrderType.NORMAL;
                 Integer amount = 10000;
 
                 // when & then
-                assertThatThrownBy(() -> Payment.builder()
+                assertThatThrownBy(() -> TempPayment.builder()
                         .member(member)
-                        .vendor(vendor)
+                        .type(type)
                         .amount(amount)
                         .build())
                         .isInstanceOf(IllegalArgumentException.class)
-                        .hasMessageContaining("Payment key must not be null");
+                        .hasMessageContaining("Order ID must not be null");
             }
         }
     }
