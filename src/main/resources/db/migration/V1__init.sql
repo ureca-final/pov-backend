@@ -1,6 +1,5 @@
 -- 1. 독립적인 테이블 먼저 생성
 CREATE TABLE common_code_group (
-                                   disabled bit not null,
                                    common_code_group_description varchar(255) null,
                                    common_code_group_name varchar(255) null,
                                    is_active bit not null,
@@ -53,7 +52,6 @@ CREATE TABLE premiere (
 
 -- 2. 외래키를 가진 테이블들 생성
 CREATE TABLE common_code (
-                             disabled bit not null,
                              code varchar(255) not null primary key,
                              common_code_description varchar(255) null,
                              common_code_name varchar(255) null,
