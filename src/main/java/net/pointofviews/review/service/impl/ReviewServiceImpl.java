@@ -14,6 +14,7 @@ import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
+import net.pointofviews.review.exception.ReviewNotFoundException;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
@@ -91,7 +92,25 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	public ReadReviewResponse findReviewDetail(Long reviewId) {
-		return null;
+
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(ReviewNotFoundException::new);
+
+		Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
+		boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId);
+
+		ReadReviewResponse response = new ReadReviewResponse(
+			review.getMovie().getTitle(),
+			review.getTitle(),
+			review.getContents(),
+			review.getMember().getNickname(),
+			review.getThumbnail(),
+			review.getCreatedAt(),
+			likeAmount,
+			isLiked
+		);
+
+		return response;
 	}
 
 	@Override
