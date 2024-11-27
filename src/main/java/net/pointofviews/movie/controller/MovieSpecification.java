@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.movie.dto.request.CreateMovieContentRequest;
 import net.pointofviews.movie.dto.SearchMovieCriteria;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
@@ -16,6 +15,9 @@ import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Tag(name = "Movie", description = "영화 관련 API")
 public interface MovieSpecification {
@@ -183,9 +185,8 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> createImage(
-            @PathVariable Long movieId,
-            @RequestBody CreateMovieContentRequest createMovieContentRequest
+    ResponseEntity<?> createImages(
+            @PathVariable Long movieId, @RequestParam("files") List<MultipartFile> files
     );
 
     // POST - 영상 URL 등록
@@ -204,9 +205,8 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> createVideo(
-            @PathVariable Long movieId,
-            @RequestBody CreateMovieContentRequest createMovieContentRequest
+    ResponseEntity<?> createVideos(
+            @PathVariable Long movieId, @RequestParam("urls") List<String> urls
     );
 
     // DELETE - 이미지 URL 삭제
@@ -237,9 +237,9 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> deleteImage(
+    ResponseEntity<?> deleteImages(
             @PathVariable Long movieId,
-            @PathVariable Long id
+            @RequestBody List<Long> ids
     );
 
     // DELETE - 영상 URL 삭제
@@ -270,9 +270,9 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> deleteVideo(
+    ResponseEntity<?> deleteVideos(
             @PathVariable Long movieId,
-            @PathVariable Long id
+            @RequestBody List<Long> ids
     );
 
 

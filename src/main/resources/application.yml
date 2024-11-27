@@ -16,6 +16,11 @@ spring:
     locations: classpath:db/migration
     baseline-version: 1
 
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 단일 파일 크기 제한
+      max-request-size: 50MB   # 전체 요청 크기 제한
+
 springdoc:
   swagger-ui:
     path: /api-docs
@@ -26,3 +31,4 @@ springdoc:
 
   show-actuator: true
   default-consumes-media-type: application/json
+
