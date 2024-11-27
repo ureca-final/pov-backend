@@ -19,6 +19,8 @@ public class Entry extends BaseEntity {
 
     private Integer amount;
 
+    private Integer quantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
@@ -26,10 +28,11 @@ public class Entry extends BaseEntity {
     private Premiere premiere;
 
     @Builder
-    private Entry(Integer amount, Member member, Premiere premiere) {
-        Assert.notNull(amount, "Amount must not be null");
+    private Entry(Integer amount, Integer quantity, Member member, Premiere premiere) {
+        Assert.notNull(quantity, "Amount must not be null");
 
         this.amount = amount;
+        this.quantity = quantity;
         this.member = member;
         this.premiere = premiere;
     }

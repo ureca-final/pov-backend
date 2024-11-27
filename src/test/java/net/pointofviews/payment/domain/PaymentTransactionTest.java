@@ -25,7 +25,7 @@ class PaymentTransactionTest {
                 String transactionKey = "transaction_key_123";
                 PaymentType type = PaymentType.PAY;
                 PaymentStatus status = PaymentStatus.SUCCESS;
-                Integer price = 10000;
+                Integer amount = 10000;
 
                 // when
                 PaymentTransaction transaction = PaymentTransaction.builder()
@@ -33,7 +33,7 @@ class PaymentTransactionTest {
                         .transactionKey(transactionKey)
                         .type(type)
                         .status(status)
-                        .price(price)
+                        .amount(amount)
                         .build();
 
                 // then
@@ -43,7 +43,7 @@ class PaymentTransactionTest {
                     softly.assertThat(transaction.getTransactionKey()).isEqualTo(transactionKey);
                     softly.assertThat(transaction.getType()).isEqualTo(type);
                     softly.assertThat(transaction.getStatus()).isEqualTo(status);
-                    softly.assertThat(transaction.getPrice()).isEqualTo(price);
+                    softly.assertThat(transaction.getAmount()).isEqualTo(amount);
                 });
             }
         }
@@ -57,14 +57,14 @@ class PaymentTransactionTest {
                 Payment payment = Mockito.mock(Payment.class);
                 PaymentType type = PaymentType.PAY;
                 PaymentStatus status = PaymentStatus.SUCCESS;
-                Integer price = 10000;
+                Integer amount = 10000;
 
                 // when & then
                 assertThatThrownBy(() -> PaymentTransaction.builder()
                         .payment(payment)
                         .type(type)
                         .status(status)
-                        .price(price)
+                        .amount(amount)
                         .build())
                         .isInstanceOf(IllegalArgumentException.class)
                         .hasMessageContaining("Transaction key must not be null");
