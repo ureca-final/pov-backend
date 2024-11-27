@@ -48,7 +48,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"message": "존재하지 않는 영화입니다."
+						"message": "영화(Id: 1)는 존재하지 않습니다."
 					}
 					"""
 				)
@@ -106,7 +106,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"message": "존재하지 않는 리뷰입니다."
+						"message": "리뷰(Id: 1)는 존재하지 않습니다."
 					}
 					"""
 				)
@@ -139,7 +139,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"message": "존재하지 않는 리뷰입니다."
+						"message": "리뷰(Id: 1)는 존재하지 않습니다."
 					}
 					"""
 				)
@@ -172,7 +172,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"message": "존재하지 않는 리뷰입니다."
+						"message": "리뷰(Id: 1)는 존재하지 않습니다."
 					}
 					"""
 				)
@@ -197,7 +197,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"message": "존재하지 않는 영화입니다."
+						"message": "영화(Id: 1)는 존재하지 않습니다."
 					}
 					"""
 				)
@@ -250,7 +250,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"message": "존재하지 않는 리뷰입니다."
+						"message": "리뷰(Id: 1)는 존재하지 않습니다."
 					}
 					"""
 				)
@@ -283,7 +283,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"message": "존재하지 않는 리뷰입니다."
+						"message": "리뷰(Id: 1)는 존재하지 않습니다."
 					}
 					"""
 				)

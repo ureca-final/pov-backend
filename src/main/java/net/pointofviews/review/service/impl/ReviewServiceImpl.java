@@ -1,11 +1,13 @@
 package net.pointofviews.review.service.impl;
 
+import static net.pointofviews.movie.exception.MovieException.*;
+import static net.pointofviews.review.exception.ReviewException.*;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.pointofviews.movie.exception.MovieNotFoundException;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
@@ -14,7 +16,6 @@ import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
-import net.pointofviews.review.exception.ReviewNotFoundException;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
@@ -61,7 +62,7 @@ public class ReviewServiceImpl implements ReviewService {
 	public ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable) {
 
 		if (movieRepository.findById(movieId).isEmpty()) {
-			throw new MovieNotFoundException();
+			throw movieNotFound(movieId);
 		}
 
 		Slice<Review> reviews = reviewRepository.findAllByMovieId(movieId, pageable);
@@ -94,7 +95,7 @@ public class ReviewServiceImpl implements ReviewService {
 	public ReadReviewResponse findReviewDetail(Long reviewId) {
 
 		Review review = reviewRepository.findById(reviewId)
-			.orElseThrow(ReviewNotFoundException::new);
+			.orElseThrow(() -> reviewNotFound(reviewId));
 
 		Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
 		boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId);
