@@ -1,13 +1,18 @@
 package net.pointofviews.movie.domain;
 
-import jakarta.persistence.*;
+import net.pointofviews.common.domain.BaseEntity;
+import net.pointofviews.member.domain.Member;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.pointofviews.common.domain.BaseEntity;
-import net.pointofviews.member.domain.Member;
-import org.springframework.util.Assert;
 
 @Entity
 @Getter
@@ -23,9 +28,12 @@ public class MovieLike extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Movie movie;
 
+    private boolean isLiked;
+
     @Builder
-    private MovieLike(Member member, Movie movie) {
+    private MovieLike(Member member, Movie movie, boolean isLiked) {
         this.member = member;
         this.movie = movie;
+        this.isLiked = isLiked;
     }
 }

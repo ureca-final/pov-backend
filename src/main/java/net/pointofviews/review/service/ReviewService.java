@@ -1,5 +1,7 @@
 package net.pointofviews.review.service;
 
+import org.springframework.data.domain.Pageable;
+
 import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
@@ -19,7 +21,7 @@ public interface ReviewService {
 
 	void blindReview(Long movieId, Long reviewId);
 
-	ReadReviewListResponse findReviewByMovie(Long movieId);
+	ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable);
 
 	ReadReviewListResponse findAllReview();
 

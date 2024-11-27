@@ -1,13 +1,22 @@
 package net.pointofviews.movie.domain;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.util.Assert;
+
+import net.pointofviews.review.domain.Review;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.*;
-import org.springframework.util.Assert;
-
-import java.time.LocalDateTime;
+import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -35,6 +44,9 @@ public class Movie {
 
     private boolean hasAward;
 
+    @OneToMany(mappedBy = "movie")
+    private final List<Review> reviews = new ArrayList<>();
+
     @Builder
     private Movie(String title, String director, String writer, String plot, String poster,
                   String country, LocalDateTime released, String imdbId, boolean hasAward) {
@@ -48,5 +60,14 @@ public class Movie {
         this.released = released;
         this.imdbId = imdbId;
         this.hasAward = hasAward;
+    }
+
+    public void addReview(Review review) {
+        this.reviews.add(review);
+
+        // 무한루프 방지
+        if (review.getMovie() != this) {
+            review.setMovie(this);
+        }
     }
 }

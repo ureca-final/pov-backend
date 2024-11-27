@@ -1,5 +1,7 @@
 package net.pointofviews.review.controller;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -12,6 +14,7 @@ import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -201,7 +204,10 @@ public interface ReviewSpecification {
 			)
 		)
 	})
-	ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(Long movieId);
+	ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(
+		@Parameter(description = "영화 ID", example = "1") Long movieId,
+		@ParameterObject Pageable pageable
+	);
 
 	@Operation(
 		summary = "리뷰 전체 조회",
