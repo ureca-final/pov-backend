@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.movie.dto.request.CreateMovieContentRequest;
 import net.pointofviews.movie.dto.SearchMovieCriteria;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
@@ -186,7 +185,7 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> createImage(
+    ResponseEntity<?> createImages(
             @PathVariable Long movieId, @RequestParam("files") List<MultipartFile> files
     );
 
@@ -206,7 +205,7 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> createVideo(
+    ResponseEntity<?> createVideos(
             @PathVariable Long movieId, @RequestParam("urls") List<String> urls
     );
 
@@ -271,7 +270,7 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<?> deleteVideo(
+    ResponseEntity<?> deleteVideos(
             @PathVariable Long movieId,
             @RequestBody List<Long> ids
     );

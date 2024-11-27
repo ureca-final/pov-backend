@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service{
 
@@ -49,9 +51,9 @@ public class S3ServiceImpl implements S3Service{
         try {
             // S3 객체 삭제 요청
             amazonS3.deleteObject(bucketName, objectKey);
-            System.out.println("삭제 완료: " + objectKey);
+            log.info("S3에서 이미지 삭제 성공: {}", objectKey); // 삭제 성공 로그
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("S3에서 이미지 삭제 중 오류 발생: {}", e.getMessage(), e); // 에러 로그
             throw new RuntimeException("S3에서 이미지 삭제 중 오류 발생: " + e.getMessage());
         }
     }
