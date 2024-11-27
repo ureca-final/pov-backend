@@ -7,6 +7,9 @@ import static org.mockito.BDDMockito.*;
 import java.util.List;
 import java.util.Optional;
 
+import net.pointofviews.review.dto.request.CreateReviewRequest;
+import net.pointofviews.review.dto.request.PutReviewRequest;
+import net.pointofviews.review.exception.ReviewNotFoundException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +28,7 @@ import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
+import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.impl.ReviewServiceImpl;
@@ -46,6 +50,203 @@ class ReviewServiceTest {
 
 	@Mock
 	private ReviewLikeCountRepository reviewLikeCountRepository;
+
+	@Mock
+	private ReviewKeywordLinkRepository reviewKeywordLinkRepository;
+
+	@Nested
+	class SaveReview {
+		@Nested
+		class Success {
+			@Test
+			void 리뷰_등록_성공() {
+				// given
+				Movie movie = mock(Movie.class);
+				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+
+				CreateReviewRequest request = new CreateReviewRequest(
+						"제목",
+						"내용",
+						"긍정적",
+						List.of("01", "02"),
+						false
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatCode(() -> reviewService.saveReview(1L, request))
+							.doesNotThrowAnyException();
+				});
+			}
+
+			@Test
+			void 키워드없이_리뷰_등록_성공() {
+				// given
+				Movie movie = mock(Movie.class);
+				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+
+				// null 케이스
+				CreateReviewRequest nullRequest = new CreateReviewRequest(
+						"제목",
+						"내용",
+						"긍정적",
+						null,
+						false
+				);
+
+				// 빈 리스트 케이스
+				CreateReviewRequest emptyRequest = new CreateReviewRequest(
+						"제목",
+						"내용",
+						"긍정적",
+						List.of(),
+						false
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatCode(() -> reviewService.saveReview(1L, nullRequest))
+							.doesNotThrowAnyException();
+					softly.assertThatCode(() -> reviewService.saveReview(1L, emptyRequest))
+							.doesNotThrowAnyException();
+				});
+			}
+		}
+
+		@Nested
+		class Failure {
+			@Test
+			void 존재하지_않는_영화_MovieNotFoundException_예외발생() {
+				// given
+				given(movieRepository.findById(any())).willReturn(Optional.empty());
+
+				CreateReviewRequest request = new CreateReviewRequest(
+						"제목",
+						"내용",
+						"긍정적",
+						List.of("01"),
+						false
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.saveReview(1L, request))
+							.isInstanceOf(MovieNotFoundException.class);
+				});
+			}
+		}
+	}
+
+	@Nested
+	class UpdateReview {
+		@Nested
+		class Success {
+			@Test
+			void 리뷰_수정_성공() {
+				// given
+				Movie movie = mock(Movie.class);
+				Review review = mock(Review.class);
+
+				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+				given(reviewRepository.findById(any())).willReturn(Optional.of(review));
+
+				PutReviewRequest request = new PutReviewRequest(
+						"수정된 제목",
+						"수정된 내용"
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatCode(() -> reviewService.updateReview(1L, 1L, request))
+							.doesNotThrowAnyException();
+				});
+			}
+		}
+
+		@Nested
+		class Failure {
+			@Test
+			void 존재하지_않는_영화_MovieNotFoundException_예외발생() {
+				// given
+				given(movieRepository.findById(any())).willReturn(Optional.empty());
+
+				PutReviewRequest request = new PutReviewRequest("제목", "내용");
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request))
+							.isInstanceOf(MovieNotFoundException.class);
+				});
+			}
+
+			@Test
+			void 존재하지_않는_리뷰_ReviewNotFoundException_예외발생() {
+				// given
+				Movie movie = mock(Movie.class);
+				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+				given(reviewRepository.findById(any())).willReturn(Optional.empty());
+
+				PutReviewRequest request = new PutReviewRequest("제목", "내용");
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request))
+							.isInstanceOf(ReviewNotFoundException.class);
+				});
+			}
+		}
+	}
+
+	@Nested
+	class DeleteReview {
+		@Nested
+		class Success {
+			@Test
+			void 리뷰_삭제_성공() {
+				// given
+				Movie movie = mock(Movie.class);
+				Review review = mock(Review.class);
+
+				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+				given(reviewRepository.findById(any())).willReturn(Optional.of(review));
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatCode(() -> reviewService.deleteReview(1L, 1L))
+							.doesNotThrowAnyException();
+				});
+			}
+		}
+
+		@Nested
+		class Failure {
+			@Test
+			void 존재하지_않는_영화_MovieNotFoundException_예외발생() {
+				// given
+				given(movieRepository.findById(any())).willReturn(Optional.empty());
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.deleteReview(1L, 1L))
+							.isInstanceOf(MovieNotFoundException.class);
+				});
+			}
+
+			@Test
+			void 존재하지_않는_리뷰_ReviewNotFoundException_예외발생() {
+				// given
+				Movie movie = mock(Movie.class);
+				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+				given(reviewRepository.findById(any())).willReturn(Optional.empty());
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.deleteReview(1L, 1L))
+							.isInstanceOf(ReviewNotFoundException.class);
+				});
+			}
+		}
+	}
 
 	@Nested
 	class FindReviewByMovie {

@@ -52,10 +52,11 @@ public class Review extends SoftDeleteEntity {
     private LocalDateTime modifiedAt;
 
     @Builder
-    private Review(Member member, String title, String contents, String preference, boolean isSpoiler) {
+    private Review(Member member, Movie movie, String title, String contents, String preference, boolean isSpoiler) {
         Assert.notNull(title, "Title must not be null");
 
         this.member = member;
+        setMovie(movie);
         this.title = title;
         this.contents = contents;
         this.preference = preference;
@@ -70,5 +71,17 @@ public class Review extends SoftDeleteEntity {
         if (!movie.getReviews().contains(this)) {
             movie.getReviews().add(this);
         }
+    }
+
+    public void update(String title, String contents) {
+        Assert.notNull(title, "Title must not be null");
+        Assert.notNull(contents, "Contents must not be null");
+
+        this.title = title;
+        this.contents = contents;
+    }
+
+    public void delete() {
+        setDeletedAt(LocalDateTime.now());
     }
 }
