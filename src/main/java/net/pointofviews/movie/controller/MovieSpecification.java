@@ -1,5 +1,20 @@
 package net.pointofviews.movie.controller;
 
+import java.util.List;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.movie.dto.SearchMovieCriteria;
+import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
+import net.pointofviews.movie.dto.response.SearchMovieListResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,17 +22,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.movie.dto.SearchMovieCriteria;
-import net.pointofviews.movie.dto.request.CreateMovieRequest;
-import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
-import net.pointofviews.movie.dto.response.SearchMovieListResponse;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Tag(name = "Movie", description = "영화 관련 API")
 public interface MovieSpecification {
@@ -94,7 +98,7 @@ public interface MovieSpecification {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
                                     {
-                                      "message": "존재하지 않는 영화입니다."
+                                      "message": "영화(Id: 1)는 존재하지 않습니다."
                                     }
                                     """)
                     )
@@ -127,7 +131,7 @@ public interface MovieSpecification {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
                                     {
-                                      "message": "존재하지 않는 영화입니다."
+                                      "message": "영화(Id: 1)는 존재하지 않습니다."
                                     }
                                     """)
                     )

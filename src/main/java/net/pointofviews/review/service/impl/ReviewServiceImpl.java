@@ -1,23 +1,24 @@
 package net.pointofviews.review.service.impl;
 
-import net.pointofviews.movie.domain.Movie;
-import net.pointofviews.review.domain.ReviewKeywordLink;
-import net.pointofviews.review.exception.ReviewNotFoundException;
-import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
+import static net.pointofviews.movie.exception.MovieException.*;
+import static net.pointofviews.review.exception.ReviewException.*;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.pointofviews.movie.exception.MovieNotFoundException;
+import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.domain.ReviewKeywordLink;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
+import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
@@ -41,7 +42,7 @@ public class ReviewServiceImpl implements ReviewService {
 	public void saveReview(Long movieId, CreateReviewRequest request) {
 
 		 Movie movie = movieRepository.findById(movieId)
-            		.orElseThrow(MovieNotFoundException::new);
+            		.orElseThrow(() -> movieNotFound(movieId));
 
 		// 리뷰 생성 및 저장
 		Review review = Review.builder()
@@ -76,11 +77,11 @@ public class ReviewServiceImpl implements ReviewService {
 	@Transactional
 	public void updateReview(Long movieId, Long reviewId, PutReviewRequest request) {
 		if (movieRepository.findById(movieId).isEmpty()) {
-			throw new MovieNotFoundException();
+			throw movieNotFound(movieId);
 		}
 
 		Review review = reviewRepository.findById(reviewId)
-				.orElseThrow(ReviewNotFoundException::new);
+				.orElseThrow(() -> reviewNotFound(reviewId));
 
 		review.update(request.title(), request.contents());
 	}
@@ -89,11 +90,11 @@ public class ReviewServiceImpl implements ReviewService {
 	@Transactional
 	public void deleteReview(Long movieId, Long reviewId) {
 		if (movieRepository.findById(movieId).isEmpty()) {
-			throw new MovieNotFoundException();
+			throw movieNotFound(movieId);
 		}
 
 		Review review = reviewRepository.findById(reviewId)
-				.orElseThrow(ReviewNotFoundException::new);
+				.orElseThrow(() -> reviewNotFound(reviewId));
 
 		review.delete(); // soft delete 처리
 	}
@@ -107,7 +108,7 @@ public class ReviewServiceImpl implements ReviewService {
 	public ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable) {
 
 		if (movieRepository.findById(movieId).isEmpty()) {
-			throw new MovieNotFoundException();
+			throw movieNotFound(movieId);
 		}
 
 		Slice<Review> reviews = reviewRepository.findAllByMovieId(movieId, pageable);
@@ -138,7 +139,25 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	public ReadReviewResponse findReviewDetail(Long reviewId) {
-		return null;
+
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> reviewNotFound(reviewId));
+
+		Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
+		boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId);
+
+		ReadReviewResponse response = new ReadReviewResponse(
+			review.getMovie().getTitle(),
+			review.getTitle(),
+			review.getContents(),
+			review.getMember().getNickname(),
+			review.getThumbnail(),
+			review.getCreatedAt(),
+			likeAmount,
+			isLiked
+		);
+
+		return response;
 	}
 
 	@Override
