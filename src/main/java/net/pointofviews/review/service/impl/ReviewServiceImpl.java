@@ -49,9 +49,9 @@ public class ReviewServiceImpl implements ReviewService {
 				.contents(request.contents())
 				.preference(request.preference())
 				.isSpoiler(request.spoiler())
+				.movie(movie)
 				.build();
 
-		review.setMovie(movie);
 		reviewRepository.save(review);
 
 		// 키워드 저장
