@@ -7,6 +7,7 @@ import org.springframework.util.Assert;
 
 import net.pointofviews.common.domain.SoftDeleteEntity;
 import net.pointofviews.member.domain.Member;
+import net.pointofviews.movie.domain.Movie;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,10 +32,15 @@ public class Review extends SoftDeleteEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Movie movie;
+
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String contents;
+
+    private String thumbnail;
 
     private String preference;
 
@@ -55,5 +61,14 @@ public class Review extends SoftDeleteEntity {
         this.preference = preference;
         this.isSpoiler = isSpoiler;
         this.disabled = false;
+    }
+
+    public void setMovie(Movie movie) {
+        this.movie = movie;
+
+        // 무한루프 방지
+        if (!movie.getReviews().contains(this)) {
+            movie.getReviews().add(this);
+        }
     }
 }
