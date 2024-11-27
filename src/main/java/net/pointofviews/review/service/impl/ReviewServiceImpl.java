@@ -1,5 +1,9 @@
 package net.pointofviews.review.service.impl;
 
+import net.pointofviews.movie.domain.Movie;
+import net.pointofviews.review.domain.ReviewKeywordLink;
+import net.pointofviews.review.exception.ReviewNotFoundException;
+import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -30,10 +34,40 @@ public class ReviewServiceImpl implements ReviewService {
 	private final MovieRepository movieRepository;
 	private final ReviewLikeRepository reviewLikeRepository;
 	private final ReviewLikeCountRepository reviewLikeCountRepository;
+	private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
 
 	@Override
+	@Transactional
 	public void saveReview(Long movieId, CreateReviewRequest request) {
 
+		if (movieRepository.findById(movieId).isEmpty()) {
+			throw new MovieNotFoundException();
+		}
+
+		Movie movie = movieRepository.findById(movieId).get();
+
+		// 리뷰 생성 및 저장
+		Review review = Review.builder()
+				.title(request.title())
+				.contents(request.contents())
+				.preference(request.preference())
+				.isSpoiler(request.spoiler())
+				.build();
+
+		review.setMovie(movie);
+		reviewRepository.save(review);
+
+		// 키워드 저장
+		if (request.keywords() != null && !request.keywords().isEmpty()) {
+			for (String keyword : request.keywords()) {
+				ReviewKeywordLink keywordLink = ReviewKeywordLink.builder()
+						.review(review)
+						.reviewKeywordCode(keyword)
+						.build();
+
+				reviewKeywordLinkRepository.save(keywordLink);
+			}
+		}
 	}
 
 	@Override
@@ -42,13 +76,29 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
+	@Transactional
 	public void updateReview(Long movieId, Long reviewId, PutReviewRequest request) {
+		if (movieRepository.findById(movieId).isEmpty()) {
+			throw new MovieNotFoundException();
+		}
 
+		Review review = reviewRepository.findById(reviewId)
+				.orElseThrow(ReviewNotFoundException::new);
+
+		review.update(request.title(), request.contents());
 	}
 
 	@Override
+	@Transactional
 	public void deleteReview(Long movieId, Long reviewId) {
+		if (movieRepository.findById(movieId).isEmpty()) {
+			throw new MovieNotFoundException();
+		}
 
+		Review review = reviewRepository.findById(reviewId)
+				.orElseThrow(ReviewNotFoundException::new);
+
+		review.delete(); // soft delete 처리
 	}
 
 	@Override
