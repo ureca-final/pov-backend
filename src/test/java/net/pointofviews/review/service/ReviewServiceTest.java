@@ -108,7 +108,7 @@ class ReviewServiceTest {
 		}
 
 		@Nested
-		class Fail {
+		class Failure {
 
 			@Test
 			void 존재하지_않는_영화_MovieNotFoundException_예외발생() {
