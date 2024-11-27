@@ -4,3 +4,7 @@ spring:
     url: ${DB_URL}
     username: ${DB_ADMIN_USERNAME}
     password: ${DB_ADMIN_PASSWORD}
+
+jwt:
+  token:
+    secretKey: "urecapointofviewsurecapointofviewsurecapoin"

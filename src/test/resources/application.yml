@@ -5,3 +5,18 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+cloud:
+  aws:
+    credentials:
+      accessKey: test-access-key
+      secretKey: test-secret-key
+    s3:
+      bucketName: test-bucket-name
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+jwt:
+  token:
+    secretKey: "testaccesssecretkeytestaccesssecretkeytesta"

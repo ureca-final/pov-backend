@@ -1,6 +1,10 @@
 package net.pointofviews.member.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.request.CreateMemberRequest;
+import net.pointofviews.auth.dto.request.LoginMemberRequest;
+import net.pointofviews.auth.dto.response.CreateMemberResponse;
+import net.pointofviews.auth.dto.response.LoginMemberResponse;
 import net.pointofviews.member.dto.request.*;
 import net.pointofviews.member.dto.response.*;
 import net.pointofviews.member.service.MemberService;
