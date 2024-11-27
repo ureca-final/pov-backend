@@ -9,10 +9,10 @@ spring:
 cloud:
   aws:
     credentials:
-      accessKey:
-      secretKey:
+      accessKey: test-access-key
+      secretKey: test-secret-key
     s3:
-      bucketName: bucket-uplus-127
+      bucketName: test-bucket-name
     region:
       static: ap-northeast-2
     stack:
