@@ -37,6 +37,7 @@ public class GlobalSecurityConfig {
         return new OrRequestMatcher(
                 new AntPathRequestMatcher("/error"),
                 new AntPathRequestMatcher("/actuator/**"),
+                new AntPathRequestMatcher("/auth/**"),
                 PathRequest.toStaticResources().atCommonLocations()
         );
     }
