@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
@@ -59,8 +60,10 @@ public interface CurationSpecification {
     ResponseEntity<?> createCuration(
             @RequestHeader(value = "Authorization", required = true)
             String authorization,
-            @RequestBody CreateCurationRequest createCurationRequest
+
+            @Valid @RequestBody CreateCurationRequest createCurationRequest
     );
+
 
     @Operation(summary = "모든 큐레이션 조회", description = "관리자가 생성한 모든 큐레이션을 조회합니다.")
     @ApiResponses({
