@@ -152,6 +152,7 @@ CREATE TABLE movie_like (
                             id bigint auto_increment primary key,
                             movie_id bigint null,
                             member_id binary(16) null,
+                            is_liked   boolean default false,
                             CONSTRAINT FK221ilwmr0s5y3m371cfbjhmgs FOREIGN KEY (member_id) REFERENCES member (id),
                             CONSTRAINT FKdglb6nfnx6ge9ogjlb6dqb63m FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
@@ -229,8 +230,10 @@ create table review
     contents    text         null,
     title       varchar(255) null,
     preference  varchar(255) null,
-    constraint FKk0ccx5i4ci2wd70vegug074w1
-        foreign key (member_id) references member (id)
+    thumbnail   varchar(255) null,
+    movie_id    bigint      not null,
+    CONSTRAINT FKk0ccx5i4ci2wd70vegug074w1 FOREIGN KEY (member_id) REFERENCES member (id),
+    CONSTRAINT FK_review_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
 CREATE TABLE review_keyword_link (
@@ -245,6 +248,7 @@ CREATE TABLE review_like (
                              id bigint auto_increment primary key,
                              review_id bigint null,
                              member_id binary(16) null,
+                             is_liked   boolean default false,
                              CONSTRAINT FK68am9vk1s1e8n1v873meqkk0k FOREIGN KEY (review_id) REFERENCES review (id),
                              CONSTRAINT FKf19ep4u0vm5vietilw2kp9jo2 FOREIGN KEY (member_id) REFERENCES member (id)
 );
