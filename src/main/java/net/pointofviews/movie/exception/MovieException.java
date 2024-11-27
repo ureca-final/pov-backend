@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 
 import net.pointofviews.common.exception.BusinessException;
 
-public class MovieNotFoundException extends BusinessException {
+public class MovieException extends BusinessException {
 
-	public MovieNotFoundException() {
+	public MovieException() {
 		super(HttpStatus.NOT_FOUND, "존재하지 않는 영화입니다.");
 	}
 
