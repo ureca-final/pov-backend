@@ -42,7 +42,7 @@ public interface ReviewSpecification {
 			)
 		),
 		@ApiResponse(
-			responseCode = "400",
+			responseCode = "404",
 			description = "리뷰 등록 실패",
 			content = @Content(
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -100,7 +100,7 @@ public interface ReviewSpecification {
 			)
 		),
 		@ApiResponse(
-			responseCode = "400",
+			responseCode = "404",
 			description = "리뷰 수정 실패",
 			content = @Content(
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -133,7 +133,7 @@ public interface ReviewSpecification {
 			)
 		),
 		@ApiResponse(
-			responseCode = "400",
+			responseCode = "404",
 			description = "리뷰 삭제 실패",
 			content = @Content(
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -166,7 +166,7 @@ public interface ReviewSpecification {
 			)
 		),
 		@ApiResponse(
-			responseCode = "400",
+			responseCode = "404",
 			description = "리뷰 숨김 실패",
 			content = @Content(
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -191,7 +191,7 @@ public interface ReviewSpecification {
 			description = "영화별 리뷰 조회 성공"
 		),
 		@ApiResponse(
-			responseCode = "400",
+			responseCode = "404",
 			description = "영화별 리뷰 조회 실패",
 			content = @Content(
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -244,7 +244,7 @@ public interface ReviewSpecification {
 			description = "리뷰 상세 조회 성공"
 		),
 		@ApiResponse(
-			responseCode = "400",
+			responseCode = "404",
 			description = "리뷰 상세 조회 실패",
 			content = @Content(
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -257,7 +257,7 @@ public interface ReviewSpecification {
 			)
 		)
 	})
-	ResponseEntity<BaseResponse<ReadReviewResponse>> readReviewDetail(Long reviewId);
+	ResponseEntity<BaseResponse<ReadReviewResponse>> readReviewDetail(@Parameter(description = "리뷰 ID", example = "1") Long reviewId);
 
 	@Operation(
 		summary = "리뷰 좋아요",
