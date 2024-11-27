@@ -2,7 +2,7 @@ name: AWS CI/CD TEST
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
 
 env:
   AWS_REGION: ap-northeast-2
@@ -70,6 +70,8 @@ jobs:
           export DB_URL="${{ secrets.DB_URL }}"
           export DB_ADMIN_USERNAME="${{ secrets.DB_ADMIN_USERNAME }}"
           export DB_ADMIN_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}"
+          export S3_ACCESS_KEY="${{ secrets.S3_ACCESS_KEY }}"
+          export S3_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET_ACCESS_KEY }}"
           cd /home/ubuntu/pov-backend
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
@@ -78,7 +80,8 @@ jobs:
           DB_URL: ${{ secrets.DB_URL }}
           DB_ADMIN_USERNAME: ${{ secrets.DB_ADMIN_USERNAME }}
           DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
-
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
       # 두 번째 인스턴스 배포
       - name: Deploy to EC2 Instance 2
         run: |
@@ -88,6 +91,8 @@ jobs:
           export DB_URL="${{ secrets.DB_URL }}"
           export DB_ADMIN_USERNAME="${{ secrets.DB_ADMIN_USERNAME }}"
           export DB_ADMIN_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}"
+          export S3_ACCESS_KEY="${{ secrets.S3_ACCESS_KEY }}"
+          export S3_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET_ACCESS_KEY }}"
           cd /home/ubuntu/pov-backend
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
@@ -96,3 +101,5 @@ jobs:
           DB_URL: ${{ secrets.DB_URL }}
           DB_ADMIN_USERNAME: ${{ secrets.DB_ADMIN_USERNAME }}
           DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
