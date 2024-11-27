@@ -1,5 +1,7 @@
 package net.pointofviews.review.controller;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,8 +69,11 @@ public class ReviewController implements ReviewSpecification {
 
 	@Override
 	@GetMapping("/{movieId}/reviews")
-	public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(@PathVariable Long movieId) {
-		ReadReviewListResponse response = reviewService.findReviewByMovie(movieId);
+	public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(
+		@PathVariable Long movieId,
+		@PageableDefault(page = 0, size = 10) Pageable pageable
+	) {
+		ReadReviewListResponse response = reviewService.findReviewByMovie(movieId, pageable);
 
 		return BaseResponse.ok("영화별 리뷰가 성공적으로 조회되었습니다.", response);
 	}
