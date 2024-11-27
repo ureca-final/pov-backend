@@ -22,7 +22,6 @@ public record CreateCurationRequest(
         @Schema(description = "큐레이션 내용", example = "관리자가 뽑은 이달의 최고의 액션영화를 소개합니다.")
         String description,
 
-        @NotBlank(message = "시작 시간은 필수 입력 항목입니다.")
         @Schema(description = "큐레이션 시작 시간 (ISO 8601 형식)", example = "2024-11-22T10:00:00Z")
         String startTime
 ) {}
