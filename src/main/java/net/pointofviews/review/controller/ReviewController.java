@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/movies")
+@RequestMapping("/api/movies")
 public class ReviewController implements ReviewSpecification {
 
 	private final ReviewService reviewService;
