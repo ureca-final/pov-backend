@@ -36,7 +36,7 @@ public class GlobalSecurityConfig {
     private RequestMatcher ignoredRequests() {
         return new OrRequestMatcher(
                 new AntPathRequestMatcher("/error"),
-                new AntPathRequestMatcher("/actuator/**"),
+                new AntPathRequestMatcher("/api/actuator/**"),
                 new AntPathRequestMatcher("/auth/**"),
                 PathRequest.toStaticResources().atCommonLocations()
         );
