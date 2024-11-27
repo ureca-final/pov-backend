@@ -1,9 +1,10 @@
-package net.pointofviews.member.dto.request;
+package net.pointofviews.auth.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 @Schema(description = "회원가입 요청 DTO")
@@ -26,4 +27,5 @@ public record CreateMemberRequest(
 
         @Schema(description = "프로필 이미지 URL", example = "https://example.com/image.jpg")
         String profileImage
-) {}
+) {
+}

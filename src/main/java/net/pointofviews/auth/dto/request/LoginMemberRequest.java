@@ -1,4 +1,4 @@
-package net.pointofviews.member.dto.request;
+package net.pointofviews.auth.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -13,4 +13,5 @@ public record LoginMemberRequest(
         @Schema(description = "소셜 로그인 타입", example = "KAKAO")
         @NotBlank
         String socialType
-) {}
+) {
+}

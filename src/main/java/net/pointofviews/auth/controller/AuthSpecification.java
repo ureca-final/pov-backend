@@ -1,4 +1,4 @@
-package net.pointofviews.member.controller;
+package net.pointofviews.auth.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.pointofviews.auth.dto.request.CreateMemberRequest;
+import net.pointofviews.auth.dto.request.LoginMemberRequest;
+import net.pointofviews.auth.dto.response.CreateMemberResponse;
+import net.pointofviews.auth.dto.response.LoginMemberResponse;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.member.dto.request.*;
-import net.pointofviews.member.dto.response.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
 
 public interface AuthSpecification {
     // 회원가입
@@ -41,9 +43,9 @@ public interface AuthSpecification {
             @ApiResponse(responseCode = "400", description = "❌ FAIL",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                                {
-                                  "message": "로그인에 실패했습니다."
-                                }""")
+                                    {
+                                      "message": "로그인에 실패했습니다."
+                                    }""")
                     )
             ),
     })

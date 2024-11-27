@@ -1,11 +1,14 @@
 package net.pointofviews.movie.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.util.Assert;
 
 @Entity
 @Getter
@@ -14,17 +17,16 @@ public class MovieLikeCount {
     @Id
     private Long movieId;
 
-    private Long likeCount;
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
+    private Long likeCount;
+
     @Builder
-    private MovieLikeCount(Movie movie, Long likeCount) {
+    private MovieLikeCount(Movie movie) {
         this.movie = movie;
-        this.movieId = movie.getId();
-        this.likeCount = likeCount;
+        this.likeCount = 0L;
     }
 }

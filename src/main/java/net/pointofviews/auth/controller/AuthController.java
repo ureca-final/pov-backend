@@ -1,18 +1,23 @@
-package net.pointofviews.member.controller;
+package net.pointofviews.auth.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.request.CreateMemberRequest;
+import net.pointofviews.auth.dto.request.LoginMemberRequest;
+import net.pointofviews.auth.dto.response.CreateMemberResponse;
+import net.pointofviews.auth.dto.response.LoginMemberResponse;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.member.dto.request.*;
-import net.pointofviews.member.dto.response.*;
 import net.pointofviews.member.service.MemberService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class AuthController implements AuthSpecification{
+public class AuthController implements AuthSpecification {
     private final MemberService memberService;
 
     @Override

@@ -1,6 +1,7 @@
-package net.pointofviews.member.dto.response;
+package net.pointofviews.auth.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.UUID;
 
 @Schema(description = "회원가입 응답 DTO")
@@ -13,4 +14,5 @@ public record CreateMemberResponse(
 
         @Schema(description = "닉네임", example = "nickname")
         String nickname
-) {}
+) {
+}
