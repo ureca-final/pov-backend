@@ -40,11 +40,8 @@ public class ReviewServiceImpl implements ReviewService {
 	@Transactional
 	public void saveReview(Long movieId, CreateReviewRequest request) {
 
-		if (movieRepository.findById(movieId).isEmpty()) {
-			throw new MovieNotFoundException();
-		}
-
-		Movie movie = movieRepository.findById(movieId).get();
+		 Movie movie = movieRepository.findById(movieId)
+            		.orElseThrow(MovieNotFoundException::new);
 
 		// 리뷰 생성 및 저장
 		Review review = Review.builder()
