@@ -38,7 +38,6 @@ public class GlobalSecurityConfig {
                 new AntPathRequestMatcher("/error"),
                 new AntPathRequestMatcher("/actuator/**"),
                 new AntPathRequestMatcher("/auth/**"),
-                new AntPathRequestMatcher("/movies/**"),
                 PathRequest.toStaticResources().atCommonLocations()
         );
     }
