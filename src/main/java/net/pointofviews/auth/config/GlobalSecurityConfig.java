@@ -37,7 +37,7 @@ public class GlobalSecurityConfig {
     private RequestMatcher ignoredRequests() {
         return new OrRequestMatcher(
                 new AntPathRequestMatcher("/error"),
-                new AntPathRequestMatcher("/actuator/**"),
+                new AntPathRequestMatcher("/api/actuator/**"),
                 new AntPathRequestMatcher("/auth/**"),
                 new AntPathRequestMatcher("/swagger-ui/**"),
                 new AntPathRequestMatcher("/v3/api-docs/**"),
