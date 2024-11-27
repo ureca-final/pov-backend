@@ -1,14 +1,13 @@
 package net.pointofviews.movie.domain;
 
+import static org.mockito.BDDMockito.*;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class MovieLikeCountTest {
@@ -23,22 +22,20 @@ class MovieLikeCountTest {
             void MovieLikeCount_객체_생성() {
                 // given
                 Movie movie = Mockito.mock(Movie.class);
-                BDDMockito.given(movie.getId()).willReturn(1L);
 
-                Long likeCount = 10L;
+                given(movie.getId()).willReturn(1L);
 
                 // when
                 MovieLikeCount movieLikeCount = MovieLikeCount.builder()
                         .movie(movie)
-                        .likeCount(likeCount)
                         .build();
 
                 // then
                 SoftAssertions.assertSoftly(softly -> {
                     softly.assertThat(movieLikeCount).isNotNull();
                     softly.assertThat(movieLikeCount.getMovie()).isNotNull();
-                    softly.assertThat(movieLikeCount.getMovieId()).isEqualTo(1L);
-                    softly.assertThat(movieLikeCount.getLikeCount()).isEqualTo(likeCount);
+                    softly.assertThat(movieLikeCount.getMovie().getId()).isEqualTo(1L);
+                    softly.assertThat(movieLikeCount.getLikeCount()).isEqualTo(0L);
                 });
             }
         }
