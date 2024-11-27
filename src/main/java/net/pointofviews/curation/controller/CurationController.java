@@ -33,7 +33,7 @@ public class CurationController implements CurationSpecification{
     @GetMapping
     @Override
     public ResponseEntity<BaseResponse<ReadCurationListResponse>> readAllCurations() {
-        ReadCurationListResponse response = curationService.readAllCuration();
+        ReadCurationListResponse response = curationService.readAllCurations();
         return BaseResponse.ok("큐레이션 전체 조회에 성공하였습니다.", response);
     }
 

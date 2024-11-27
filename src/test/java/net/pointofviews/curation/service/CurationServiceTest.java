@@ -91,7 +91,7 @@ class CurationServiceTest {
                 given(curationRepository.findAll()).willReturn(curations);
 
                 // when
-                ReadCurationListResponse response = curationService.readAllCuration();
+                ReadCurationListResponse response = curationService.readAllCurations();
 
                 // then
                 assertSoftly(softly -> {
@@ -148,6 +148,63 @@ class CurationServiceTest {
                 // when & then
                 assertThrows(CurationNotFoundException.class, () -> curationService.readCuration(1L));
                 verify(curationRepository, times(1)).findById(anyLong());
+            }
+        }
+    }
+
+
+    @Nested
+    class SearchCurations {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 큐레이션_검색_성공() {
+                // given
+                String theme = "Action";
+                CurationCategory category = CurationCategory.GENRE;
+
+                List<Curation> curations = List.of(
+                        Curation.builder().theme("Action Movies").category(CurationCategory.GENRE).title("Best Action").description("Top Action Movies").build(),
+                        Curation.builder().theme("Action Favorites").category(CurationCategory.GENRE).title("All Time Action").description("Favorite Action Movies").build()
+                );
+
+                given(curationRepository.searchCurations(theme, category)).willReturn(curations);
+
+                // when
+                ReadCurationListResponse response = curationService.searchCurations(theme, category);
+
+                // then
+                assertSoftly(softly -> {
+                    softly.assertThat(response.curations()).hasSize(2);
+                    softly.assertThat(response.curations().get(0).theme()).isEqualTo("Action Movies");
+                    softly.assertThat(response.curations().get(0).category()).isEqualTo(CurationCategory.GENRE);
+                    softly.assertThat(response.curations().get(0).title()).isEqualTo("Best Action");
+                    softly.assertThat(response.curations().get(0).description()).isEqualTo("Top Action Movies");
+                    softly.assertThat(response.curations().get(1).theme()).isEqualTo("Action Favorites");
+                });
+
+                verify(curationRepository, times(1)).searchCurations(theme, category);
+            }
+
+            @Test
+            void 검색_결과가_없을_경우_빈_목록_반환() {
+                // given
+                String theme = "Nonexistent";
+                CurationCategory category = CurationCategory.DIRECTOR;
+
+                given(curationRepository.searchCurations(theme, category)).willReturn(List.of());
+
+                // when
+                ReadCurationListResponse response = curationService.searchCurations(theme, category);
+
+                // then
+                assertSoftly(softly -> {
+                    softly.assertThat(response.curations()).isEmpty();
+                });
+
+                verify(curationRepository, times(1)).searchCurations(theme, category);
             }
         }
     }

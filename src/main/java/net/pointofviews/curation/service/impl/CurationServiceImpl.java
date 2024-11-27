@@ -49,7 +49,7 @@ public class CurationServiceImpl implements CurationService {
 
 
     @Override
-    public ReadCurationListResponse readAllCuration() {
+    public ReadCurationListResponse readAllCurations() {
         List<ReadCurationResponse> curationResponses = curationRepository.findAll()
                 .stream()
                 .map(curation -> new ReadCurationResponse(
