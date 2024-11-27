@@ -71,4 +71,16 @@ public class Review extends SoftDeleteEntity {
             movie.getReviews().add(this);
         }
     }
+
+    public void update(String title, String contents) {
+        Assert.notNull(title, "Title must not be null");
+        Assert.notNull(contents, "Contents must not be null");
+
+        this.title = title;
+        this.contents = contents;
+    }
+
+    public void delete() {
+        setDeletedAt(LocalDateTime.now());
+    }
 }
