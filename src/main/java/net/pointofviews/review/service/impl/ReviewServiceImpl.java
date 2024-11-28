@@ -111,25 +111,9 @@ public class ReviewServiceImpl implements ReviewService {
 			throw movieNotFound(movieId);
 		}
 
-		Slice<Review> reviews = reviewRepository.findAllByMovieId(movieId, pageable);
+		Slice<ReadReviewResponse> reviews = reviewRepository.findAllWithLikesByMovieId(movieId, pageable);
 
-		Slice<ReadReviewResponse> response = reviews.map(review -> {
-			Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(review.getId());
-			boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(review.getId());
-
-			return new ReadReviewResponse(
-				review.getMovie().getTitle(),
-				review.getTitle(),
-				review.getContents(),
-				review.getMember().getNickname(),
-				review.getThumbnail(),
-				review.getCreatedAt(),
-				likeAmount,
-				isLiked
-			);
-		});
-
-		return new ReadReviewListResponse(response);
+		return new ReadReviewListResponse(reviews);
 	}
 
 	@Override

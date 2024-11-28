@@ -7,15 +7,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.dto.response.ReadReviewResponse;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 	@Query(value = """
-		SELECT r
-		  FROM Review r
-		  JOIN FETCH r.movie m
-		 WHERE m.id = :movieId
-		 ORDER BY r.createdAt DESC
+		SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
+				mv.title,
+				r.title,
+				r.contents,
+				m.nickname,
+				r.thumbnail,
+				r.createdAt,
+				(SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id),
+				CASE WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.isLiked = true) THEN true ELSE false END
+		 )
+		 FROM Review r
+		 JOIN FETCH r.member m
+		 JOIN FETCH r.movie mv
+		 WHERE mv.id = :movieId
 	""")
-	Slice<Review> findAllByMovieId(@Param("movieId") Long movieId, Pageable pageable);
+	Slice<ReadReviewResponse> findAllWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
+
 }
