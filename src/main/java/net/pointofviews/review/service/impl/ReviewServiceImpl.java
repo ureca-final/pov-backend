@@ -99,6 +99,11 @@ public class ReviewServiceImpl implements ReviewService {
 		Review review = reviewRepository.findById(reviewId)
 				.orElseThrow(() -> reviewNotFound(reviewId));
 
+		// 이미지 삭제 로직
+		List<String> imageUrls = extractImageUrlsFromHtml(review.getContents());
+		deleteReviewImages(imageUrls);
+
+
 		review.delete(); // soft delete 처리
 	}
 
