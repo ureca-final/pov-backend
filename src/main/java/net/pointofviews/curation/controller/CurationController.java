@@ -1,37 +1,35 @@
 package net.pointofviews.curation.controller;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
+import net.pointofviews.curation.service.CurationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/movies/curations")
+@RequestMapping("/api/movies/curations")
+@RequiredArgsConstructor
 public class CurationController implements CurationSpecification{
 
-    @PostMapping
-    @Override
-    public ResponseEntity<BaseResponse<Void>> createCuration(String authorization, CreateCurationRequest createCurationRequest) {
-        return null;
-    }
+    private final CurationService curationService;
 
     @GetMapping
     @Override
     public ResponseEntity<BaseResponse<ReadCurationListResponse>> readAllCurations() {
-        return null;
+        ReadCurationListResponse response = curationService.readAllCurations();
+        return BaseResponse.ok("큐레이션 전체 조회에 성공하였습니다.", response);
     }
 
     @GetMapping("/{curationId}")
     @Override
     public ResponseEntity<BaseResponse<ReadCurationResponse>> readCuration(Long curationId) {
-        return null;
+        ReadCurationResponse response = curationService.readCuration(curationId);
+        return BaseResponse.ok("큐레이션 조회에 성공하였습니다.", response);
     }
 
-    @DeleteMapping("/{curationId}")
-    @Override
-    public ResponseEntity<Void> deleteCuration(Long curationId) {
-        return null;
-    }
 }
