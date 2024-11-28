@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,19 +38,23 @@ public class Curation extends BaseEntity {
 
     private String description;
 
+    private LocalDateTime startTime;
+
     @Builder
-    public Curation(Member member, String theme, CurationCategory category, String title, String description) {
+    public Curation(Member member, String theme, CurationCategory category, String title, String description, LocalDateTime startTime) {
         this.member = member;
         this.theme = theme;
         this.category = category;
         this.title = title;
         this.description = description;
+        this.startTime = startTime;
     }
 
-    public void updateCuration(String theme, CurationCategory category, String title, String description) {
+    public void updateCuration(String theme, CurationCategory category, String title, String description, LocalDateTime startTime) {
         this.theme = theme;
         this.category = category;
         this.title = title;
         this.description = description;
+        this.startTime = startTime;
     }
 }
