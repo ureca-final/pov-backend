@@ -1,14 +1,12 @@
 package net.pointofviews.review.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "리뷰 DTO")
-public record ReadReviewResponse(
-
-	@Schema(description = "영화 제목", example = "Inception")
-	String movieTitle,
+@Schema(description = "리뷰 상세 조회 DTO")
+public record ReadReviewDetailResponse(
 
 	@Schema(description = "리뷰 제목", example = "영화계의 걸작!")
 	String title,
@@ -36,7 +34,10 @@ public record ReadReviewResponse(
 	Long likeAmount,
 
 	@Schema(description = "좋아요 여부", example = "true")
-	boolean isLiked
+	boolean isLiked,
+
+	@Schema(description = "키워드", example = "[\"흥미진진\", \"몰입감\"]")
+	List<String> keywords
 ) {
 }
 

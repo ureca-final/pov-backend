@@ -19,6 +19,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 				r.title,
 				r.contents,
 				m.nickname,
+				m.profileImage,
 				r.thumbnail,
 				r.createdAt,
 				(SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id),
@@ -29,7 +30,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 		 JOIN r.movie mv
 		 WHERE mv.id = :movieId
 	""")
-	Slice<ReadReviewResponse> findAllWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
+	Slice<ReadReviewResponse> findReviewsWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
 
 	@Query("""
 		SELECT r

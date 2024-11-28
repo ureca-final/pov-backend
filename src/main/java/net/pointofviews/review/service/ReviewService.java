@@ -6,8 +6,8 @@ import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
+import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
-import net.pointofviews.review.dto.response.ReadReviewResponse;
 
 public interface ReviewService {
 
@@ -25,7 +25,7 @@ public interface ReviewService {
 
 	ReadReviewListResponse findAllReview();
 
-	ReadReviewResponse findReviewDetail(Long reviewId);
+	ReadReviewDetailResponse findReviewDetail(Long reviewId);
 
 	void updateReviewLike(Long reviewId, Long likedId);
 }

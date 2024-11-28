@@ -10,8 +10,8 @@ import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
+import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
-import net.pointofviews.review.dto.response.ReadReviewResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -257,7 +257,7 @@ public interface ReviewSpecification {
 			)
 		)
 	})
-	ResponseEntity<BaseResponse<ReadReviewResponse>> readReviewDetail(@Parameter(description = "리뷰 ID", example = "1") Long reviewId);
+	ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@Parameter(description = "리뷰 ID", example = "1") Long reviewId);
 
 	@Operation(
 		summary = "리뷰 좋아요",
