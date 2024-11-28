@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.common.exception.S3Exception;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,9 +24,6 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public String saveImage(MultipartFile image, String filePath) {
-        String originalFilename = image.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-
         try {
             // InputStream 및 메타데이터 생성
             byte[] bytes = image.getBytes();
@@ -39,7 +37,7 @@ public class S3ServiceImpl implements S3Service {
             // 업로드된 파일의 URL 반환
             return amazonS3.getUrl(bucketName, filePath).toString();
         } catch (Exception e) {
-            throw new RuntimeException("S3 업로드 실패: " + e.getMessage());
+            throw S3Exception.failedToUpload(e.getMessage());
         }
     }
 
@@ -54,7 +52,7 @@ public class S3ServiceImpl implements S3Service {
             log.info("S3에서 이미지 삭제 성공: {}", objectKey); // 삭제 성공 로그
         } catch (Exception e) {
             log.error("S3에서 이미지 삭제 중 오류 발생: {}", e.getMessage(), e); // 에러 로그
-            throw new RuntimeException("S3에서 이미지 삭제 중 오류 발생: " + e.getMessage());
+            throw S3Exception.failedToDelete(e.getMessage());
         }
     }
 }

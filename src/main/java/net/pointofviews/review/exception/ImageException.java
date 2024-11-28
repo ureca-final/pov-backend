@@ -21,16 +21,8 @@ public class ImageException extends BusinessException {
         return new ImageException(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다.");
     }
 
-    public static ImageException invalidImageUrl(String url) {
-        return new ImageException(HttpStatus.BAD_REQUEST, String.format("잘못된 이미지 URL 형식입니다: %s", url));
-    }
-
     public static ImageException emptyImageUrls() {
         return new ImageException(HttpStatus.BAD_REQUEST, "삭제할 이미지 URL이 없습니다.");
-    }
-
-    public static ImageException failedToDeleteImage(String message) {
-        return new ImageException(HttpStatus.INTERNAL_SERVER_ERROR, String.format("이미지 삭제 중 오류가 발생했습니다: %s", message));
     }
 
     public static ImageException failedToParseHtml(String message) {
