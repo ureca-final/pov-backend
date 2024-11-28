@@ -81,6 +81,10 @@ public class Review extends SoftDeleteEntity {
         this.contents = contents;
     }
 
+    public void toggleDisabled() {
+        this.disabled = !this.disabled;
+    }
+
     public void delete() {
         setDeletedAt(LocalDateTime.now());
     }

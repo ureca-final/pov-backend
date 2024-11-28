@@ -100,7 +100,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"messsage": "리뷰가 성공적으로 수정되었습니다."
+						"message": "리뷰가 성공적으로 수정되었습니다."
 					}
 					""")
 			)
@@ -133,7 +133,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"messsage": "리뷰가 성공적으로 삭제되었습니다."
+						"message": "리뷰가 성공적으로 삭제되었습니다."
 					}
 					""")
 			)
@@ -166,7 +166,7 @@ public interface ReviewSpecification {
 				mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-						"messsage": "리뷰가 성공적으로 숨김 처리 되었습니다."
+						"message": "리뷰가 성공적으로 숨김 처리 되었습니다."
 					}
 					""")
 			)
