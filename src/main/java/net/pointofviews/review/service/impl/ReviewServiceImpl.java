@@ -1,19 +1,24 @@
 package net.pointofviews.review.service.impl;
 
+import static net.pointofviews.movie.exception.MovieException.*;
+import static net.pointofviews.review.exception.ReviewException.*;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.pointofviews.movie.exception.MovieNotFoundException;
+import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.domain.ReviewKeywordLink;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
+import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
@@ -30,10 +35,37 @@ public class ReviewServiceImpl implements ReviewService {
 	private final MovieRepository movieRepository;
 	private final ReviewLikeRepository reviewLikeRepository;
 	private final ReviewLikeCountRepository reviewLikeCountRepository;
+	private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
 
 	@Override
+	@Transactional
 	public void saveReview(Long movieId, CreateReviewRequest request) {
 
+		 Movie movie = movieRepository.findById(movieId)
+            		.orElseThrow(() -> movieNotFound(movieId));
+
+		// 리뷰 생성 및 저장
+		Review review = Review.builder()
+				.title(request.title())
+				.contents(request.contents())
+				.preference(request.preference())
+				.isSpoiler(request.spoiler())
+				.movie(movie)
+				.build();
+
+		reviewRepository.save(review);
+
+		// 키워드 저장
+		if (request.keywords() != null && !request.keywords().isEmpty()) {
+			for (String keyword : request.keywords()) {
+				ReviewKeywordLink keywordLink = ReviewKeywordLink.builder()
+						.review(review)
+						.reviewKeywordCode(keyword)
+						.build();
+
+				reviewKeywordLinkRepository.save(keywordLink);
+			}
+		}
 	}
 
 	@Override
@@ -42,46 +74,56 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
+	@Transactional
 	public void updateReview(Long movieId, Long reviewId, PutReviewRequest request) {
+		if (movieRepository.findById(movieId).isEmpty()) {
+			throw movieNotFound(movieId);
+		}
 
+		Review review = reviewRepository.findById(reviewId)
+				.orElseThrow(() -> reviewNotFound(reviewId));
+
+		review.update(request.title(), request.contents());
 	}
 
 	@Override
+	@Transactional
 	public void deleteReview(Long movieId, Long reviewId) {
+		if (movieRepository.findById(movieId).isEmpty()) {
+			throw movieNotFound(movieId);
+		}
 
+		Review review = reviewRepository.findById(reviewId)
+				.orElseThrow(() -> reviewNotFound(reviewId));
+
+		review.delete(); // soft delete 처리
 	}
 
 	@Override
+	@Transactional
 	public void blindReview(Long movieId, Long reviewId) {
+		// TODO: 사용자 정보 가져오기
 
+		if (movieRepository.findById(movieId).isEmpty()) {
+			throw movieNotFound(movieId);
+		}
+
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> reviewNotFound(reviewId));
+
+		review.toggleDisabled();
 	}
 
 	@Override
 	public ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable) {
 
 		if (movieRepository.findById(movieId).isEmpty()) {
-			throw new MovieNotFoundException();
+			throw movieNotFound(movieId);
 		}
 
-		Slice<Review> reviews = reviewRepository.findAllByMovieId(movieId, pageable);
+		Slice<ReadReviewResponse> reviews = reviewRepository.findAllWithLikesByMovieId(movieId, pageable);
 
-		Slice<ReadReviewResponse> response = reviews.map(review -> {
-			Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(review.getId());
-			boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(review.getId());
-
-			return new ReadReviewResponse(
-				review.getMovie().getTitle(),
-				review.getTitle(),
-				review.getContents(),
-				review.getMember().getNickname(),
-				review.getThumbnail(),
-				review.getCreatedAt(),
-				likeAmount,
-				isLiked
-			);
-		});
-
-		return new ReadReviewListResponse(response);
+		return new ReadReviewListResponse(reviews);
 	}
 
 	@Override
@@ -91,7 +133,25 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	public ReadReviewResponse findReviewDetail(Long reviewId) {
-		return null;
+
+		Review review = reviewRepository.findReviewDetailById(reviewId)
+			.orElseThrow(() -> reviewNotFound(reviewId));
+
+		Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
+		boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId);
+
+		ReadReviewResponse response = new ReadReviewResponse(
+			review.getMovie().getTitle(),
+			review.getTitle(),
+			review.getContents(),
+			review.getMember().getNickname(),
+			review.getThumbnail(),
+			review.getCreatedAt(),
+			likeAmount,
+			isLiked
+		);
+
+		return response;
 	}
 
 	@Override

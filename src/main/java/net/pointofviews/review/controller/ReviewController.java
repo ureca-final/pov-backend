@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/movies")
+@RequestMapping("/api/movies")
 public class ReviewController implements ReviewSpecification {
 
 	private final ReviewService reviewService;
@@ -34,7 +34,8 @@ public class ReviewController implements ReviewSpecification {
 	@Override
 	@PostMapping("/{movieId}/reviews")
 	public ResponseEntity<BaseResponse<Void>> createReview(@PathVariable Long movieId, @Valid @RequestBody CreateReviewRequest request) {
-		return BaseResponse.created("", "리뷰가 성공적으로 등록되었습니다.");
+		reviewService.saveReview(movieId, request);
+		return BaseResponse.created("/movies/" + movieId + "/reviews", "리뷰가 성공적으로 등록되었습니다.");
 	}
 
 	@Override
@@ -52,18 +53,22 @@ public class ReviewController implements ReviewSpecification {
 		@PathVariable Long reviewId,
 		@RequestBody PutReviewRequest request
 	) {
+		reviewService.updateReview(movieId, reviewId, request);
 		return BaseResponse.ok("리뷰가 성공적으로 수정되었습니다.");
 	}
 
 	@Override
 	@DeleteMapping("/{movieId}/reviews/{reviewId}")
 	public ResponseEntity<BaseResponse<Void>> deleteReview(@PathVariable Long movieId, @PathVariable Long reviewId) {
+		reviewService.deleteReview(movieId, reviewId);
 		return BaseResponse.ok("리뷰가 성공적으로 삭제되었습니다.");
 	}
 
+	// TODO: 사용자 권한 확인
 	@Override
 	@PutMapping("/{movieId}/reviews/{reviewId}/blind")
 	public ResponseEntity<BaseResponse<Void>> blindReview(@PathVariable Long movieId, @PathVariable Long reviewId) {
+		reviewService.blindReview(movieId, reviewId);
 		return BaseResponse.ok("리뷰가 성공적으로 숨김 처리 되었습니다.");
 	}
 
