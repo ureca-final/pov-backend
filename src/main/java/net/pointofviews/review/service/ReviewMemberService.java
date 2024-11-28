@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public interface ReviewService {
+public interface ReviewMemberService {
 
 	void saveReview(Long movieId, CreateReviewRequest request);
 
@@ -22,8 +22,6 @@ public interface ReviewService {
 	void updateReview(Long movieId, Long reviewId, PutReviewRequest request);
 
 	void deleteReview(Long movieId, Long reviewId);
-
-	void blindReview(Long movieId, Long reviewId);
 
 	ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable);
 

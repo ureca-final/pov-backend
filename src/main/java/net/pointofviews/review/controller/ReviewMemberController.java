@@ -15,7 +15,7 @@ import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
-import net.pointofviews.review.service.ReviewService;
+import net.pointofviews.review.service.ReviewMemberService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,21 +26,21 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/movies")
-public class ReviewController implements ReviewSpecification {
+public class ReviewMemberController implements ReviewMemberSpecification {
 
-	private final ReviewService reviewService;
+	private final ReviewMemberService reviewMemberService;
 
 	@Override
 	@PostMapping("/{movieId}/reviews")
 	public ResponseEntity<BaseResponse<Void>> createReview(@PathVariable Long movieId, @Valid @RequestBody CreateReviewRequest request) {
-		reviewService.saveReview(movieId, request);
+		reviewMemberService.saveReview(movieId, request);
 		return BaseResponse.created("/movies/" + movieId + "/reviews", "리뷰가 성공적으로 등록되었습니다.");
 	}
 
 	@Override
 	@PostMapping("/{movieId}/reviews/proofread")
 	public ResponseEntity<BaseResponse<ProofreadReviewResponse>> proofreadReview(@PathVariable Long movieId, @Valid @RequestBody ProofreadReviewRequest request) {
-		ProofreadReviewResponse response = reviewService.proofreadReview(movieId, request);
+		ProofreadReviewResponse response = reviewMemberService.proofreadReview(movieId, request);
 
 		return BaseResponse.ok("문장이 성공적으로 교정되었습니다.", response);
 	}
@@ -52,23 +52,15 @@ public class ReviewController implements ReviewSpecification {
 		@PathVariable Long reviewId,
 		@RequestBody PutReviewRequest request
 	) {
-		reviewService.updateReview(movieId, reviewId, request);
+		reviewMemberService.updateReview(movieId, reviewId, request);
 		return BaseResponse.ok("리뷰가 성공적으로 수정되었습니다.");
 	}
 
 	@Override
 	@DeleteMapping("/{movieId}/reviews/{reviewId}")
 	public ResponseEntity<BaseResponse<Void>> deleteReview(@PathVariable Long movieId, @PathVariable Long reviewId) {
-		reviewService.deleteReview(movieId, reviewId);
+		reviewMemberService.deleteReview(movieId, reviewId);
 		return BaseResponse.ok("리뷰가 성공적으로 삭제되었습니다.");
-	}
-
-	// TODO: 사용자 권한 확인
-	@Override
-	@PutMapping("/{movieId}/reviews/{reviewId}/blind")
-	public ResponseEntity<BaseResponse<Void>> blindReview(@PathVariable Long movieId, @PathVariable Long reviewId) {
-		reviewService.blindReview(movieId, reviewId);
-		return BaseResponse.ok("리뷰가 성공적으로 숨김 처리 되었습니다.");
 	}
 
 	@Override
@@ -77,7 +69,7 @@ public class ReviewController implements ReviewSpecification {
 		@PathVariable Long movieId,
 		@PageableDefault(page = 0, size = 10) Pageable pageable
 	) {
-		ReadReviewListResponse response = reviewService.findReviewByMovie(movieId, pageable);
+		ReadReviewListResponse response = reviewMemberService.findReviewByMovie(movieId, pageable);
 
 		return BaseResponse.ok("영화별 리뷰가 성공적으로 조회되었습니다.", response);
 	}
@@ -85,7 +77,7 @@ public class ReviewController implements ReviewSpecification {
 	@Override
 	@GetMapping("/reviews")
 	public ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews() {
-		ReadReviewListResponse response = reviewService.findAllReview();
+		ReadReviewListResponse response = reviewMemberService.findAllReview();
 
 		return BaseResponse.ok("모든 리뷰가 성공적으로 조회되었습니다.", response);
 	}
@@ -93,7 +85,7 @@ public class ReviewController implements ReviewSpecification {
 	@Override
 	@GetMapping("/reviews/{reviewId}")
 	public ResponseEntity<BaseResponse<ReadReviewResponse>> readReviewDetail(@PathVariable Long reviewId) {
-		ReadReviewResponse response = reviewService.findReviewDetail(reviewId);
+		ReadReviewResponse response = reviewMemberService.findReviewDetail(reviewId);
 
 		return BaseResponse.ok("리뷰가 성공적으로 상세 조회되었습니다.", response);
 	}
@@ -109,14 +101,14 @@ public class ReviewController implements ReviewSpecification {
 	public ResponseEntity<BaseResponse<CreateReviewImageListResponse>> createReviewImages(
 			@RequestPart(value = "files") List<MultipartFile> files
 	) {
-		CreateReviewImageListResponse response = reviewService.saveReviewImages(files);
+		CreateReviewImageListResponse response = reviewMemberService.saveReviewImages(files);
 		return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
 	}
 
 	@Override
 	@DeleteMapping("/reviews/images")
 	public ResponseEntity<BaseResponse<Void>> deleteReviewImages(@RequestBody DeleteReviewImageListRequest request) {
-		reviewService.deleteReviewImages(request.imageUrls());
+		reviewMemberService.deleteReviewImages(request.imageUrls());
 		return BaseResponse.ok("이미지가 성공적으로 삭제되었습니다.");
 	}
 }

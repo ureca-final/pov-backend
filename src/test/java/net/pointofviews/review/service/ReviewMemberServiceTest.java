@@ -37,15 +37,15 @@ import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
-import net.pointofviews.review.service.impl.ReviewServiceImpl;
+import net.pointofviews.review.service.impl.ReviewMemberServiceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
-class ReviewServiceTest {
+class ReviewMemberServiceTest {
 
 	@InjectMocks
-	private ReviewServiceImpl reviewService;
+	private ReviewMemberServiceImpl reviewService;
 
 	@Mock
 	private ReviewRepository reviewRepository;

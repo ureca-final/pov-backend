@@ -29,7 +29,7 @@ import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
-import net.pointofviews.review.service.ReviewService;
+import net.pointofviews.review.service.ReviewMemberService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +41,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ReviewServiceImpl implements ReviewService {
+public class ReviewMemberServiceImpl implements ReviewMemberService {
 
 	private final ReviewRepository reviewRepository;
 	private final MovieRepository movieRepository;
@@ -115,21 +115,6 @@ public class ReviewServiceImpl implements ReviewService {
 
 
 		review.delete(); // soft delete 처리
-	}
-
-	@Override
-	@Transactional
-	public void blindReview(Long movieId, Long reviewId) {
-		// TODO: 사용자 정보 가져오기
-
-		if (movieRepository.findById(movieId).isEmpty()) {
-			throw movieNotFound(movieId);
-		}
-
-		Review review = reviewRepository.findById(reviewId)
-			.orElseThrow(() -> reviewNotFound(reviewId));
-
-		review.toggleDisabled();
 	}
 
 	@Override
