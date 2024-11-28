@@ -3,7 +3,8 @@ package net.pointofviews.movie.controller;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
-import net.pointofviews.movie.dto.response.SearchTMDbMovieListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
+import net.pointofviews.movie.service.MovieApiSearchService;
 import net.pointofviews.movie.service.MovieContentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +15,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/movies")
 @RequiredArgsConstructor
-public class MovieAdminController implements MovieAdminSpecification{
+public class MovieAdminController implements MovieAdminSpecification {
 
     private final MovieContentService movieContentService;
+    private final MovieApiSearchService movieApiSearchService;
 
     @Override
     @PostMapping
@@ -27,12 +29,6 @@ public class MovieAdminController implements MovieAdminSpecification{
     @Override
     @DeleteMapping("/{movieId}")
     public ResponseEntity<?> deleteMovie(@PathVariable Long movieId) {
-        return null;
-    }
-
-    @Override
-    @GetMapping("/search")
-    public ResponseEntity<BaseResponse<SearchTMDbMovieListResponse>> searchTMDbMovieList(@RequestParam String title) {
         return null;
     }
 
@@ -69,7 +65,7 @@ public class MovieAdminController implements MovieAdminSpecification{
 
     @Override
     @PostMapping("/{movieId}/videos")
-    public ResponseEntity<BaseResponse<List<String>>> createVideos(@PathVariable Long movieId, @RequestParam("urls") List<String> urls) {
+    public ResponseEntity<BaseResponse<List<String>>> createVideos(@PathVariable Long movieId, @RequestBody List<String> urls) {
         try {
             // 1. URL 유효성 검사
             for (String url : urls) {
@@ -137,6 +133,14 @@ public class MovieAdminController implements MovieAdminSpecification{
             // 기타 실패 응답 반환
             return BaseResponse.internalServerError("영상 삭제 중 오류가 발생했습니다.", null);
         }
+    }
+
+    @Override
+    @GetMapping("/tmdb-search")
+    public ResponseEntity<BaseResponse<SearchMovieApiListResponse>> searchTMDbMovieList(@RequestParam String query, @RequestParam(defaultValue = "1") int page) {
+        SearchMovieApiListResponse searchMovieApiListResponse = movieApiSearchService.searchMovie(query, page);
+
+        return BaseResponse.ok("OK", searchMovieApiListResponse);
     }
 
     // 유튜브 도메인 유효성 검사

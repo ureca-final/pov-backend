@@ -6,15 +6,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
-import net.pointofviews.movie.dto.response.SearchTMDbMovieListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Tag(name = "Movie-Admin", description = "관리자 영화 관련 API")
 public interface MovieAdminSpecification {
 
     @Operation(
@@ -195,7 +197,8 @@ public interface MovieAdminSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<SearchTMDbMovieListResponse>> searchTMDbMovieList(
-            @Parameter(description = "검색할 영화 제목", example = "Inception") String title
+    ResponseEntity<BaseResponse<SearchMovieApiListResponse>> searchTMDbMovieList(
+            @Parameter(description = "검색할 영화 제목", example = "Inception") String query,
+            @Parameter(description = "요청 페이지", example = "1") int page
     );
 }

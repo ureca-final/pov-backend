@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.SearchMovieCriteria;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
@@ -12,6 +13,7 @@ import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+@Tag(name = "Movie", description = "공통 영화 관련 API")
 public interface MovieSpecification {
 
     @Operation(summary = "영화 목록 검색", description = "검색 조건에 따라 영화 목록을 조회하는 API.")
