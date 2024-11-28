@@ -1,16 +1,11 @@
 package net.pointofviews.review.controller;
 
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
@@ -23,6 +18,9 @@ import net.pointofviews.review.service.ReviewService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -101,5 +99,13 @@ public class ReviewController implements ReviewSpecification {
 	@PutMapping("/{movieId}/reviews/{reviewId}/likes")
 	public ResponseEntity<BaseResponse<Void>> putReviewLike(@PathVariable Long movieId, @PathVariable Long reviewId) {
 		return BaseResponse.ok("리뷰 좋아요가 성공적으로 완료되었습니다.");
+	}
+	@Override
+	@PostMapping(value = "/reviews/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<BaseResponse<CreateReviewImageListResponse>> createReviewImages(
+			@RequestPart(value = "files") List<MultipartFile> files
+	) {
+		CreateReviewImageListResponse response = reviewService.saveReviewImages(files);
+		return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
 	}
 }

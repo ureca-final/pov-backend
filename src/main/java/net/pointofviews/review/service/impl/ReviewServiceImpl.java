@@ -3,6 +3,9 @@ package net.pointofviews.review.service.impl;
 import static net.pointofviews.movie.exception.MovieException.*;
 import static net.pointofviews.review.exception.ReviewException.*;
 
+import net.pointofviews.common.service.S3Service;
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
+import net.pointofviews.review.exception.ImageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -147,5 +150,58 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public void updateReviewLike(Long reviewId, Long likedId) {
 
+	}
+
+	@Override
+	public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files) {
+		List<String> imageUrls = new ArrayList<>();
+
+		for (MultipartFile file : files) {
+			validateImageFile(file);
+
+			String uniqueFileName = createUniqueFileName(file.getOriginalFilename());
+			String filePath = "reviews/" + uniqueFileName;
+
+			String imageUrl = s3Service.saveImage(file, filePath);
+			imageUrls.add(imageUrl);
+		}
+
+		return new CreateReviewImageListResponse(imageUrls);
+	}
+
+	private void validateImageFile(MultipartFile file) {
+		if (file.isEmpty()) {
+			throw ImageException.emptyImage();
+		}
+
+		if (file.getSize() > 2 * 1024 * 1024) {
+			throw ImageException.invalidImageSize();
+		}
+
+		String contentType = file.getContentType();
+		if (contentType == null || !contentType.startsWith("image/")) {
+			throw ImageException.invalidImageFormat();
+		}
+
+		// 이미지 확장자 검증 추가
+		String filename = file.getOriginalFilename();
+		if (filename != null && !isImageFile(filename)) {
+			throw ImageException.invalidImageFormat();
+		}
+	}
+
+	private String createUniqueFileName(String originalFilename) {
+		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+		String baseName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
+		String uniquePrefix = UUID.randomUUID().toString().substring(0, 5);
+		return baseName + "_" + uniquePrefix + extension;
+	}
+
+
+	private boolean isImageFile(String filename) {
+		String extension = filename.toLowerCase();
+		return extension.endsWith(".jpg") ||
+				extension.endsWith(".jpeg") ||
+				extension.endsWith(".png");
 	}
 }

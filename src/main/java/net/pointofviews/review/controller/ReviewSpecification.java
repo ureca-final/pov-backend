@@ -1,5 +1,6 @@
 package net.pointofviews.review.controller;
 
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -20,6 +21,9 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Tag(name = "Review", description = "리뷰 관련 API")
 public interface ReviewSpecification {
@@ -291,5 +295,43 @@ public interface ReviewSpecification {
 		)
 	})
 	ResponseEntity<BaseResponse<Void>> putReviewLike(Long movieId, Long reviewId);
+
+	@Operation(
+			summary = "리뷰 이미지 업로드",
+			description = "리뷰 작성 시 이미지를 업로드하는 API."
+	)
+	@ApiResponses(value = {
+			@ApiResponse(
+					responseCode = "200",
+					description = "이미지 업로드 성공"
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "이미지 업로드 실패",
+					content = @Content(
+							mediaType = MediaType.APPLICATION_JSON_VALUE,
+							examples = @ExampleObject(value = """
+                {
+                    "message": "지원하지 않는 파일 형식입니다."
+                }
+                """)
+					)
+			),
+			@ApiResponse(
+					responseCode = "413",
+					description = "파일 크기 초과",
+					content = @Content(
+							mediaType = MediaType.APPLICATION_JSON_VALUE,
+							examples = @ExampleObject(value = """
+                {
+                    "message": "파일 크기가 제한을 초과했습니다."
+                }
+                """)
+					)
+			)
+	})
+	ResponseEntity<BaseResponse<CreateReviewImageListResponse>> createReviewImages(
+			@Parameter(description = "이미지 파일 목록") List<MultipartFile> files
+	);
 
 }
