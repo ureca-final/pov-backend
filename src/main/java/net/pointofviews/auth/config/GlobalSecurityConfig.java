@@ -1,5 +1,6 @@
 package net.pointofviews.auth.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,8 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-
-import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -36,6 +35,9 @@ public class GlobalSecurityConfig {
 
     private RequestMatcher ignoredRequests() {
         return new OrRequestMatcher(
+                new AntPathRequestMatcher("/api/swagger-ui/**"),
+                new AntPathRequestMatcher("/v3/api-docs/**"),
+                new AntPathRequestMatcher("/api/docs"),
                 new AntPathRequestMatcher("/error"),
                 new AntPathRequestMatcher("/api/actuator/**"),
                 new AntPathRequestMatcher("/auth/**"),
