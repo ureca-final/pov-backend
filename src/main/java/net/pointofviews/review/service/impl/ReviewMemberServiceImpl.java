@@ -226,7 +226,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 	private String createUniqueFileName(String originalFilename) {
 		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
 		String baseName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
-		String uniquePrefix = UUID.randomUUID().toString().substring(0, 5);
+		String uniquePrefix = UUID.randomUUID().toString();
 		return baseName + "_" + uniquePrefix + extension;
 	}
 
