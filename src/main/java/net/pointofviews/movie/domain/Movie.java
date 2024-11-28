@@ -1,22 +1,16 @@
 package net.pointofviews.movie.domain;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.util.Assert;
-
-import net.pointofviews.review.domain.Review;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.review.domain.Review;
+import org.springframework.util.Assert;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,20 +30,24 @@ public class Movie {
 
     private String poster;
 
+    private String backdrop;
+
     private String country;
 
-    private LocalDateTime released;
+    private LocalDate released;
 
-    private String imdbId;
+    private Integer tmdbId;
 
     private boolean hasAward;
+
+    private boolean isAdult;
 
     @OneToMany(mappedBy = "movie")
     private final List<Review> reviews = new ArrayList<>();
 
     @Builder
     private Movie(String title, String director, String writer, String plot, String poster,
-                  String country, LocalDateTime released, String imdbId, boolean hasAward) {
+                  String country, LocalDate released, Integer tmdbId, boolean hasAward, String backdrop, boolean isAdult) {
         Assert.notNull(title, "title must not be null");
         this.title = title;
         this.director = director;
@@ -58,8 +56,10 @@ public class Movie {
         this.poster = poster;
         this.country = country;
         this.released = released;
-        this.imdbId = imdbId;
+        this.tmdbId = tmdbId;
         this.hasAward = hasAward;
+        this.backdrop = backdrop;
+        this.isAdult = isAdult;
     }
 
     public void addReview(Review review) {

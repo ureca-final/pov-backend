@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -27,10 +27,12 @@ class MovieTest {
                 String writer = "Jonathan Nolan";
                 String plot = "A mind-bending thriller about dreams within dreams.";
                 String poster = "inception-poster.jpg";
+                String backdrop = "inception-backdrop.jpg";
                 String country = "USA";
-                LocalDateTime released = LocalDateTime.of(2010, 7, 16, 0, 0);
-                String imdbId = "tt1375666";
+                LocalDate released = LocalDate.of(2010, 7, 16);
+                Integer tmdbId = 375666;
                 boolean hasAward = true;
+                boolean isAdult = false;
 
                 // when
                 Movie movie = Movie.builder()
@@ -41,8 +43,10 @@ class MovieTest {
                         .poster(poster)
                         .country(country)
                         .released(released)
-                        .imdbId(imdbId)
+                        .tmdbId(tmdbId)
                         .hasAward(hasAward)
+                        .backdrop(backdrop)
+                        .isAdult(isAdult)
                         .build();
 
                 // then
@@ -55,8 +59,10 @@ class MovieTest {
                     softly.assertThat(movie.getPoster()).isEqualTo(poster);
                     softly.assertThat(movie.getCountry()).isEqualTo(country);
                     softly.assertThat(movie.getReleased()).isEqualTo(released);
-                    softly.assertThat(movie.getImdbId()).isEqualTo(imdbId);
+                    softly.assertThat(movie.getTmdbId()).isEqualTo(tmdbId);
                     softly.assertThat(movie.isHasAward()).isTrue();
+                    softly.assertThat(movie.isAdult()).isEqualTo(isAdult);
+                    softly.assertThat(movie.getBackdrop()).isEqualTo(backdrop);
                 });
 
             }
@@ -68,19 +74,17 @@ class MovieTest {
             @Test
             void 제목_없음_IllegalArgumentException_예외발생() {
                 // when & then
-                assertThatThrownBy(() -> {
-                    Movie.builder()
-                            .title(null) // 제목이 null인 경우
-                            .director("Christopher Nolan")
-                            .writer("Jonathan Nolan")
-                            .plot("A mind-bending thriller.")
-                            .poster("poster.jpg")
-                            .country("USA")
-                            .released(LocalDateTime.of(2010, 7, 16, 0, 0))
-                            .imdbId("tt1375666")
-                            .hasAward(true)
-                            .build();
-                }).isInstanceOf(IllegalArgumentException.class)
+                assertThatThrownBy(() -> Movie.builder()
+                        .title(null) // 제목이 null인 경우
+                        .director("Christopher Nolan")
+                        .writer("Jonathan Nolan")
+                        .plot("A mind-bending thriller.")
+                        .poster("poster.jpg")
+                        .country("USA")
+                        .released(LocalDate.of(2010, 7, 16))
+                        .tmdbId(375666)
+                        .hasAward(true)
+                        .build()).isInstanceOf(IllegalArgumentException.class)
                         .hasMessageContaining("title must not be null");
             }
 
