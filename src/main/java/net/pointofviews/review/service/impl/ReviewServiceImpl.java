@@ -174,11 +174,14 @@ public class ReviewServiceImpl implements ReviewService {
 		for (MultipartFile file : files) {
 			validateImageFile(file);
 
-			String uniqueFileName = createUniqueFileName(file.getOriginalFilename());
-			String filePath = "reviews/" + uniqueFileName;
+			String originalFilename = file.getOriginalFilename();
+			if (originalFilename != null && !originalFilename.isEmpty()) {
+				String uniqueFileName = createUniqueFileName(originalFilename);
+				String filePath = "reviews/" + uniqueFileName;
 
-			String imageUrl = s3Service.saveImage(file, filePath);
-			imageUrls.add(imageUrl);
+				String imageUrl = s3Service.saveImage(file, filePath);
+				imageUrls.add(imageUrl);
+			}
 		}
 
 		return new CreateReviewImageListResponse(imageUrls);
@@ -191,15 +194,16 @@ public class ReviewServiceImpl implements ReviewService {
 			throw ImageException.emptyImageUrls();
 		}
 
-		try {
-			for (String imageUrl : imageUrls) {
-				if (!imageUrl.startsWith("https://") || !imageUrl.contains("s3")) {
-					throw ImageException.invalidImageUrl(imageUrl);
-				}
-				s3Service.deleteImage(imageUrl);
+		for (String imageUrl : imageUrls) {
+			if (!imageUrl.startsWith("https://") || !imageUrl.contains("s3")) {
+				throw ImageException.invalidImageUrl(imageUrl);
 			}
-		} catch (Exception e) {
-			throw ImageException.failedToDeleteImage(e.getMessage());
+
+			try {
+				s3Service.deleteImage(imageUrl);
+			} catch (Exception e) {
+				throw ImageException.failedToDeleteImage(e.getMessage());
+			}
 		}
 	}
 

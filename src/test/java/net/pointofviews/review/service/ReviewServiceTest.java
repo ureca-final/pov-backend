@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import net.pointofviews.common.service.S3Service;
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
+import net.pointofviews.review.exception.ImageException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +38,8 @@ import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.impl.ReviewServiceImpl;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceTest {
@@ -56,6 +61,9 @@ class ReviewServiceTest {
 
 	@Mock
 	private ReviewKeywordLinkRepository reviewKeywordLinkRepository;
+
+	@Mock
+	private S3Service s3Service;
 
 	@Nested
 	class SaveReview {
@@ -212,11 +220,18 @@ class ReviewServiceTest {
 
 				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
 				given(reviewRepository.findById(any())).willReturn(Optional.of(review));
+				given(review.getContents()).willReturn("""
+                <p>리뷰 내용</p>
+                <img src="https://s3-bucket.../image1.jpg" />
+                <img src="https://s3-bucket.../image2.jpg" />
+                """);
 
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatCode(() -> reviewService.deleteReview(1L, 1L))
 							.doesNotThrowAnyException();
+					verify(s3Service, times(2)).deleteImage(any());
+					verify(review, times(1)).delete();
 				});
 			}
 		}
@@ -405,4 +420,138 @@ class ReviewServiceTest {
 			}
 		}
 	}
+
+	@Nested
+	class SaveReviewImages {
+		@Nested
+		class Success {
+			@Test
+			void 이미지_업로드_성공() {
+				// given
+				MockMultipartFile file = new MockMultipartFile(
+						"test-image",
+						"test.jpg",
+						MediaType.IMAGE_JPEG_VALUE,
+						"test image content".getBytes()
+				);
+				given(s3Service.saveImage(any(), any()))
+						.willReturn("https://s3-bucket.../test.jpg");
+
+				// when
+				CreateReviewImageListResponse response = reviewService.saveReviewImages(List.of(file));
+
+				// then
+				assertSoftly(softly -> {
+					softly.assertThat(response.imageUrls()).hasSize(1);
+					softly.assertThat(response.imageUrls().get(0)).contains("s3");
+					verify(s3Service, times(1)).saveImage(any(), any());
+				});
+			}
+		}
+
+		@Nested
+		class Failure {
+			@Test
+			void 파일_용량_초과시_ImageException_invalidImageSize_예외발생() {
+				// given
+				MockMultipartFile largeFile = new MockMultipartFile(
+						"large-image",
+						"large.jpg",
+						MediaType.IMAGE_JPEG_VALUE,
+						new byte[3 * 1024 * 1024] // 3MB 파일
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(largeFile)))
+							.isInstanceOf(ImageException.class)
+							.hasMessage("파일 크기가 2MB를 초과합니다.");
+				});
+			}
+			@Test
+			void 빈_파일_업로드시_ImageException_emptyImage_예외발생() {
+				// given
+				MockMultipartFile emptyFile = new MockMultipartFile(
+						"empty-file",
+						"empty.jpg",
+						MediaType.IMAGE_JPEG_VALUE,
+						new byte[0]
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(emptyFile)))
+							.isInstanceOf(ImageException.class)
+							.hasMessage("파일이 비어있습니다.");
+				});
+			}
+
+			@Test
+			void 지원하지_않는_파일형식_업로드시_ImageException_invalidImageFormat_예외발생() {
+				// given
+				MockMultipartFile textFile = new MockMultipartFile(
+						"text-file",
+						"test.txt",
+						MediaType.TEXT_PLAIN_VALUE,
+						"test content".getBytes()
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(textFile)))
+							.isInstanceOf(ImageException.class)
+							.hasMessage("지원하지 않는 파일 형식입니다.");
+				});
+			}
+		}
+	}
+
+	@Nested
+	class DeleteReviewImages {
+		@Nested
+		class Success {
+			@Test
+			void 이미지_삭제_성공() {
+				// given
+				List<String> imageUrls = List.of(
+						"https://s3-bucket.../image1.jpg",
+						"https://s3-bucket.../image2.jpg"
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatCode(() -> reviewService.deleteReviewImages(imageUrls))
+							.doesNotThrowAnyException();
+					verify(s3Service, times(2)).deleteImage(any());
+				});
+			}
+		}
+
+		@Nested
+		class Failure {
+			@Test
+			void 잘못된_URL_형식으로_삭제시_ImageException_invalidImageUrl_예외발생() {
+				// given
+				List<String> invalidUrls = List.of("invalid-url");
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.deleteReviewImages(invalidUrls))
+							.isInstanceOf(ImageException.class)
+							.hasMessage("잘못된 이미지 URL 형식입니다: invalid-url");
+				});
+			}
+
+			@Test
+			void 빈_URL_리스트로_삭제시_ImageException_emptyImageUrls_예외발생() {
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.deleteReviewImages(List.of()))
+							.isInstanceOf(ImageException.class)
+							.hasMessage("삭제할 이미지 URL이 없습니다.");
+				});
+			}
+		}
+	}
+
 }
