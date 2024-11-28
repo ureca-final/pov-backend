@@ -124,7 +124,7 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public ReadReviewResponse findReviewDetail(Long reviewId) {
 
-		Review review = reviewRepository.findById(reviewId)
+		Review review = reviewRepository.findReviewDetailById(reviewId)
 			.orElseThrow(() -> reviewNotFound(reviewId));
 
 		Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);

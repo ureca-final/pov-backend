@@ -1,5 +1,7 @@
 package net.pointofviews.review.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,4 +31,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	""")
 	Slice<ReadReviewResponse> findAllWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
 
+	@Query("""
+		SELECT r
+		  FROM Review r
+		  JOIN FETCH r.member m
+		  JOIN FETCH r.movie mv
+		 WHERE r.id = :reviewId
+	""")
+	Optional<Review> findReviewDetailById(@Param("reviewId") Long reviewId);
 }
