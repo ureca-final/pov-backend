@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import net.pointofviews.member.domain.Member;
 
+import java.time.LocalDateTime;
+
 @ExtendWith(value = MockitoExtension.class)
 class CurationTest {
 
@@ -28,6 +30,7 @@ class CurationTest {
 				String theme = "영화배우";
 				String description = "강동원의 모든 영화";
 				CurationCategory category = ACTOR;
+				java.time.LocalDateTime startTime = LocalDateTime.of(2024, 11, 27, 10, 0, 0);
 
 			    // when -- 테스트하고자 하는 행동
 				Curation curation = Curation.builder()
@@ -36,6 +39,7 @@ class CurationTest {
 					.theme(theme)
 					.description(description)
 					.category(category)
+					.startTime(startTime)
 					.build();
 
 			    // then -- 예상되는 변화 및 결과
@@ -46,6 +50,7 @@ class CurationTest {
 					softly.assertThat(curation.getDescription()).isEqualTo(description);
 					softly.assertThat(curation.getCategory()).isEqualTo(category);
 					softly.assertThat(curation.getCreatedAt()).isNull();
+					softly.assertThat(curation.getStartTime()).isEqualTo(startTime);
 				});
 			}
 		}

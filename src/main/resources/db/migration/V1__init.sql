@@ -108,6 +108,7 @@ CREATE TABLE curation (
                           theme varchar(255) null,
                           title varchar(255) null,
                           category enum ('ACTOR', 'AWARD', 'COUNTRY', 'DIRECTOR', 'GENRE', 'OTHER', 'RELEASE') null,
+                          start_time datetime(6) null,
                           CONSTRAINT FKdlnps7qqivebgquql0rxw9qri FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
