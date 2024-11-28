@@ -100,8 +100,18 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
+	@Transactional
 	public void blindReview(Long movieId, Long reviewId) {
+		// TODO: 사용자 정보 가져오기
 
+		if (movieRepository.findById(movieId).isEmpty()) {
+			throw movieNotFound(movieId);
+		}
+
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> reviewNotFound(reviewId));
+
+		review.toggleDisabled();
 	}
 
 	@Override
