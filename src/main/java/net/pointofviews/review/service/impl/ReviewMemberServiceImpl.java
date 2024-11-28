@@ -190,15 +190,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 		}
 
 		for (String imageUrl : imageUrls) {
-			if (!imageUrl.startsWith("https://") || !imageUrl.contains("s3")) {
-				throw ImageException.invalidImageUrl(imageUrl);
-			}
-
-			try {
-				s3Service.deleteImage(imageUrl);
-			} catch (Exception e) {
-				throw ImageException.failedToDeleteImage(e.getMessage());
-			}
+			s3Service.deleteImage(imageUrl);
 		}
 	}
 

@@ -530,19 +530,6 @@ class ReviewMemberServiceTest {
 		@Nested
 		class Failure {
 			@Test
-			void 잘못된_URL_형식으로_삭제시_ImageException_invalidImageUrl_예외발생() {
-				// given
-				List<String> invalidUrls = List.of("invalid-url");
-
-				// when & then
-				assertSoftly(softly -> {
-					softly.assertThatThrownBy(() -> reviewService.deleteReviewImages(invalidUrls))
-							.isInstanceOf(ImageException.class)
-							.hasMessage("잘못된 이미지 URL 형식입니다: invalid-url");
-				});
-			}
-
-			@Test
 			void 빈_URL_리스트로_삭제시_ImageException_emptyImageUrls_예외발생() {
 				// when & then
 				assertSoftly(softly -> {
