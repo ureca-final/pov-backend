@@ -1,4 +1,3 @@
-// S3Exception.java
 package net.pointofviews.common.exception;
 
 import org.springframework.http.HttpStatus;
