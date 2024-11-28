@@ -169,6 +169,25 @@ public class ReviewServiceImpl implements ReviewService {
 		return new CreateReviewImageListResponse(imageUrls);
 	}
 
+	@Override
+	@Transactional
+	public void deleteReviewImages(List<String> imageUrls) {
+		if (imageUrls == null || imageUrls.isEmpty()) {
+			throw ImageException.emptyImageUrls();
+		}
+
+		try {
+			for (String imageUrl : imageUrls) {
+				if (!imageUrl.startsWith("https://") || !imageUrl.contains("s3")) {
+					throw ImageException.invalidImageUrl(imageUrl);
+				}
+				s3Service.deleteImage(imageUrl);
+			}
+		} catch (Exception e) {
+			throw ImageException.failedToDeleteImage(e.getMessage());
+		}
+	}
+
 	private void validateImageFile(MultipartFile file) {
 		if (file.isEmpty()) {
 			throw ImageException.emptyImage();
@@ -197,6 +216,23 @@ public class ReviewServiceImpl implements ReviewService {
 		return baseName + "_" + uniquePrefix + extension;
 	}
 
+	private List<String> extractImageUrlsFromHtml(String html) {
+		List<String> imageUrls = new ArrayList<>();
+		try {
+			Document doc = Jsoup.parse(html);
+			Elements imgTags = doc.select("img[src]");
+
+			for (Element img : imgTags) {
+				String imageUrl = img.attr("src");
+				if (imageUrl.contains("s3")) {
+					imageUrls.add(imageUrl);
+				}
+			}
+			return imageUrls;
+		} catch (Exception e) {
+			throw ImageException.failedToParseHtml(e.getMessage());
+		}
+	}
 
 	private boolean isImageFile(String filename) {
 		String extension = filename.toLowerCase();

@@ -1,5 +1,6 @@
 package net.pointofviews.review.controller;
 
+import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -334,4 +336,35 @@ public interface ReviewSpecification {
 			@Parameter(description = "이미지 파일 목록") List<MultipartFile> files
 	);
 
+	@Operation(
+			summary = "리뷰 임시 이미지 삭제",
+			description = "임시 저장된 리뷰의 미사용 이미지를 삭제하는 API."
+	)
+	@ApiResponses(value = {
+			@ApiResponse(
+					responseCode = "200",
+					description = "이미지 삭제 성공",
+					content = @Content(
+							mediaType = MediaType.APPLICATION_JSON_VALUE,
+							examples = @ExampleObject(value = """
+                {
+                    "message": "이미지가 성공적으로 삭제되었습니다."
+                }
+                """)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "이미지 삭제 실패",
+					content = @Content(
+							mediaType = MediaType.APPLICATION_JSON_VALUE,
+							examples = @ExampleObject(value = """
+                {
+                    "message": "잘못된 이미지 URL입니다."
+                }
+                """)
+					)
+			)
+	})
+	ResponseEntity<BaseResponse<Void>> deleteReviewImages(@RequestBody DeleteReviewImageListRequest request);
 }

@@ -1,5 +1,6 @@
 package net.pointofviews.review.controller;
 
+import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -100,6 +101,7 @@ public class ReviewController implements ReviewSpecification {
 	public ResponseEntity<BaseResponse<Void>> putReviewLike(@PathVariable Long movieId, @PathVariable Long reviewId) {
 		return BaseResponse.ok("리뷰 좋아요가 성공적으로 완료되었습니다.");
 	}
+
 	@Override
 	@PostMapping(value = "/reviews/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<BaseResponse<CreateReviewImageListResponse>> createReviewImages(
@@ -107,5 +109,12 @@ public class ReviewController implements ReviewSpecification {
 	) {
 		CreateReviewImageListResponse response = reviewService.saveReviewImages(files);
 		return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
+	}
+
+	@Override
+	@DeleteMapping("/reviews/images")
+	public ResponseEntity<BaseResponse<Void>> deleteReviewImages(@RequestBody DeleteReviewImageListRequest request) {
+		reviewService.deleteReviewImages(request.imageUrls());
+		return BaseResponse.ok("이미지가 성공적으로 삭제되었습니다.");
 	}
 }

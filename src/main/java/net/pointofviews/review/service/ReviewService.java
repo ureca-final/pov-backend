@@ -34,4 +34,6 @@ public interface ReviewService {
 	void updateReviewLike(Long reviewId, Long likedId);
 
 	CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files);
+
+    void deleteReviewImages(List<String> strings);
 }
