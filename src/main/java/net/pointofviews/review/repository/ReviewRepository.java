@@ -23,8 +23,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 				CASE WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.isLiked = true) THEN true ELSE false END
 		 )
 		 FROM Review r
-		 JOIN FETCH r.member m
-		 JOIN FETCH r.movie mv
+		 JOIN r.member m
+		 JOIN r.movie mv
 		 WHERE mv.id = :movieId
 	""")
 	Slice<ReadReviewResponse> findAllWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
