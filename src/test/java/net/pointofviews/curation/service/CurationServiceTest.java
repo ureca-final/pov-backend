@@ -4,9 +4,11 @@ import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import net.pointofviews.curation.service.impl.CurationAdminServiceImpl;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,8 @@ class CurationServiceTest {
 
     @InjectMocks
     private CurationServiceImpl curationService;
+    @InjectMocks
+    private CurationAdminServiceImpl curationAdminService;
 
     @Mock
     private CurationRepository curationRepository;
@@ -46,7 +50,7 @@ class CurationServiceTest {
                         CurationCategory.GENRE,
                         "Title",
                         "Description",
-                        "2024-11-22T10:00:00Z"
+                        LocalDateTime.now()
                 );
 
                 Curation curation = Curation.builder()
@@ -59,7 +63,7 @@ class CurationServiceTest {
                 given(curationRepository.save(any(Curation.class))).willReturn(curation);
 
                 // when
-                ReadCurationResponse response = curationService.saveCuration(request);
+                ReadCurationResponse response = curationAdminService.saveCuration(request);
 
                 // then
                 assertSoftly(softly -> {
@@ -84,7 +88,8 @@ class CurationServiceTest {
             void 모든_큐레이션_조회_성공() {
                 // given
                 List<Curation> curations = List.of(
-                        Curation.builder().theme("Theme1").category(CurationCategory.GENRE).title("Title1").description("Description1").build(),
+                        Curation.builder().theme("Theme1").category(CurationCategory.GENRE).title("Title1").description("Description1")
+                                .startTime(LocalDateTime.of(2024, 11, 27, 14, 30, 45)).build(),
                         Curation.builder().theme("Theme2").category(CurationCategory.DIRECTOR).title("Title2").description("Description2").build()
                 );
 
@@ -167,13 +172,13 @@ class CurationServiceTest {
 
                 List<Curation> curations = List.of(
                         Curation.builder().theme("Action Movies").category(CurationCategory.GENRE).title("Best Action").description("Top Action Movies").build(),
-                        Curation.builder().theme("Action Favorites").category(CurationCategory.GENRE).title("All Time Action").description("Favorite Action Movies").build()
+                        Curation.builder().theme("Action Favorites").category(CurationCategory.ACTOR).title("All Time Action").description("Favorite Action Movies").build()
                 );
 
                 given(curationRepository.searchCurations(theme, category)).willReturn(curations);
 
                 // when
-                ReadCurationListResponse response = curationService.searchCurations(theme, category);
+                ReadCurationListResponse response = curationAdminService.searchCurations(theme, category);
 
                 // then
                 assertSoftly(softly -> {
@@ -197,7 +202,7 @@ class CurationServiceTest {
                 given(curationRepository.searchCurations(theme, category)).willReturn(List.of());
 
                 // when
-                ReadCurationListResponse response = curationService.searchCurations(theme, category);
+                ReadCurationListResponse response = curationAdminService.searchCurations(theme, category);
 
                 // then
                 assertSoftly(softly -> {
@@ -228,7 +233,7 @@ class CurationServiceTest {
                 given(curationRepository.findById(anyLong())).willReturn(Optional.of(curation));
 
                 // when
-                curationService.deleteCuration(1L);
+                curationAdminService.deleteCuration(1L);
 
                 // then
                 verify(curationRepository, times(1)).deleteById(anyLong());
@@ -244,7 +249,7 @@ class CurationServiceTest {
                 given(curationRepository.findById(anyLong())).willReturn(Optional.empty());
 
                 // when & then
-                assertThrows(CurationNotFoundException.class, () -> curationService.deleteCuration(1L));
+                assertThrows(CurationNotFoundException.class, () -> curationAdminService.deleteCuration(1L));
                 verify(curationRepository, times(1)).findById(anyLong());
             }
         }
