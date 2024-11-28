@@ -6,6 +6,10 @@ import static net.pointofviews.review.exception.ReviewException.*;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import net.pointofviews.review.exception.ImageException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,11 @@ import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +48,7 @@ public class ReviewServiceImpl implements ReviewService {
 	private final ReviewLikeRepository reviewLikeRepository;
 	private final ReviewLikeCountRepository reviewLikeCountRepository;
 	private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
+	private final S3Service s3Service;
 
 	@Override
 	@Transactional
