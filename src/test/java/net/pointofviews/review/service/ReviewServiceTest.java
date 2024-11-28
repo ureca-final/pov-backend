@@ -27,6 +27,7 @@ import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
+import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
 import net.pointofviews.review.exception.ReviewException;
@@ -334,6 +335,7 @@ class ReviewServiceTest {
 					"리뷰제목1",
 					"리뷰내용1",
 					"작성자1",
+					"https://example.com/profileImage1.jpg",
 					"https://example.com/thumbnail1.jpg",
 					LocalDateTime.of(2024, 12, 25, 0, 0),
 					10L,
@@ -345,6 +347,7 @@ class ReviewServiceTest {
 					"리뷰제목2",
 					"리뷰내용2",
 					"작성자2",
+					"https://example.com/profileImage2.jpg",
 					"https://example.com/thumbnail2.jpg",
 					LocalDateTime.of(2023, 12, 25, 0, 0),
 					20L,
@@ -354,7 +357,7 @@ class ReviewServiceTest {
 				List<ReadReviewResponse> reviewList = List.of(review1, review2);
 				Slice<ReadReviewResponse> reviews = new SliceImpl<>(reviewList);
 
-				given(reviewRepository.findAllWithLikesByMovieId(any(), any())).willReturn(reviews);
+				given(reviewRepository.findReviewsWithLikesByMovieId(any(), any())).willReturn(reviews);
 
 				Pageable pageable = PageRequest.of(0, 10);
 
@@ -376,7 +379,7 @@ class ReviewServiceTest {
 				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
 
 				Slice<ReadReviewResponse> reviews = new SliceImpl<>(List.of());
-				given(reviewRepository.findAllWithLikesByMovieId(any(), any())).willReturn(reviews);
+				given(reviewRepository.findReviewsWithLikesByMovieId(any(), any())).willReturn(reviews);
 
 				Pageable pageable = PageRequest.of(0, 10);
 
@@ -422,30 +425,30 @@ class ReviewServiceTest {
 			@Test
 			void 리뷰_상세_조회() {
 				// given -- 테스트의 상태 설정
-				Movie movie = mock(Movie.class);
 				Member member = mock(Member.class);
 				Review review = mock(Review.class);
 
-				given(review.getMovie()).willReturn(movie);
 				given(review.getMember()).willReturn(member);
 
 				given(reviewRepository.findReviewDetailById(any())).willReturn(Optional.of(review));
 				given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(true);
 				given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(10L);
+				given(reviewKeywordLinkRepository.findKeywordsByReviewId(any())).willReturn(List.of("흥미진진", "몰입감"));
 
 				// when -- 테스트하고자 하는 행동
-				ReadReviewResponse result = reviewService.findReviewDetail(1L);
+				ReadReviewDetailResponse result = reviewService.findReviewDetail(1L);
 
 				// then -- 예상되는 변화 및 결과
 				assertSoftly(softly -> {
 					softly.assertThat(result).isNotNull();
-					softly.assertThat(result.movieTitle()).isEqualTo(movie.getTitle());
 					softly.assertThat(result.title()).isEqualTo(review.getTitle());
 					softly.assertThat(result.contents()).isEqualTo(review.getContents());
 					softly.assertThat(result.reviewer()).isEqualTo(member.getNickname());
+					softly.assertThat(result.profileImage()).isEqualTo(member.getProfileImage());
 					softly.assertThat(result.thumbnail()).isEqualTo(review.getThumbnail());
 					softly.assertThat(result.likeAmount()).isEqualTo(10L);
 					softly.assertThat(result.isLiked()).isTrue();
+					softly.assertThat(result.keywords()).contains("흥미진진", "몰입감");
 				});
 			}
 		}
