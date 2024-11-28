@@ -64,9 +64,11 @@ public class ReviewController implements ReviewSpecification {
 		return BaseResponse.ok("리뷰가 성공적으로 삭제되었습니다.");
 	}
 
+	// TODO: 사용자 권한 확인
 	@Override
 	@PutMapping("/{movieId}/reviews/{reviewId}/blind")
 	public ResponseEntity<BaseResponse<Void>> blindReview(@PathVariable Long movieId, @PathVariable Long reviewId) {
+		reviewService.blindReview(movieId, reviewId);
 		return BaseResponse.ok("리뷰가 성공적으로 숨김 처리 되었습니다.");
 	}
 
