@@ -2,6 +2,7 @@ package net.pointofviews.movie.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.common.service.S3Service;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.domain.MovieContent;
 import net.pointofviews.movie.domain.MovieContentType;

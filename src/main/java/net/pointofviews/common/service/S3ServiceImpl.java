@@ -1,4 +1,4 @@
-package net.pointofviews.movie.service;
+package net.pointofviews.common.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -14,7 +14,7 @@ import java.io.ByteArrayInputStream;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class S3ServiceImpl implements S3Service{
+public class S3ServiceImpl implements S3Service {
 
     private final AmazonS3 amazonS3;
 
