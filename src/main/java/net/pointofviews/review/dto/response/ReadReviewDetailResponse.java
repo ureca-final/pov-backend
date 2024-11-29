@@ -24,7 +24,7 @@ public record ReadReviewDetailResponse(
 	@Schema(description = "작성자 프로필 이미지", example = "https://example.com/profile/profileImage.jpg")
 	String profileImage,
 
-	@Schema(description = "리뷰/영화 썸네일 URL", example = "https://example.com/thumbnails/inception.jpg")
+	@Schema(description = "영화 리뷰 포스터 URL", example = "https://example.com/thumbnails/inception.jpg")
 	String thumbnail,
 
 	@Schema(description = "리뷰 작성 시간", example = "2024-11-26T10:30:00")
