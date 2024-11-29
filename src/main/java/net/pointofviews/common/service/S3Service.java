@@ -1,4 +1,4 @@
-package net.pointofviews.movie.service;
+package net.pointofviews.common.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
