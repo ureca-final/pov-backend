@@ -1,6 +1,6 @@
 package net.pointofviews.movie.domain;
 
-import org.assertj.core.api.SoftAssertions;
+import net.pointofviews.review.domain.Review;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class MovieTest {
@@ -50,7 +52,7 @@ class MovieTest {
                         .build();
 
                 // then
-                SoftAssertions.assertSoftly(softly -> {
+                assertSoftly(softly -> {
                     softly.assertThat(movie).isNotNull();
                     softly.assertThat(movie.getTitle()).isEqualTo(title);
                     softly.assertThat(movie.getDirector()).isEqualTo(director);
@@ -100,16 +102,17 @@ class MovieTest {
             void 영화_리뷰_추가() {
                 // given -- 테스트의 상태 설정
                 Movie movie = Movie.builder()
-                    .title("Inception")
-                    .director("Christopher Nolan")
-                    .writer("Jonathan Nolan")
-                    .plot("A mind-bending thriller about dreams within dreams.")
-                    .poster("inception-poster.jpg")
-                    .country("USA")
-                    .released(LocalDateTime.now())
-                    .imdbId("tt1375666")
-                    .hasAward(true)
-                    .build();
+                        .title("Inception")
+                        .director("Christopher Nolan")
+                        .writer("Jonathan Nolan")
+                        .plot("A mind-bending thriller about dreams within dreams.")
+                        .poster("inception-poster.jpg")
+                        .country("USA")
+                        .released(LocalDate.now())
+                        .tmdbId(1375666)
+                        .hasAward(true)
+                        .isAdult(false)
+                        .build();
 
                 Review review = mock(Review.class);
 
