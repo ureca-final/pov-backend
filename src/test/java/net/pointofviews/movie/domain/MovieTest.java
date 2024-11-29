@@ -90,4 +90,38 @@ class MovieTest {
 
         }
     }
+
+    @Nested
+    class AddReview {
+
+        @Nested
+        class Success {
+            @Test
+            void 영화_리뷰_추가() {
+                // given -- 테스트의 상태 설정
+                Movie movie = Movie.builder()
+                    .title("Inception")
+                    .director("Christopher Nolan")
+                    .writer("Jonathan Nolan")
+                    .plot("A mind-bending thriller about dreams within dreams.")
+                    .poster("inception-poster.jpg")
+                    .country("USA")
+                    .released(LocalDateTime.now())
+                    .imdbId("tt1375666")
+                    .hasAward(true)
+                    .build();
+
+                Review review = mock(Review.class);
+
+                // when -- 테스트하고자 하는 행동
+                movie.addReview(review);
+
+                // then -- 예상되는 변화 및 결과
+                assertSoftly(softly -> {
+                    softly.assertThat(movie.getReviews()).contains(review);
+                    softly.assertThat(movie.getReviews().size()).isEqualTo(1);
+                });
+            }
+        }
+    }
 }

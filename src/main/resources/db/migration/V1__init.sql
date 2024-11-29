@@ -54,11 +54,12 @@ CREATE TABLE premiere (
 
 -- 2. 외래키를 가진 테이블들 생성
 CREATE TABLE common_code (
-                             code varchar(255) not null primary key,
+                             code varchar(255) not null,
                              common_code_description varchar(255) null,
                              common_code_name varchar(255) null,
-                             group_code varchar(255) null,
+                             group_code varchar(255) not null,
                              is_active bit not null ,
+                             PRIMARY KEY (group_code, code),
                              CONSTRAINT FKhkusbmskjw1jk5pjh8sui9cnp FOREIGN KEY (group_code) REFERENCES common_code_group (group_code)
 );
 
@@ -110,6 +111,7 @@ CREATE TABLE curation (
                           theme varchar(255) null,
                           title varchar(255) null,
                           category enum ('ACTOR', 'AWARD', 'COUNTRY', 'DIRECTOR', 'GENRE', 'OTHER', 'RELEASE') null,
+                          start_time datetime(6) null,
                           CONSTRAINT FKdlnps7qqivebgquql0rxw9qri FOREIGN KEY (member_id) REFERENCES member (id)
 );
 

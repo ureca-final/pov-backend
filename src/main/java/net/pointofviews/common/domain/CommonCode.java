@@ -10,11 +10,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommonCode {
-    @Id
-    @Column(name = "code")
-    private String code;
+
+    @EmbeddedId
+    private CommonCodeId code;
 
     @ManyToOne
+    @MapsId("groupCode")
     @JoinColumn(name = "group_code")
     private CommonCodeGroup groupCode;
 
@@ -28,7 +29,7 @@ public class CommonCode {
 
     @Builder
     public CommonCode(String code, CommonCodeGroup groupCode, String name, String description) {
-        this.code = code;
+        this.code = new CommonCodeId(code, groupCode.getGroupCode());
         this.groupCode = groupCode;
         this.name = name;
         this.description = description;

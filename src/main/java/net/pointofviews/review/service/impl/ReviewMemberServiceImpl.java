@@ -3,6 +3,14 @@ package net.pointofviews.review.service.impl;
 import static net.pointofviews.movie.exception.MovieException.*;
 import static net.pointofviews.review.exception.ReviewException.*;
 
+import net.pointofviews.common.service.S3Service;
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
+import net.pointofviews.review.exception.ImageException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -16,26 +24,33 @@ import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
+import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
 import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
-import net.pointofviews.review.service.ReviewService;
+import net.pointofviews.review.service.ReviewMemberService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ReviewServiceImpl implements ReviewService {
+public class ReviewMemberServiceImpl implements ReviewMemberService {
 
 	private final ReviewRepository reviewRepository;
 	private final MovieRepository movieRepository;
 	private final ReviewLikeRepository reviewLikeRepository;
 	private final ReviewLikeCountRepository reviewLikeCountRepository;
 	private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
+	private final S3Service s3Service;
 
 	@Override
 	@Transactional
@@ -96,12 +111,12 @@ public class ReviewServiceImpl implements ReviewService {
 		Review review = reviewRepository.findById(reviewId)
 				.orElseThrow(() -> reviewNotFound(reviewId));
 
+		// 이미지 삭제 로직
+		List<String> imageUrls = extractImageUrlsFromHtml(review.getContents());
+		deleteReviewImages(imageUrls);
+
+
 		review.delete(); // soft delete 처리
-	}
-
-	@Override
-	public void blindReview(Long movieId, Long reviewId) {
-
 	}
 
 	@Override
@@ -111,7 +126,7 @@ public class ReviewServiceImpl implements ReviewService {
 			throw movieNotFound(movieId);
 		}
 
-		Slice<ReadReviewResponse> reviews = reviewRepository.findAllWithLikesByMovieId(movieId, pageable);
+		Slice<ReadReviewResponse> reviews = reviewRepository.findReviewsWithLikesByMovieId(movieId, pageable);
 
 		return new ReadReviewListResponse(reviews);
 	}
@@ -122,23 +137,25 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public ReadReviewResponse findReviewDetail(Long reviewId) {
+	public ReadReviewDetailResponse findReviewDetail(Long reviewId) {
 
 		Review review = reviewRepository.findReviewDetailById(reviewId)
 			.orElseThrow(() -> reviewNotFound(reviewId));
 
 		Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
 		boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId);
+		List<String> keywords = reviewKeywordLinkRepository.findKeywordsByReviewId(reviewId);
 
-		ReadReviewResponse response = new ReadReviewResponse(
-			review.getMovie().getTitle(),
+		ReadReviewDetailResponse response = new ReadReviewDetailResponse(
 			review.getTitle(),
 			review.getContents(),
 			review.getMember().getNickname(),
+			review.getMember().getProfileImage(),
 			review.getThumbnail(),
 			review.getCreatedAt(),
 			likeAmount,
-			isLiked
+			isLiked,
+			keywords
 		);
 
 		return response;
@@ -147,5 +164,100 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public void updateReviewLike(Long reviewId, Long likedId) {
 
+	}
+
+	@Override
+	public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files) {
+
+		long totalSize = files.stream()
+				.mapToLong(MultipartFile::getSize)
+				.sum();
+
+		if (totalSize > 10 * 1024 * 1024) {  // 총 파일 크기 10MB 제한
+			throw ImageException.invalidTotalImageSize();
+		}
+
+		List<String> imageUrls = new ArrayList<>();
+
+		for (MultipartFile file : files) {
+			validateImageFile(file);
+
+			String originalFilename = file.getOriginalFilename();
+			if (originalFilename != null && !originalFilename.isEmpty()) {
+				String uniqueFileName = createUniqueFileName(originalFilename);
+				String filePath = "reviews/" + uniqueFileName;
+
+				String imageUrl = s3Service.saveImage(file, filePath);
+				imageUrls.add(imageUrl);
+			}
+		}
+
+		return new CreateReviewImageListResponse(imageUrls);
+	}
+
+	@Override
+	@Transactional
+	public void deleteReviewImages(List<String> imageUrls) {
+		if (imageUrls == null || imageUrls.isEmpty()) {
+			throw ImageException.emptyImageUrls();
+		}
+
+		for (String imageUrl : imageUrls) {
+			s3Service.deleteImage(imageUrl);
+		}
+	}
+
+	private void validateImageFile(MultipartFile file) {
+		if (file.isEmpty()) {
+			throw ImageException.emptyImage();
+		}
+
+		if (file.getSize() > 2 * 1024 * 1024) {
+			throw ImageException.invalidImageSize();
+		}
+
+		String contentType = file.getContentType();
+		if (contentType == null || !(
+				contentType.equals("image/jpeg") || contentType.equals("image/jpg") || contentType.equals("image/png"))) {
+			throw ImageException.invalidImageFormat();
+		}
+
+		// 이미지 확장자 검증 추가
+		String filename = file.getOriginalFilename();
+		if (filename != null && !isImageFile(filename)) {
+			throw ImageException.invalidImageFormat();
+		}
+	}
+
+	private String createUniqueFileName(String originalFilename) {
+		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+		String baseName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
+		String uniquePrefix = UUID.randomUUID().toString();
+		return baseName + "_" + uniquePrefix + extension;
+	}
+
+	private List<String> extractImageUrlsFromHtml(String html) {
+		List<String> imageUrls = new ArrayList<>();
+		try {
+			Document doc = Jsoup.parse(html);
+			Elements imgTags = doc.select("img[src]");
+
+			for (Element img : imgTags) {
+				String imageUrl = img.attr("src");
+				if (imageUrl.contains("s3")) {
+					imageUrls.add(imageUrl);
+				}
+			}
+			return imageUrls;
+		} catch (Exception e) {
+			throw ImageException.failedToParseHtml(e.getMessage());
+		}
+	}
+
+	private boolean isImageFile(String filename) {
+		String extension = filename.toLowerCase();
+		return extension.endsWith(".jpg") ||
+				extension.endsWith(".jpeg") ||
+				extension.endsWith(".png");
 	}
 }
