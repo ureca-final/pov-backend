@@ -13,6 +13,11 @@ public class ImageException extends BusinessException {
         return new ImageException(HttpStatus.BAD_REQUEST, "파일이 비어있습니다.");
     }
 
+    public static ImageException invalidTotalImageSize() {
+        return new ImageException(HttpStatus.PAYLOAD_TOO_LARGE,
+                "전체 파일 크기가 10MB를 초과합니다.");
+    }
+
     public static ImageException invalidImageSize() {
         return new ImageException(HttpStatus.PAYLOAD_TOO_LARGE, "파일 크기가 2MB를 초과합니다.");
     }

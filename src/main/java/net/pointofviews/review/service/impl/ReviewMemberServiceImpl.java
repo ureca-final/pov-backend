@@ -164,6 +164,15 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
 	@Override
 	public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files) {
+
+		long totalSize = files.stream()
+				.mapToLong(MultipartFile::getSize)
+				.sum();
+
+		if (totalSize > 10 * 1024 * 1024) {  // 총 파일 크기 10MB 제한
+			throw ImageException.invalidTotalImageSize();
+		}
+
 		List<String> imageUrls = new ArrayList<>();
 
 		for (MultipartFile file : files) {

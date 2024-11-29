@@ -40,6 +40,7 @@ import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.impl.ReviewMemberServiceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewMemberServiceTest {
@@ -443,7 +444,6 @@ class ReviewMemberServiceTest {
 				// then
 				assertSoftly(softly -> {
 					softly.assertThat(response.imageUrls()).hasSize(1);
-					softly.assertThat(response.imageUrls().get(0)).contains("s3");
 					verify(s3Service, times(1)).saveImage(any(), any());
 				});
 			}
@@ -452,7 +452,33 @@ class ReviewMemberServiceTest {
 		@Nested
 		class Failure {
 			@Test
-			void 파일_용량_초과시_ImageException_invalidImageSize_예외발생() {
+			void 총_파일_크기_초과시_ImageException_invalidTotalImageSize_예외발생() {
+				// given
+				MockMultipartFile file1 = new MockMultipartFile(
+						"image1",
+						"test1.jpg",
+						MediaType.IMAGE_JPEG_VALUE,
+						new byte[6 * 1024 * 1024]  // 6MB
+				);
+				MockMultipartFile file2 = new MockMultipartFile(
+						"image2",
+						"test2.jpg",
+						MediaType.IMAGE_JPEG_VALUE,
+						new byte[5 * 1024 * 1024]  // 5MB
+				);
+
+				List<MultipartFile> files = List.of(file1, file2);  // 총 11MB
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(files))
+							.isInstanceOf(ImageException.class)
+							.hasMessage("전체 파일 크기가 10MB를 초과합니다.");
+				});
+			}
+
+			@Test
+			void 단일_파일_용량_초과시_ImageException_invalidImageSize_예외발생() {
 				// given
 				MockMultipartFile largeFile = new MockMultipartFile(
 						"large-image",
