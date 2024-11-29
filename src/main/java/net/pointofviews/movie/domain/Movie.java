@@ -64,10 +64,5 @@ public class Movie {
 
     public void addReview(Review review) {
         this.reviews.add(review);
-
-        // 무한루프 방지
-        if (review.getMovie() != this) {
-            review.setMovie(this);
-        }
     }
 }
