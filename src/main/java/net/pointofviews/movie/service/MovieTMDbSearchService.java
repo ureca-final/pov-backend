@@ -1,7 +1,5 @@
 package net.pointofviews.movie.service;
 
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.exception.MovieException;
 import org.apache.commons.lang3.StringUtils;
@@ -15,30 +13,29 @@ import org.springframework.web.client.RestClient;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class MovieTMDbSearchService implements MovieApiSearchService {
 
     @Value("${TMDb.access}")
     private String TMDbApiKey;
 
-    private RestClient restClient;
+    private final RestClient restClient;
 
-    @PostConstruct
-    public void initRestClient() {
-        restClient = RestClient.builder()
-                .baseUrl("https://api.themoviedb.org/3")
-                .defaultHeader("Authorization", "Bearer " + TMDbApiKey)
-                .build();
+    public MovieTMDbSearchService(RestClient.Builder restClient) {
+        this.restClient = restClient.build();
     }
 
     @Override
     public SearchMovieApiListResponse searchMovie(String query, int page) {
         return restClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/search/movie")
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .host("api.themoviedb.org")
+                        .path("/3/search/movie")
                         .queryParam("query", query)
                         .queryParam("page", page)
                         .queryParam("language", "ko-KR")
                         .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::is4xxClientError,
