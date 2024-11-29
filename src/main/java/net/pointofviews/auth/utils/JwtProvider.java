@@ -2,6 +2,7 @@ package net.pointofviews.auth.utils;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -27,9 +28,9 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createToken(String email, long expireTime) {
+    public String createToken(UUID memberId, long expireTime) {
         return BEARER_PREFIX + Jwts.builder()
-                .subject(email)
+                .subject(memberId.toString())
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plusMillis(expireTime)))
                 .signWith(key)

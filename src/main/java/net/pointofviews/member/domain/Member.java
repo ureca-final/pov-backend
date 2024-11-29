@@ -27,19 +27,21 @@ public class Member extends SoftDeleteEntity {
 
     private String nickname;
 
-    private String socialType;
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private RoleType roleType;
 
     private boolean isNoticeActive;
 
     @Builder
-    private Member(LocalDate birth, String email, String nickname, String profileImage, String role, String socialType) {
+    private Member(LocalDate birth, String email, String nickname, String profileImage, RoleType roleType, SocialType socialType) {
         this.birth = birth;
         this.email = email;
         this.nickname = nickname;
         this.profileImage = profileImage;
-        this.role = role;
+        this.roleType = roleType;
         this.socialType = socialType;
         this.isNoticeActive = true;
     }
