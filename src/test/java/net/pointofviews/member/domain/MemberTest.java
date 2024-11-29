@@ -24,8 +24,8 @@ public class MemberTest {
                 String profileImage = "profileImage";
                 LocalDate birth = LocalDate.of(1990, 1, 1);
                 String nickname = "nickname";
-                String socialType = "socialType";
-                String role = "user";
+                SocialType socialType = SocialType.Google;
+                RoleType roleType = RoleType.User;
 
                 // when
                 Member member = Member.builder()
@@ -33,7 +33,7 @@ public class MemberTest {
                         .birth(birth)
                         .nickname(nickname)
                         .socialType(socialType)
-                        .role(role)
+                        .roleType(roleType)
                         .profileImage(profileImage)
                         .build();
 
@@ -45,7 +45,7 @@ public class MemberTest {
                     softly.assertThat(member.getBirth()).isEqualTo(birth);
                     softly.assertThat(member.getNickname()).isEqualTo(nickname);
                     softly.assertThat(member.getSocialType()).isEqualTo(socialType);
-                    softly.assertThat(member.getRole()).isEqualTo(role);
+                    softly.assertThat(member.getRoleType()).isEqualTo(roleType);
                     softly.assertThat(member.getProfileImage()).isEqualTo(profileImage);
                     softly.assertThat(member.isNoticeActive()).isTrue();
                     softly.assertThat(member.getCreatedAt()).isNull();
