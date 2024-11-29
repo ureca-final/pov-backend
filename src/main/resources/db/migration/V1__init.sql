@@ -57,7 +57,7 @@ CREATE TABLE common_code (
                              common_code_name varchar(255) null,
                              group_code varchar(255) not null,
                              is_active bit not null ,
-                             PRIMARY KEY (code, group_code),
+                             PRIMARY KEY (group_code, code),
                              CONSTRAINT FKhkusbmskjw1jk5pjh8sui9cnp FOREIGN KEY (group_code) REFERENCES common_code_group (group_code)
 );
 
