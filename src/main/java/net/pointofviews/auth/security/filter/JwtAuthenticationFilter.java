@@ -35,8 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var claims = jwtProvider.parseToken(token);
                 UUID memberId = UUID.fromString(claims.getPayload().getSubject());
 
-                // 이메일로 회원 조회
-                Member member = memberRepository.findById(memberId)  // findByEmail 대신 findById
+                // uuid로 회원 조회
+                Member member = memberRepository.findById(memberId)
                         .orElseThrow(() -> new RuntimeException("Member not found"));
 
                 // roleType으로 권한 설정

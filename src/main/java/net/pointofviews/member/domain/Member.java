@@ -30,8 +30,6 @@ public class Member extends SoftDeleteEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    // Enum 으로 역할 구분 추가
-    private String role;
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
 
