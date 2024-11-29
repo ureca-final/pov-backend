@@ -13,8 +13,8 @@ import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
+import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
-import net.pointofviews.review.dto.response.ReadReviewResponse;
 import net.pointofviews.review.service.ReviewMemberService;
 
 import jakarta.validation.Valid;
@@ -65,10 +65,7 @@ public class ReviewMemberController implements ReviewMemberSpecification {
 
 	@Override
 	@GetMapping("/{movieId}/reviews")
-	public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(
-		@PathVariable Long movieId,
-		@PageableDefault(page = 0, size = 10) Pageable pageable
-	) {
+	public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(@PathVariable Long movieId, @PageableDefault Pageable pageable) {
 		ReadReviewListResponse response = reviewMemberService.findReviewByMovie(movieId, pageable);
 
 		return BaseResponse.ok("영화별 리뷰가 성공적으로 조회되었습니다.", response);
@@ -84,8 +81,8 @@ public class ReviewMemberController implements ReviewMemberSpecification {
 
 	@Override
 	@GetMapping("/reviews/{reviewId}")
-	public ResponseEntity<BaseResponse<ReadReviewResponse>> readReviewDetail(@PathVariable Long reviewId) {
-		ReadReviewResponse response = reviewMemberService.findReviewDetail(reviewId);
+	public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@PathVariable Long reviewId) {
+		ReadReviewDetailResponse response = reviewMemberService.findReviewDetail(reviewId);
 
 		return BaseResponse.ok("리뷰가 성공적으로 상세 조회되었습니다.", response);
 	}

@@ -64,7 +64,7 @@ public class Review extends SoftDeleteEntity {
         this.disabled = false;
     }
 
-    public void setMovie(Movie movie) {
+    private void setMovie(Movie movie) {
         this.movie = movie;
 
         // 무한루프 방지

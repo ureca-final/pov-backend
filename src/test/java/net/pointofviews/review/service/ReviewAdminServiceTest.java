@@ -1,5 +1,20 @@
 package net.pointofviews.review.service;
 
+import static org.assertj.core.api.SoftAssertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.repository.MovieRepository;
@@ -7,21 +22,8 @@ import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.exception.ReviewException;
 import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.impl.ReviewAdminServiceImpl;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.http.HttpStatus;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mock;
-
+@ExtendWith(MockitoExtension.class)
 class ReviewAdminServiceTest {
 
     @InjectMocks

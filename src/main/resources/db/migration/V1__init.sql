@@ -52,11 +52,12 @@ CREATE TABLE premiere (
 
 -- 2. 외래키를 가진 테이블들 생성
 CREATE TABLE common_code (
-                             code varchar(255) not null primary key,
+                             code varchar(255) not null,
                              common_code_description varchar(255) null,
                              common_code_name varchar(255) null,
-                             group_code varchar(255) null,
+                             group_code varchar(255) not null,
                              is_active bit not null ,
+                             PRIMARY KEY (group_code, code),
                              CONSTRAINT FKhkusbmskjw1jk5pjh8sui9cnp FOREIGN KEY (group_code) REFERENCES common_code_group (group_code)
 );
 

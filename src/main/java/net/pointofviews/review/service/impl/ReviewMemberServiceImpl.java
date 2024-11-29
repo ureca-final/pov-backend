@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
+import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
 import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
@@ -124,7 +126,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 			throw movieNotFound(movieId);
 		}
 
-		Slice<ReadReviewResponse> reviews = reviewRepository.findAllWithLikesByMovieId(movieId, pageable);
+		Slice<ReadReviewResponse> reviews = reviewRepository.findReviewsWithLikesByMovieId(movieId, pageable);
 
 		return new ReadReviewListResponse(reviews);
 	}
@@ -135,23 +137,25 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 	}
 
 	@Override
-	public ReadReviewResponse findReviewDetail(Long reviewId) {
+	public ReadReviewDetailResponse findReviewDetail(Long reviewId) {
 
 		Review review = reviewRepository.findReviewDetailById(reviewId)
 			.orElseThrow(() -> reviewNotFound(reviewId));
 
 		Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
 		boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId);
+		List<String> keywords = reviewKeywordLinkRepository.findKeywordsByReviewId(reviewId);
 
-		ReadReviewResponse response = new ReadReviewResponse(
-			review.getMovie().getTitle(),
+		ReadReviewDetailResponse response = new ReadReviewDetailResponse(
 			review.getTitle(),
 			review.getContents(),
 			review.getMember().getNickname(),
+			review.getMember().getProfileImage(),
 			review.getThumbnail(),
 			review.getCreatedAt(),
 			likeAmount,
-			isLiked
+			isLiked,
+			keywords
 		);
 
 		return response;
