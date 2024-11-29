@@ -13,9 +13,10 @@ public interface ReviewKeywordLinkRepository extends JpaRepository<ReviewKeyword
 	@Query(value = """
 		SELECT cc.name
 		  FROM ReviewKeywordLink rkl
-		  JOIN CommonCode cc ON rkl.reviewKeywordCode = cc.code.code
+		  JOIN CommonCode cc
+			  ON rkl.reviewKeywordCode = cc.code.code
+			 AND cc.groupCode.groupCode = '020'
 		 WHERE rkl.review.id = :reviewId
-		   AND cc.groupCode.groupCode = '020'
 	""")
 	List<String> findKeywordsByReviewId(@Param("reviewId") Long reviewId);
 
