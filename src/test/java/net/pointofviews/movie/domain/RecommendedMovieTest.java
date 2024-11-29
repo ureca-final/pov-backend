@@ -3,14 +3,13 @@ package net.pointofviews.movie.domain;
 import net.pointofviews.member.domain.Member;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,7 +19,7 @@ class RecommendedMovieTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void RecommendedMovie_객체_생성() {

@@ -16,7 +16,7 @@ class TempPaymentTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void TempPayment_객체_생성() {
@@ -45,7 +45,7 @@ class TempPaymentTest {
         }
 
         @Nested
-        class failure {
+        class Failure {
             @Test
             void 주문ID_없음_IllegalArgumentException_예외발생() {
                 // given

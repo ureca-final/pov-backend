@@ -1,13 +1,13 @@
 package net.pointofviews.movie.domain;
 
-import static org.mockito.BDDMockito.*;
-
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class MovieLikeCountTest {
@@ -16,7 +16,7 @@ class MovieLikeCountTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void MovieLikeCount_객체_생성() {

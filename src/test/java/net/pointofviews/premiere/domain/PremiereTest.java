@@ -15,7 +15,7 @@ class PremiereTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void Premiere_객체_생성() {

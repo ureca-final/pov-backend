@@ -19,7 +19,7 @@ class MovieTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void Movie_객체_생성() {
@@ -71,7 +71,7 @@ class MovieTest {
         }
 
         @Nested
-        class failure {
+        class Failure {
 
             @Test
             void 제목_없음_IllegalArgumentException_예외발생() {

@@ -3,12 +3,11 @@ package net.pointofviews.movie.domain;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,7 +47,7 @@ class ActorTest {
         }
 
         @Nested
-        class failure {
+        class Failure {
 
             @Test
             void 이름_없음_IllegalArgumentException_예외발생() {
