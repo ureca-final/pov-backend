@@ -25,7 +25,7 @@ public class GlobalSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(ignoredRequests).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
@@ -41,8 +41,6 @@ public class GlobalSecurityConfig {
                 new AntPathRequestMatcher("/error"),
                 new AntPathRequestMatcher("/api/actuator/**"),
                 new AntPathRequestMatcher("/auth/**"),
-                new AntPathRequestMatcher("/swagger-ui/**"),
-                new AntPathRequestMatcher("/v3/api-docs/**"),
                 PathRequest.toStaticResources().atCommonLocations()
         );
     }

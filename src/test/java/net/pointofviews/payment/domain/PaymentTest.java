@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PaymentTest {
@@ -15,7 +14,7 @@ class PaymentTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void Payment_객체_생성() {
@@ -45,7 +44,7 @@ class PaymentTest {
         }
 
         @Nested
-        class failure {
+        class Failure {
             @Test
             void 결제키_없음_IllegalArgumentException_예외발생() {
                 // given

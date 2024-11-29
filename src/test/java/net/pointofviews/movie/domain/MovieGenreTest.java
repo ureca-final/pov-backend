@@ -3,12 +3,11 @@ package net.pointofviews.movie.domain;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
@@ -18,7 +17,7 @@ class MovieGenreTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void MovieGenre_객체_생성() {
@@ -45,28 +44,24 @@ class MovieGenreTest {
         }
 
         @Nested
-        class failure {
+        class Failure {
             @Test
             void GenreCode_없음_IllegalArgumentException_예외발생() {
                 // when & then
-                assertThatThrownBy(() -> {
-                    MovieGenre.builder()
-                            .movie(Mockito.mock(Movie.class))
-                            .genreCode(null) // GenreCode가 null인 경우
-                            .build();
-                }).isInstanceOf(IllegalArgumentException.class)
+                assertThatThrownBy(() -> MovieGenre.builder()
+                        .movie(Mockito.mock(Movie.class))
+                        .genreCode(null) // GenreCode가 null인 경우
+                        .build()).isInstanceOf(IllegalArgumentException.class)
                         .hasMessageContaining("GenreCode must be exactly 2 characters");
             }
 
             @Test
             void GenreCode_길이_초과_IllegalArgumentException_예외발생() {
                 // when & then
-                assertThatThrownBy(() -> {
-                    MovieGenre.builder()
-                            .movie(Mockito.mock(Movie.class))
-                            .genreCode("010") // GenreCode가 2자리를 초과하는 경우
-                            .build();
-                }).isInstanceOf(IllegalArgumentException.class)
+                assertThatThrownBy(() -> MovieGenre.builder()
+                        .movie(Mockito.mock(Movie.class))
+                        .genreCode("010") // GenreCode가 2자리를 초과하는 경우
+                        .build()).isInstanceOf(IllegalArgumentException.class)
                         .hasMessageContaining("GenreCode must be exactly 2 characters");
             }
         }

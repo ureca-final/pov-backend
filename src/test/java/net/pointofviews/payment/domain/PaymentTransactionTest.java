@@ -16,7 +16,7 @@ class PaymentTransactionTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void PaymentTransaction_객체_생성() {
@@ -49,7 +49,7 @@ class PaymentTransactionTest {
         }
 
         @Nested
-        class failure {
+        class Failure {
 
             @Test
             void 거래키_없음_IllegalArgumentException_예외발생() {

@@ -9,14 +9,16 @@ CREATE TABLE common_code_group (
 CREATE TABLE movie (
                        has_award bit not null,
                        id bigint auto_increment primary key,
-                       released datetime(6) null,
+                       released date null,
                        country varchar(255) null,
                        director varchar(255) null,
-                       imdb_id varchar(255) null,
+                       tmdb_id int null,
                        plot varchar(255) null,
                        poster varchar(255) null,
                        title varchar(255) null,
-                       writer varchar(255) null
+                       writer varchar(255) null,
+                       is_adult bit not null,
+                       backdrop varchar(255) null
 );
 
 CREATE TABLE club (
