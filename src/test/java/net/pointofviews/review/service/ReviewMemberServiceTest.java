@@ -267,72 +267,6 @@ class ReviewMemberServiceTest {
 	}
 
 	@Nested
-	class BlindReview {
-
-		@Nested
-		class Success {
-
-			@Test
-			void 리뷰_숨김() {
-			    // given -- 테스트의 상태 설정
-				Movie movie = mock(Movie.class);
-				Review review = mock(Review.class);
-
-				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
-				given(reviewRepository.findById(any())).willReturn(Optional.of(review));
-
-			    // when -- 테스트하고자 하는 행동
-				reviewService.blindReview(1L, 1L);
-
-			    // then -- 예상되는 변화 및 결과
-				verify(review).toggleDisabled();
-			}
-		}
-
-		@Nested
-		class Failure {
-
-			@Test
-			void 존재하지_않는_영화_MovieException_movieNotFound_예외발생() {
-			    // given -- 테스트의 상태 설정
-				given(movieRepository.findById(any())).willReturn(Optional.empty());
-
-			    // when -- 테스트하고자 하는 행동
-				MovieException exception = assertThrows(MovieException.class, () ->
-					reviewService.blindReview(-1L, 1L)
-				);
-
-				// then -- 예상되는 변화 및 결과
-				assertSoftly(softly -> {
-					softly.assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-					softly.assertThat(exception.getMessage()).isEqualTo("영화(Id: -1)는 존재하지 않습니다.");
-					verifyNoInteractions(reviewRepository);
-				});
-			}
-
-			@Test
-			void 존재하지_않는_리뷰_ReviewException_reviewNotFound_예외발생() {
-			    // given -- 테스트의 상태 설정
-				Movie movie = mock(Movie.class);
-
-				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
-				given(reviewRepository.findById(any())).willReturn(Optional.empty());
-
-			    // when -- 테스트하고자 하는 행동
-				ReviewException exception = assertThrows(ReviewException.class, () ->
-					reviewService.blindReview(1L, -1L)
-				);
-
-				// then -- 예상되는 변화 및 결과
-				assertSoftly(softly -> {
-					softly.assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-					softly.assertThat(exception.getMessage()).contains("리뷰(Id: -1)는 존재하지 않습니다.");
-				});
-			}
-		}
-	}
-
-	@Nested
 	class FindReviewByMovie {
 
 		@Nested
@@ -553,10 +487,28 @@ class ReviewMemberServiceTest {
 			}
 
 			@Test
-			void 지원하지_않는_파일형식_업로드시_ImageException_invalidImageFormat_예외발생() {
+			void 지원하지_않는_ContentType으로_업로드시_ImageException_invalidImageFormat_예외발생() {
+				// given
+				MockMultipartFile invalidTypeFile = new MockMultipartFile(
+						"invalid-type",
+						"test.jpg",
+						"image/fake",
+						"test content".getBytes()
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(invalidTypeFile)))
+							.isInstanceOf(ImageException.class)
+							.hasMessage("지원하지 않는 파일 형식입니다.");
+				});
+			}
+
+			@Test
+			void 지원하지_않는_확장자_업로드시_ImageException_invalidImageFormat_예외발생() {
 				// given
 				MockMultipartFile textFile = new MockMultipartFile(
-						"text-file",
+						"invalid-extension",
 						"test.txt",
 						MediaType.TEXT_PLAIN_VALUE,
 						"test content".getBytes()

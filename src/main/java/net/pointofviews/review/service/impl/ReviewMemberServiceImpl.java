@@ -204,7 +204,8 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 		}
 
 		String contentType = file.getContentType();
-		if (contentType == null || !contentType.startsWith("image/")) {
+		if (contentType == null || !(
+				contentType.equals("image/jpeg") || contentType.equals("image/jpg") || contentType.equals("image/png"))) {
 			throw ImageException.invalidImageFormat();
 		}
 
