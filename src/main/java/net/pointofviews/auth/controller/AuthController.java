@@ -44,9 +44,9 @@ public class AuthController implements AuthSpecification {
         response.setHeader("Authorization", accessToken);
 
         // Refresh Token은 보안 쿠키로 설정
-        refreshToken = refreshToken.replace("Bearer ", "");  // Bearer prefix 제거
+        String cookieRefreshToken = refreshToken.replace(" ", "%20");
 
-        Cookie refreshTokenCookie = new Cookie("refresh-token", refreshToken);
+        Cookie refreshTokenCookie = new Cookie("refresh-token", cookieRefreshToken);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true);  // HTTPS only
         refreshTokenCookie.setPath("/");
