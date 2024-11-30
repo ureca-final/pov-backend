@@ -5,7 +5,7 @@ import static net.pointofviews.review.exception.ReviewException.*;
 
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
-import net.pointofviews.review.exception.ImageException;
+import net.pointofviews.review.exception.ReviewImageException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -174,7 +174,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 				.sum();
 
 		if (totalSize > 10 * 1024 * 1024) {  // 총 파일 크기 10MB 제한
-			throw ImageException.invalidTotalImageSize();
+			throw ReviewImageException.invalidTotalImageSize();
 		}
 
 		List<String> imageUrls = new ArrayList<>();
@@ -199,7 +199,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 	@Transactional
 	public void deleteReviewImages(List<String> imageUrls) {
 		if (imageUrls == null || imageUrls.isEmpty()) {
-			throw ImageException.emptyImageUrls();
+			throw ReviewImageException.emptyImageUrls();
 		}
 
 		for (String imageUrl : imageUrls) {
@@ -209,23 +209,23 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
 	private void validateImageFile(MultipartFile file) {
 		if (file.isEmpty()) {
-			throw ImageException.emptyImage();
+			throw ReviewImageException.emptyImage();
 		}
 
 		if (file.getSize() > 2 * 1024 * 1024) {
-			throw ImageException.invalidImageSize();
+			throw ReviewImageException.invalidImageSize();
 		}
 
 		String contentType = file.getContentType();
 		if (contentType == null || !(
 				contentType.equals("image/jpeg") || contentType.equals("image/jpg") || contentType.equals("image/png"))) {
-			throw ImageException.invalidImageFormat();
+			throw ReviewImageException.invalidImageFormat();
 		}
 
 		// 이미지 확장자 검증 추가
 		String filename = file.getOriginalFilename();
 		if (filename != null && !isImageFile(filename)) {
-			throw ImageException.invalidImageFormat();
+			throw ReviewImageException.invalidImageFormat();
 		}
 	}
 
@@ -250,7 +250,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 			}
 			return imageUrls;
 		} catch (Exception e) {
-			throw ImageException.failedToParseHtml(e.getMessage());
+			throw ReviewImageException.failedToParseHtml(e.getMessage());
 		}
 	}
 
