@@ -24,8 +24,8 @@ public class MemberTest {
                 String profileImage = "profileImage";
                 LocalDate birth = LocalDate.of(1990, 1, 1);
                 String nickname = "nickname";
-                SocialType socialType = SocialType.Google;
-                RoleType roleType = RoleType.User;
+                SocialType socialType = SocialType.GOOGLE;
+                RoleType roleType = RoleType.USER;
 
                 // when
                 Member member = Member.builder()
