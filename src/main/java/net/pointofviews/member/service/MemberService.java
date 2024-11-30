@@ -15,11 +15,11 @@ public interface MemberService {
 
     void deleteMember();
 
-    PutMemberGenreListResponse updateGenre(PutMemberGenreListRequest request);
+    PutMemberGenreListResponse updateGenre(Member loginMember, PutMemberGenreListRequest request);
 
     PutMemberImageResponse updateImage(PutMemberImageRequest request);
 
-    PutMemberNicknameResponse updateNickname(Member member, PutMemberNicknameRequest request);
+    PutMemberNicknameResponse updateNickname(Member loginMember, PutMemberNicknameRequest request);
 
     PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request);
 }
