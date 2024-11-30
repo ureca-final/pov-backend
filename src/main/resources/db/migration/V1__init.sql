@@ -39,8 +39,8 @@ CREATE TABLE member (
                         email varchar(255) null,
                         nickname varchar(255) null,
                         profile_image varchar(255) null,
-                        role_type enum ('Admin', 'User') null,
-                        social_type enum ('Google', 'Naver') null
+                        role_type enum ('ADMIN', 'USER') null,
+                        social_type enum ('GOOGLE', 'NAVER') null
 );
 
 CREATE TABLE premiere (
