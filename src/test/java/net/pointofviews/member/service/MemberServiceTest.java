@@ -64,7 +64,7 @@ class MemberServiceTest {
                 assertSoftly(softly -> {
                     softly.assertThat(response.email()).isEqualTo(email);
                     softly.assertThat(response.nickname()).isEqualTo("testuser");
-                    softly.assertThat(response.role()).isEqualTo("User");
+                    softly.assertThat(response.role()).isEqualTo("USER");
                     verify(memberRepository, times(1)).findByEmail(email);
                 });
             }
