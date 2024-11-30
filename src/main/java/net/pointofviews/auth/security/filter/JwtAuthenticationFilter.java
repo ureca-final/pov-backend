@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.auth.utils.JwtProvider;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
@@ -39,9 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Member member = memberRepository.findById(memberId)
                         .orElseThrow(() -> new RuntimeException("Member not found"));
 
+                MemberDetailsDto memberDetails = MemberDetailsDto.from(member);
+
                 // roleType으로 권한 설정
                 var authentication = new UsernamePasswordAuthenticationToken(
-                        memberId.toString(),
+                        memberDetails,
                         null,
                         List.of(new SimpleGrantedAuthority("ROLE_" + member.getRoleType().name()))
                 );
