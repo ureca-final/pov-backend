@@ -44,14 +44,14 @@ class MemberServiceTest {
             void 로그인_성공() {
                 // given
                 String email = "test@example.com";
-                String socialType = "Google";
+                String socialType = "GOOGLE";
 
                 Member member = mock(Member.class);
                 given(member.getId()).willReturn(UUID.randomUUID());
                 given(member.getEmail()).willReturn(email);
                 given(member.getNickname()).willReturn("testuser");
-                given(member.getRoleType()).willReturn(RoleType.User);
-                given(member.getSocialType()).willReturn(SocialType.Google);
+                given(member.getRoleType()).willReturn(RoleType.USER);
+                given(member.getSocialType()).willReturn(SocialType.GOOGLE);
 
                 given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
 
@@ -96,7 +96,7 @@ class MemberServiceTest {
                 // given
                 String email = "test@example.com";
                 Member member = mock(Member.class);
-                given(member.getSocialType()).willReturn(SocialType.Google);
+                given(member.getSocialType()).willReturn(SocialType.GOOGLE);
                 given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
 
                 LoginMemberRequest request = new LoginMemberRequest(
