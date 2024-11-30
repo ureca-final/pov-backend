@@ -21,6 +21,8 @@ spring:
       max-file-size: 10MB      # 단일 파일 크기 제한
       max-request-size: 50MB   # 전체 요청 크기 제한
 springdoc:
+  api-docs:
+    path: /api/v3/api-docs
   swagger-ui:
     path: /api/docs
     groups-order: desc

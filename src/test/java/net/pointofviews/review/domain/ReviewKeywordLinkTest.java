@@ -15,7 +15,7 @@ class ReviewKeywordLinkTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void ReviewKeywordLink_객체_생성() {

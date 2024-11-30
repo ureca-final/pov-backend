@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "TMDB 영화 검색 응답 DTO")
-public record SearchTMDBMovieResponse(
+@Schema(description = "TMDb 영화 검색 응답 DTO")
+public record SearchTMDbMovieResponse(
         @Schema(description = "영화 제목", example = "Inception")
         String title,
 

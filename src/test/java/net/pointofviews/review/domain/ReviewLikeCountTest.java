@@ -15,7 +15,7 @@ class ReviewLikeCountTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void ReviewLikeCount_객체_생성() {

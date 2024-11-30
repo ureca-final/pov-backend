@@ -72,6 +72,8 @@ jobs:
           export DB_ADMIN_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}"
           export S3_ACCESS_KEY="${{ secrets.S3_ACCESS_KEY }}"
           export S3_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET_ACCESS_KEY }}"
+          export TMDB_ACCESS_TOKEN="${{ secrets.TMDB_ACCESS_TOKEN }}"
+  
           cd /home/ubuntu/pov-backend
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
@@ -82,6 +84,7 @@ jobs:
           DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+          TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
       # 두 번째 인스턴스 배포
       - name: Deploy to EC2 Instance 2
         run: |
@@ -93,6 +96,7 @@ jobs:
           export DB_ADMIN_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}"
           export S3_ACCESS_KEY="${{ secrets.S3_ACCESS_KEY }}"
           export S3_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET_ACCESS_KEY }}"
+          export TMDB_ACCESS_TOKEN="${{ secrets.TMDB_ACCESS_TOKEN }}"
           cd /home/ubuntu/pov-backend
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
@@ -103,3 +107,4 @@ jobs:
           DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+          TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}

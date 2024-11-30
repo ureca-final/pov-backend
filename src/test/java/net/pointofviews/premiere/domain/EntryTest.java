@@ -17,7 +17,7 @@ class EntryTest {
     class Constructor {
 
         @Nested
-        class success {
+        class Success {
 
             @Test
             void Entry_객체_생성() {
@@ -47,7 +47,7 @@ class EntryTest {
         }
 
         @Nested
-        class failure {
+        class Failure {
 
             @Test
             void 수량_없음_IllegalArgumentException_예외발생() {

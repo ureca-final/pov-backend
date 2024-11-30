@@ -20,3 +20,6 @@ cloud:
 jwt:
   token:
     secretKey: "urecapointofviewsurecapointofviewsurecapoin"
+
+TMDb:
+  access: ${TMDB_ACCESS_TOKEN}
