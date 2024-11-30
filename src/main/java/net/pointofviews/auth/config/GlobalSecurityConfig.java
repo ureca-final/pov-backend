@@ -43,6 +43,7 @@ public class GlobalSecurityConfig {
                 new AntPathRequestMatcher("/auth/**"),
                 new AntPathRequestMatcher("/swagger-ui/**"),
                 new AntPathRequestMatcher("/v3/api-docs/**"),
+                new AntPathRequestMatcher("/api/movies/**"),
                 PathRequest.toStaticResources().atCommonLocations()
         );
     }
