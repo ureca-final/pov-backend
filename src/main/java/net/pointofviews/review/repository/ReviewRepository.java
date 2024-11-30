@@ -15,6 +15,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 	@Query(value = """
 		SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
+				r.id,
 				mv.title,
 				r.title,
 				r.contents,
