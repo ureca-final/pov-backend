@@ -281,6 +281,7 @@ class ReviewMemberServiceTest {
 				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
 
 				ReadReviewResponse review1 = new ReadReviewResponse(
+					1L,
 					movie.getTitle(),
 					"리뷰제목1",
 					"리뷰내용1",
@@ -293,6 +294,7 @@ class ReviewMemberServiceTest {
 				);
 
 				ReadReviewResponse review2 = new ReadReviewResponse(
+					2L,
 					movie.getTitle(),
 					"리뷰제목2",
 					"리뷰내용2",
