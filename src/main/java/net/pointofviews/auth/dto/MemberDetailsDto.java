@@ -1,34 +1,33 @@
 package net.pointofviews.auth.dto;
 
 import net.pointofviews.member.domain.Member;
-import net.pointofviews.member.domain.RoleType;
-import net.pointofviews.member.domain.SocialType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import java.util.Collection;
+import java.util.List;
 
 public record MemberDetailsDto(
-        UUID id,
-        String email,
-        String profileImage,
-        LocalDate birth,
-        String nickname,
-        SocialType socialType,
-        RoleType roleType,
-        boolean isNoticeActive,
         Member member
-) {
+) implements UserDetails {
+
     public static MemberDetailsDto from(Member member) {
-        return new MemberDetailsDto(
-                member.getId(),
-                member.getEmail(),
-                member.getProfileImage(),
-                member.getBirth(),
-                member.getNickname(),
-                member.getSocialType(),
-                member.getRoleType(),
-                member.isNoticeActive(),
-                member
-        );
+        return new MemberDetailsDto(member);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + member.getRoleType().name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return member.getEmail();
     }
 }
