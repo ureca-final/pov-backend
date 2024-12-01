@@ -14,7 +14,7 @@ public class CommonCode {
     @EmbeddedId
     private CommonCodeId code;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("groupCode")
     @JoinColumn(name = "group_code")
     private CommonCodeGroup groupCode;
