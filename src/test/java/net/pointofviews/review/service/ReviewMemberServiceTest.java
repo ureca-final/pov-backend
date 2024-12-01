@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
-import net.pointofviews.review.exception.ImageException;
+import net.pointofviews.review.exception.ReviewImageException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -477,7 +477,7 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(files))
-							.isInstanceOf(ImageException.class)
+							.isInstanceOf(ReviewImageException.class)
 							.hasMessage("전체 파일 크기가 10MB를 초과합니다.");
 				});
 			}
@@ -495,7 +495,7 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(largeFile)))
-							.isInstanceOf(ImageException.class)
+							.isInstanceOf(ReviewImageException.class)
 							.hasMessage("파일 크기가 2MB를 초과합니다.");
 				});
 			}
@@ -512,7 +512,7 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(emptyFile)))
-							.isInstanceOf(ImageException.class)
+							.isInstanceOf(ReviewImageException.class)
 							.hasMessage("파일이 비어있습니다.");
 				});
 			}
@@ -530,7 +530,7 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(invalidTypeFile)))
-							.isInstanceOf(ImageException.class)
+							.isInstanceOf(ReviewImageException.class)
 							.hasMessage("지원하지 않는 파일 형식입니다.");
 				});
 			}
@@ -548,7 +548,7 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(textFile)))
-							.isInstanceOf(ImageException.class)
+							.isInstanceOf(ReviewImageException.class)
 							.hasMessage("지원하지 않는 파일 형식입니다.");
 				});
 			}
@@ -583,7 +583,7 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.deleteReviewImages(List.of()))
-							.isInstanceOf(ImageException.class)
+							.isInstanceOf(ReviewImageException.class)
 							.hasMessage("삭제할 이미지 URL이 없습니다.");
 				});
 			}
