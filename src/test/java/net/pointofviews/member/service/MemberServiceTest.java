@@ -65,7 +65,7 @@ class MemberServiceTest {
                 String email = "test@example.com";
                 String nickname = "testuser";
                 LocalDate birth = LocalDate.of(2000, 1, 1);
-                String socialType = "NAVER";
+                SocialType socialType = SocialType.NAVER;
                 String profileImage = "https://example.com/image.jpg";
                 List<String> genres = List.of("로맨스", "코미디", "액션");
 
@@ -73,7 +73,7 @@ class MemberServiceTest {
                         email,
                         nickname,
                         birth,
-                        socialType,
+                        socialType.name(),
                         genres,
                         profileImage
                 );
@@ -111,14 +111,14 @@ class MemberServiceTest {
                 String email = "test@example.com";
                 String nickname = "testuser";
                 LocalDate birth = LocalDate.of(2000, 1, 1);
-                String socialType = "NAVER";
+                SocialType socialType = SocialType.NAVER;
                 String profileImage = "https://example.com/image.jpg";
 
                 CreateMemberRequest request = new CreateMemberRequest(
                         email,
                         nickname,
                         birth,
-                        socialType,
+                        socialType.name(),
                         null,  // 장르 선택 없음
                         profileImage
                 );
@@ -158,7 +158,7 @@ class MemberServiceTest {
                         email,
                         "nickname",
                         LocalDate.of(2000, 1, 1),
-                        "NAVER",
+                        SocialType.NAVER.name(),
                         List.of(),
                         "https://example.com/image.jpg"
                 );
@@ -201,7 +201,7 @@ class MemberServiceTest {
                         "test@example.com",
                         "nickname",
                         LocalDate.of(2000, 1, 1),
-                        "NAVER",
+                        SocialType.NAVER.name(),
                         List.of("로맨틱"),  // 존재하지 않는 장르명
                         "https://example.com/image.jpg"
                 );
@@ -231,7 +231,7 @@ class MemberServiceTest {
             void 로그인_성공() {
                 // given
                 String email = "test@example.com";
-                String socialType = "GOOGLE";
+                SocialType socialType = SocialType.GOOGLE;;
 
                 Member member = mock(Member.class);
                 given(member.getId()).willReturn(UUID.randomUUID());
@@ -242,7 +242,7 @@ class MemberServiceTest {
 
                 given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
 
-                LoginMemberRequest request = new LoginMemberRequest(email, socialType);
+                LoginMemberRequest request = new LoginMemberRequest(email, socialType.name());
 
                 // when
                 LoginMemberResponse response = memberService.login(request);
@@ -268,7 +268,7 @@ class MemberServiceTest {
                         .willReturn(Optional.empty());
 
                 LoginMemberRequest request = new LoginMemberRequest(
-                        email, "GOOGLE"
+                        email, SocialType.GOOGLE.name()
                 );
 
                 // when & then
@@ -288,7 +288,7 @@ class MemberServiceTest {
                 given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
 
                 LoginMemberRequest request = new LoginMemberRequest(
-                        email, "NAVER"  // 다른 소셜 타입으로 요청
+                        email, SocialType.NAVER.name()  // 다른 소셜 타입으로 요청
                 );
 
                 // when & then
