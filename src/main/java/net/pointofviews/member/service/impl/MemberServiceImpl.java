@@ -47,10 +47,9 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public CreateMemberResponse signup(CreateMemberRequest request) {
         // 이메일 중복 검사
-        memberRepository.findByEmail(request.email())
-                .ifPresent(member -> {
-                    throw emailAlreadyExists();
-                });
+		if (memberRepository.existsByEmail(request.email())) {
+			throw emailAlreadyExists();
+		}
 
         // 소셜 타입 검증
         SocialType socialType;
