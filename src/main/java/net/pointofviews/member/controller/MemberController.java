@@ -27,8 +27,12 @@ public class MemberController implements MemberSpecification {
 
     @Override
     @PutMapping("/profiles/genres")
-    public ResponseEntity<BaseResponse<PutMemberGenreListResponse>> putGenres(PutMemberGenreListRequest request) {
-        PutMemberGenreListResponse response = memberService.updateGenre(request);
+    public ResponseEntity<BaseResponse<PutMemberGenreListResponse>> putGenres(
+        @AuthenticationPrincipal(expression = "member") Member loginMember,
+        @Valid @RequestBody PutMemberGenreListRequest request
+    ) {
+        PutMemberGenreListResponse response = memberService.updateGenre(loginMember, request);
+
         return BaseResponse.ok("장르 설정이 완료되었습니다.", response);
     }
 

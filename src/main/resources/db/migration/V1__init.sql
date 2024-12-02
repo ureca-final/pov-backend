@@ -128,7 +128,6 @@ CREATE TABLE entry (
 
 CREATE TABLE member_favor_genre (
                                     genre_code varchar(2) null,
-                                    created_at datetime(6) null,
                                     id bigint auto_increment primary key,
                                     member_id binary(16) null,
                                     CONSTRAINT FKiaxiyt0n6b6l4v6lg57xmvfv4 FOREIGN KEY (member_id) REFERENCES member (id)

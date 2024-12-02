@@ -49,16 +49,20 @@ public interface MemberSpecification {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
 		),
-		@ApiResponse(responseCode = "404", description = "❌ FAIL",
+		@ApiResponse(responseCode = "400", description = "❌ FAIL",
 			content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-					  "message": "장르 설정에 실패했습니다."
-					}""")
+					  "message": "잘못된 장르(Name: 시사교양)를 요청했습니다."
+					}
+					""")
 			)
 		)
 	})
-	ResponseEntity<BaseResponse<PutMemberGenreListResponse>> putGenres(@RequestBody PutMemberGenreListRequest request);
+	ResponseEntity<BaseResponse<PutMemberGenreListResponse>> putGenres(
+		@AuthenticationPrincipal(expression = "member") Member loginMember,
+		@Valid @RequestBody PutMemberGenreListRequest request
+	);
 
 	// 회원 프로필 이미지 변경
 	@Tag(name = "Member", description = "회원 프로필 이미지 변경 관련 API")

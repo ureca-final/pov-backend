@@ -6,6 +6,7 @@ import net.pointofviews.common.exception.BusinessException;
 import org.springframework.http.HttpStatus;
 
 public class MemberException extends BusinessException {
+
     public MemberException(HttpStatus status, String message) {
         super(status, message);
     }
@@ -24,6 +25,10 @@ public class MemberException extends BusinessException {
 
     public static MemberException nicknameDuplicate() {
         return new MemberException(HttpStatus.CONFLICT, "닉네임 중복으로 인해 변경이 실패했습니다.");
+    }
+
+    public static MemberException memberGenreBadRequest(String genreName) {
+        return new MemberException(HttpStatus.BAD_REQUEST, String.format("잘못된 장르(Name: %s)를 요청했습니다.", genreName));
     }
 
     public static MemberException emailAlreadyExists() {
