@@ -2,6 +2,10 @@ package net.pointofviews.member.service.impl;
 
 import static net.pointofviews.member.exception.MemberException.*;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +13,9 @@ import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.member.domain.Member;
+import net.pointofviews.member.domain.MemberFavorGenre;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
 import net.pointofviews.member.dto.request.PutMemberImageRequest;
 import net.pointofviews.member.dto.request.PutMemberNicknameRequest;
@@ -17,9 +24,8 @@ import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
 import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.dto.response.PutMemberNoticeResponse;
-import net.pointofviews.auth.utils.JwtProvider;
-import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
+import net.pointofviews.member.repository.MemberFavorGenreRepository;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.member.service.MemberService;
 
@@ -30,66 +36,118 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
 
-    private final MemberRepository memberRepository;
-    private final JwtProvider jwtProvider;
+	private final MemberRepository memberRepository;
+	private final MemberFavorGenreRepository memberFavorGenreRepository;
 
-    @Override
-    public CreateMemberResponse signup(CreateMemberRequest request) {
-        return null;
-    }
+	@Override
+	public CreateMemberResponse signup(CreateMemberRequest request) {
+		return null;
+	}
 
-    @Override
-    public LoginMemberResponse login(LoginMemberRequest request) {
-        // 이메일로 회원 조회
-        Member member = memberRepository.findByEmail(request.email())
-                .orElseThrow(MemberException::memberNotFound);
+	@Override
+	public LoginMemberResponse login(LoginMemberRequest request) {
+		// 이메일로 회원 조회
+		Member member = memberRepository.findByEmail(request.email())
+			.orElseThrow(MemberException::memberNotFound);
 
-        if (!member.getSocialType().name().equals(request.socialType())) {
-            throw invalidSocialType();
-        }
+		if (!member.getSocialType().name().equals(request.socialType())) {
+			throw invalidSocialType();
+		}
 
-        // 응답 생성
-        return new LoginMemberResponse(
-                member.getId(),
-                member.getEmail(),
-                member.getNickname(),
-                member.getRoleType().name()
-        );
-    }
+		// 응답 생성
+		return new LoginMemberResponse(
+			member.getId(),
+			member.getEmail(),
+			member.getNickname(),
+			member.getRoleType().name()
+		);
+	}
 
-    @Override
-    public void deleteMember() {
+	@Override
+	public void deleteMember() {
 
-    }
+	}
 
-    @Override
-    public PutMemberGenreListResponse updateGenre(PutMemberGenreListRequest request) {
-        return null;
-    }
+	@Override
+	@Transactional
+	public PutMemberGenreListResponse updateGenre(Member loginMember, PutMemberGenreListRequest request) {
 
-    @Override
-    public PutMemberImageResponse updateImage(PutMemberImageRequest request) {
-        return null;
-    }
+		Member member = memberRepository.findById(loginMember.getId())
+			.orElseThrow(() -> memberNotFound(loginMember.getId()));
 
-    @Override
-    @Transactional
-    public PutMemberNicknameResponse updateNickname(Member loginMember, PutMemberNicknameRequest request) {
+		// 기존 및 요청한 장르 코드 추출
+		List<String> existingGenreCodes = memberFavorGenreRepository.findGenreCodeByMemberId(member.getId());
+		List<String> requestGenreCodes = request.genres().stream()
+			.map(this::extractRequestGenreCode)
+			.toList();
 
-        Member member = memberRepository.findById(loginMember.getId())
-            .orElseThrow(() -> memberNotFound(loginMember.getId()));
+		// 추가 및 삭제할 장르 코드 추출
+		Set<String> genresToAdd = findGenresToAdd(requestGenreCodes, existingGenreCodes);
+		Set<String> genresToDelete = findGenresToDelete(existingGenreCodes, requestGenreCodes);
 
-        if (memberRepository.existsByNickname(request.nickname())) {
-            throw nicknameDuplicate();
-        }
+		// 삭제 및 추가 작업 처리
+		if (!genresToDelete.isEmpty()) {
+			memberFavorGenreRepository.deleteByMemberIdAndGenreCodeIn(member.getId(), genresToDelete);
+		}
 
-        member.updateNickname(request.nickname());
+		genresToAdd.forEach(genreCode -> {
+			MemberFavorGenre newFavorGenre = MemberFavorGenre.builder()
+				.member(member)
+				.genreCode(genreCode)
+				.build();
 
-        return new PutMemberNicknameResponse(member.getNickname());
-    }
+			memberFavorGenreRepository.save(newFavorGenre);
+		});
 
-    @Override
-    public PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request) {
-        return null;
-    }
+		return new PutMemberGenreListResponse(request.genres());
+	}
+
+	private static Set<String> findGenresToAdd(List<String> requestGenreCodes, List<String> existingGenreCodes) {
+		return requestGenreCodes.stream()
+			.filter(genreCode -> !existingGenreCodes.contains(genreCode))
+			.collect(Collectors.toSet());
+	}
+
+	private static Set<String> findGenresToDelete(List<String> existingGenreCodes, List<String> requestGenreCodes) {
+		return existingGenreCodes.stream()
+			.filter(genreCode -> !requestGenreCodes.contains(genreCode))
+			.collect(Collectors.toSet());
+	}
+
+	private String extractRequestGenreCode(String genreName) {
+		String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
+		String genreCode = memberFavorGenreRepository.findGenreCodeByGenreName(genreName, groupCode);
+
+		if (genreCode == null) {
+			throw memberGenreBadRequest(genreName);
+		}
+
+		return genreCode;
+	}
+
+	@Override
+	public PutMemberImageResponse updateImage(PutMemberImageRequest request) {
+		return null;
+	}
+
+	@Override
+	@Transactional
+	public PutMemberNicknameResponse updateNickname(Member loginMember, PutMemberNicknameRequest request) {
+
+		Member member = memberRepository.findById(loginMember.getId())
+			.orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+		if (memberRepository.existsByNickname(request.nickname())) {
+			throw nicknameDuplicate();
+		}
+
+		member.updateNickname(request.nickname());
+
+		return new PutMemberNicknameResponse(member.getNickname());
+	}
+
+	@Override
+	public PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request) {
+		return null;
+	}
 }
