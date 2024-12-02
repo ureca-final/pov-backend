@@ -25,4 +25,8 @@ public class MemberException extends BusinessException {
     public static MemberException nicknameDuplicate() {
         return new MemberException(HttpStatus.CONFLICT, "닉네임 중복으로 인해 변경이 실패했습니다.");
     }
+
+    public static MemberException emailAlreadyExists() {
+        return new MemberException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.");
+    }
 }
