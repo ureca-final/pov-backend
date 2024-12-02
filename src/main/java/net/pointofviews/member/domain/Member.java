@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import net.pointofviews.common.domain.SoftDeleteEntity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -48,5 +49,9 @@ public class Member extends SoftDeleteEntity {
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void delete() {
+        this.setDeletedAt(LocalDateTime.now());
     }
 }
