@@ -46,7 +46,7 @@ class MovieTMDbSearchServiceTest {
             @SneakyThrows
             void TMDb_검색_성공() {
                 // given
-                SearchMovieApiResponse mockResponse = new SearchMovieApiResponse(false, null, null, 1, null, null, null, null, null, "Inception");
+                SearchMovieApiResponse mockResponse = new SearchMovieApiResponse(false, null, 1, null, null, "Inception");
                 SearchMovieApiListResponse mockResponseList = new SearchMovieApiListResponse(1, 10, 100, List.of(mockResponse));
 
                 ObjectMapper objectMapper = new ObjectMapper();
