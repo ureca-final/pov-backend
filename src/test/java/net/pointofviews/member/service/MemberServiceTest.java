@@ -84,7 +84,7 @@ class MemberServiceTest {
                 given(savedMember.getEmail()).willReturn(email);
                 given(savedMember.getNickname()).willReturn(nickname);
 
-                given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
+                given(memberRepository.existsByEmail(email)).willReturn(false);
                 given(memberRepository.save(any(Member.class))).willReturn(savedMember);
                 given(commonCodeService.convertNameToCommonCode(eq("로맨스"), any())).willReturn("14");
                 given(commonCodeService.convertNameToCommonCode(eq("코미디"), any())).willReturn("04");
@@ -98,7 +98,7 @@ class MemberServiceTest {
                     softly.assertThat(response.id()).isEqualTo(memberId);
                     softly.assertThat(response.email()).isEqualTo(email);
                     softly.assertThat(response.nickname()).isEqualTo(nickname);
-                    verify(memberRepository, times(1)).findByEmail(email);
+                    verify(memberRepository, times(1)).existsByEmail(email);
                     verify(memberRepository, times(1)).save(any(Member.class));
                     verify(memberFavorGenreRepository, times(3)).save(any(MemberFavorGenre.class));
                     verify(commonCodeService, times(3)).convertNameToCommonCode(anyString(), any());
@@ -129,7 +129,7 @@ class MemberServiceTest {
                 given(savedMember.getEmail()).willReturn(email);
                 given(savedMember.getNickname()).willReturn(nickname);
 
-                given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
+                given(memberRepository.existsByEmail(email)).willReturn(false);
                 given(memberRepository.save(any(Member.class))).willReturn(savedMember);
 
                 // when
@@ -140,7 +140,7 @@ class MemberServiceTest {
                     softly.assertThat(response.id()).isEqualTo(memberId);
                     softly.assertThat(response.email()).isEqualTo(email);
                     softly.assertThat(response.nickname()).isEqualTo(nickname);
-                    verify(memberRepository, times(1)).findByEmail(email);
+                    verify(memberRepository, times(1)).existsByEmail(email);
                     verify(memberRepository, times(1)).save(any(Member.class));
                     verify(memberFavorGenreRepository, never()).save(any(MemberFavorGenre.class));
                     verify(commonCodeService, never()).convertNameToCommonCode(anyString(), any());
@@ -163,8 +163,7 @@ class MemberServiceTest {
                         "https://example.com/image.jpg"
                 );
 
-                given(memberRepository.findByEmail(email))
-                        .willReturn(Optional.of(mock(Member.class)));
+                given(memberRepository.existsByEmail(email)).willReturn(true);
 
                 // when & then
                 assertSoftly(softly -> {
@@ -173,6 +172,7 @@ class MemberServiceTest {
                             .hasMessage("이미 존재하는 이메일입니다.");
                 });
             }
+
 
             @Test
             void 잘못된_소셜타입_MemberException_invalidSocialType_예외발생() {
@@ -206,7 +206,7 @@ class MemberServiceTest {
                         "https://example.com/image.jpg"
                 );
 
-                given(memberRepository.findByEmail(anyString())).willReturn(Optional.empty());
+                given(memberRepository.existsByEmail(anyString())).willReturn(false);
                 given(memberRepository.save(any(Member.class))).willReturn(mock(Member.class));
                 given(commonCodeService.convertNameToCommonCode(anyString(), any()))
                         .willThrow(CommonCodeException.genreNameNotFound("로맨틱"));
@@ -231,7 +231,7 @@ class MemberServiceTest {
             void 로그인_성공() {
                 // given
                 String email = "test@example.com";
-                SocialType socialType = SocialType.GOOGLE;;
+                SocialType socialType = SocialType.GOOGLE;
 
                 Member member = mock(Member.class);
                 given(member.getId()).willReturn(UUID.randomUUID());
