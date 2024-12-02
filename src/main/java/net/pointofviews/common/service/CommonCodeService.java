@@ -8,5 +8,7 @@ import java.util.List;
 public interface CommonCodeService {
     String convertCommonCodeNameToName(String numberCode, CodeGroupEnum codeGroupEnum);
 
+    String convertNameToCommonCode(String name, CodeGroupEnum codeGroupEnum);
+
     List<CommonCode> findAllByCodeGroupEnum(CodeGroupEnum codeGroupEnum);
 }

@@ -30,4 +30,8 @@ public class MemberException extends BusinessException {
     public static MemberException memberGenreBadRequest(String genreName) {
         return new MemberException(HttpStatus.BAD_REQUEST, String.format("잘못된 장르(Name: %s)를 요청했습니다.", genreName));
     }
+
+    public static MemberException emailAlreadyExists() {
+        return new MemberException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.");
+    }
 }

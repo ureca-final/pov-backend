@@ -2,6 +2,7 @@ package net.pointofviews.member.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.dto.request.*;
@@ -19,8 +20,8 @@ public class MemberController implements MemberSpecification {
 
     @Override
     @DeleteMapping("")
-    public ResponseEntity<BaseResponse<Void>> withdraw() {
-        memberService.deleteMember();
+    public ResponseEntity<BaseResponse<Void>> withdraw(@AuthenticationPrincipal MemberDetailsDto memberDetails) {
+        memberService.deleteMember(memberDetails.member());
         return BaseResponse.ok("회원 탈퇴가 완료되었습니다.");
     }
 
