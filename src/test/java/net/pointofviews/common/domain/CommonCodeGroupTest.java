@@ -1,12 +1,11 @@
 package net.pointofviews.common.domain;
 
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @ExtendWith(MockitoExtension.class)
 class CommonCodeGroupTest {
@@ -26,9 +25,7 @@ class CommonCodeGroupTest {
 
 			    // when -- 테스트하고자 하는 행동
 				CommonCodeGroup commonCodeGroup = CommonCodeGroup.builder()
-					.groupCode(groupCode)
-					.name(name)
-					.description(description)
+					.codeGroupEnum(CodeGroupEnum.MOVIE_GENRE)
 					.build();
 
 			    // then -- 예상되는 변화 및 결과

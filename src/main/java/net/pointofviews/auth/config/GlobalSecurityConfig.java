@@ -35,15 +35,13 @@ public class GlobalSecurityConfig {
 
     private RequestMatcher ignoredRequests() {
         return new OrRequestMatcher(
-                new AntPathRequestMatcher("/api/swagger-ui/**"),
-                new AntPathRequestMatcher("/v3/api-docs/**"),
-                new AntPathRequestMatcher("/api/docs"),
                 new AntPathRequestMatcher("/error"),
                 new AntPathRequestMatcher("/api/actuator/**"),
-                new AntPathRequestMatcher("/auth/**"),
-                new AntPathRequestMatcher("/swagger-ui/**"),
-                new AntPathRequestMatcher("/v3/api-docs/**"),
-                new AntPathRequestMatcher("/api/movies/**"),
+                new AntPathRequestMatcher("/api/auth/**"),
+                new AntPathRequestMatcher("/api/docs/**"),
+                new AntPathRequestMatcher("/api/v3/api-docs/**"),
+                new AntPathRequestMatcher("/api/swagger-resources/**"),
+                new AntPathRequestMatcher("/api/swagger-ui/**"),
                 PathRequest.toStaticResources().atCommonLocations()
         );
     }

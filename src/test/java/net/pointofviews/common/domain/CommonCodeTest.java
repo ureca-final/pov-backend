@@ -1,11 +1,11 @@
 package net.pointofviews.common.domain;
 
-import static org.assertj.core.api.SoftAssertions.*;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @ExtendWith(MockitoExtension.class)
 class CommonCodeTest {
@@ -20,9 +20,7 @@ class CommonCodeTest {
 			void CommonCode_객체_생성() {
 			    // given -- 테스트의 상태 설정
 			    CommonCodeGroup groupCode = CommonCodeGroup.builder()
-					.groupCode("010")
-					.name("영화 장르")
-					.description("장르")
+					.codeGroupEnum(CodeGroupEnum.MOVIE_GENRE)
 					.build();
 
 				String code = "01";
