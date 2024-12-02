@@ -2,6 +2,12 @@ package net.pointofviews.member.service.impl;
 
 import static net.pointofviews.member.exception.MemberException.*;
 
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.member.domain.MemberFavorGenre;
+import net.pointofviews.member.domain.RoleType;
+import net.pointofviews.member.domain.SocialType;
+import net.pointofviews.member.repository.MemberFavorGenreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +23,6 @@ import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
 import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.dto.response.PutMemberNoticeResponse;
-import net.pointofviews.auth.utils.JwtProvider;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberRepository;
@@ -31,11 +36,58 @@ import lombok.RequiredArgsConstructor;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final JwtProvider jwtProvider;
+    private final MemberFavorGenreRepository memberFavorGenreRepository;
+    private final CommonCodeService commonCodeService;
 
     @Override
+    @Transactional
     public CreateMemberResponse signup(CreateMemberRequest request) {
-        return null;
+        // 이메일 중복 검사
+        memberRepository.findByEmail(request.email())
+                .ifPresent(member -> {
+                    throw emailAlreadyExists();
+                });
+
+        // 소셜 타입 검증
+        SocialType socialType;
+        try {
+            socialType = SocialType.valueOf(request.socialType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw invalidSocialType();
+        }
+
+        Member member = Member.builder()
+                .email(request.email())
+                .nickname(request.nickname())
+                .birth(request.birth())
+                .socialType(socialType)
+                .profileImage(request.profileImage())
+                .roleType(RoleType.USER)
+                .build();
+
+        Member savedMember = memberRepository.save(member);
+
+        // 관심 장르 저장
+        if (request.favorGenres() != null && !request.favorGenres().isEmpty()) {
+            request.favorGenres().forEach(genreName -> {
+                String genreCode = commonCodeService.convertNameToCommonCode(
+                        genreName,
+                        CodeGroupEnum.MOVIE_GENRE
+                );
+
+                MemberFavorGenre favorGenre = MemberFavorGenre.builder()
+                        .member(savedMember)
+                        .genreCode(genreCode)
+                        .build();
+                memberFavorGenreRepository.save(favorGenre);
+            });
+        }
+
+        return new CreateMemberResponse(
+                savedMember.getId(),
+                savedMember.getEmail(),
+                savedMember.getNickname()
+        );
     }
 
     @Override
@@ -58,8 +110,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void deleteMember() {
+    @Transactional
+    public void deleteMember(Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
+        member.delete();
     }
 
     @Override
