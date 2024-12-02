@@ -10,7 +10,7 @@ public record SearchMovieApiResponse(
         boolean adult,
 
         @Schema(description = "장르 ID 리스트", example = "[28, 878, 12]")
-        List<Integer> genre_ids,
+        List<String> genre_ids,
 
         @Schema(description = "영화 ID", example = "27205")
         int id,
