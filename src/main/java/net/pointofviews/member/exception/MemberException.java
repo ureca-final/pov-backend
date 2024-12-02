@@ -1,5 +1,7 @@
 package net.pointofviews.member.exception;
 
+import java.util.UUID;
+
 import net.pointofviews.common.exception.BusinessException;
 import org.springframework.http.HttpStatus;
 
@@ -12,7 +14,15 @@ public class MemberException extends BusinessException {
         return new MemberException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
     }
 
+    public static MemberException memberNotFound(UUID memberId) {
+        return new MemberException(HttpStatus.NOT_FOUND, String.format("회원(Id: %s)이 존재하지 않습니다.", memberId));
+    }
+
     public static MemberException invalidSocialType() {
         return new MemberException(HttpStatus.BAD_REQUEST, "잘못된 소셜 로그인 타입입니다.");
+    }
+
+    public static MemberException nicknameDuplicate() {
+        return new MemberException(HttpStatus.CONFLICT, "닉네임 중복으로 인해 변경이 실패했습니다.");
     }
 }

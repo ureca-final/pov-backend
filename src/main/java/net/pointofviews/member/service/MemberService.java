@@ -4,6 +4,7 @@ import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.dto.request.*;
 import net.pointofviews.member.dto.response.*;
 
@@ -18,7 +19,7 @@ public interface MemberService {
 
     PutMemberImageResponse updateImage(PutMemberImageRequest request);
 
-    PutMemberNicknameResponse updateNickname(PutMemberNicknameRequest request);
+    PutMemberNicknameResponse updateNickname(Member member, PutMemberNicknameRequest request);
 
     PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request);
 }

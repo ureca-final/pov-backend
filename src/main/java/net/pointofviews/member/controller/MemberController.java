@@ -1,16 +1,20 @@
 package net.pointofviews.member.controller;
 
+import java.util.UUID;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.dto.request.*;
 import net.pointofviews.member.dto.response.*;
 import net.pointofviews.member.service.MemberService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/members")
+@RequestMapping("/api/members")
 @RequiredArgsConstructor
 public class MemberController implements MemberSpecification {
     private final MemberService memberService;
@@ -38,8 +42,12 @@ public class MemberController implements MemberSpecification {
 
     @Override
     @PutMapping("/profiles/nickname")
-    public ResponseEntity<BaseResponse<PutMemberNicknameResponse>> putNickname(@Valid PutMemberNicknameRequest request) {
-        PutMemberNicknameResponse response = memberService.updateNickname(request);
+    public ResponseEntity<BaseResponse<PutMemberNicknameResponse>> putNickname(
+        @AuthenticationPrincipal(expression = "member") Member loginMember,
+        @Valid @RequestBody PutMemberNicknameRequest request
+    ) {
+        PutMemberNicknameResponse response = memberService.updateNickname(loginMember, request);
+
         return BaseResponse.ok("닉네임이 변경되었습니다.", response);
     }
 
