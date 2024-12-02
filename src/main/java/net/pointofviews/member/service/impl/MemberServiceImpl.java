@@ -19,9 +19,7 @@ import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
-import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.member.domain.Member;
-import net.pointofviews.member.domain.MemberFavorGenre;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
 import net.pointofviews.member.dto.request.PutMemberImageRequest;
 import net.pointofviews.member.dto.request.PutMemberNicknameRequest;
@@ -30,9 +28,7 @@ import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
 import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.dto.response.PutMemberNoticeResponse;
-import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
-import net.pointofviews.member.repository.MemberFavorGenreRepository;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.member.service.MemberService;
 
@@ -45,8 +41,6 @@ public class MemberServiceImpl implements MemberService {
 
 	private final MemberRepository memberRepository;
 	private final MemberFavorGenreRepository memberFavorGenreRepository;
-    private final MemberRepository memberRepository;
-    private final MemberFavorGenreRepository memberFavorGenreRepository;
     private final CommonCodeService commonCodeService;
 
     @Override
