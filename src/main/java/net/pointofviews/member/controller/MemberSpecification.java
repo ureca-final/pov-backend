@@ -48,7 +48,7 @@ public interface MemberSpecification {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
 		),
-		@ApiResponse(responseCode = "404", description = "❌ FAIL",
+		@ApiResponse(responseCode = "400", description = "❌ FAIL",
 			content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{

@@ -2,8 +2,8 @@ package net.pointofviews.member.service.impl;
 
 import static net.pointofviews.member.exception.MemberException.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +13,8 @@ import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.domain.MemberFavorGenre;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
 import net.pointofviews.member.dto.request.PutMemberImageRequest;
@@ -22,8 +24,6 @@ import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
 import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.dto.response.PutMemberNoticeResponse;
-import net.pointofviews.auth.utils.JwtProvider;
-import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberFavorGenreRepository;
 import net.pointofviews.member.repository.MemberRepository;
@@ -38,7 +38,6 @@ public class MemberServiceImpl implements MemberService {
 
 	private final MemberRepository memberRepository;
 	private final MemberFavorGenreRepository memberFavorGenreRepository;
-	private final JwtProvider jwtProvider;
 
 	@Override
 	public CreateMemberResponse signup(CreateMemberRequest request) {
@@ -76,38 +75,54 @@ public class MemberServiceImpl implements MemberService {
 		Member member = memberRepository.findById(loginMember.getId())
 			.orElseThrow(() -> memberNotFound(loginMember.getId()));
 
-		deleteExistingGenres(member);
+		// 기존 및 요청한 장르 코드 추출
+		List<String> existingGenreCodes = memberFavorGenreRepository.findGenreCodeByMemberId(member.getId());
+		List<String> requestGenreCodes = request.genres().stream()
+			.map(this::extractRequestGenreCode)
+			.toList();
 
-		List<String> newFavorGenres = saveNewGenres(request, member);
+		// 추가 및 삭제할 장르 코드 추출
+		Set<String> genresToAdd = findGenresToAdd(requestGenreCodes, existingGenreCodes);
+		Set<String> genresToDelete = findGenresToDelete(existingGenreCodes, requestGenreCodes);
 
-		return new PutMemberGenreListResponse(newFavorGenres);
-	}
-
-	private void deleteExistingGenres(Member member) {
-		List<MemberFavorGenre> originalFavorGenres = memberFavorGenreRepository.findAllByMemberId(member.getId());
-
-		if (!originalFavorGenres.isEmpty()) {
-			memberFavorGenreRepository.deleteAllByMemberId(member.getId());
+		// 삭제 및 추가 작업 처리
+		if (!genresToDelete.isEmpty()) {
+			memberFavorGenreRepository.deleteByMemberIdAndGenreCodeIn(member.getId(), genresToDelete);
 		}
+
+		genresToAdd.forEach(genreCode -> {
+			MemberFavorGenre newFavorGenre = MemberFavorGenre.builder()
+				.member(member)
+				.genreCode(genreCode)
+				.build();
+
+			memberFavorGenreRepository.save(newFavorGenre);
+		});
+
+		return new PutMemberGenreListResponse(request.genres());
 	}
 
-	private List<String> saveNewGenres(PutMemberGenreListRequest request, Member member) {
+	private static Set<String> findGenresToAdd(List<String> requestGenreCodes, List<String> existingGenreCodes) {
+		return requestGenreCodes.stream()
+			.filter(genreCode -> !existingGenreCodes.contains(genreCode))
+			.collect(Collectors.toSet());
+	}
 
-		return request.genres().stream()
-			.peek(genreName -> {
-				String genreCode = memberFavorGenreRepository.findGenreCodeByGenreName(genreName);
+	private static Set<String> findGenresToDelete(List<String> existingGenreCodes, List<String> requestGenreCodes) {
+		return existingGenreCodes.stream()
+			.filter(genreCode -> !requestGenreCodes.contains(genreCode))
+			.collect(Collectors.toSet());
+	}
 
-				if (genreCode == null) {
-					throw memberGenreBadRequest(genreName);
-				}
+	private String extractRequestGenreCode(String genreName) {
+		String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
+		String genreCode = memberFavorGenreRepository.findGenreCodeByGenreName(genreName, groupCode);
 
-				MemberFavorGenre memberFavorGenre = MemberFavorGenre.builder()
-					.member(member)
-					.genreCode(genreCode)
-					.build();
+		if (genreCode == null) {
+			throw memberGenreBadRequest(genreName);
+		}
 
-				memberFavorGenreRepository.save(memberFavorGenre);
-			}).collect(Collectors.toList());
+		return genreCode;
 	}
 
 	@Override

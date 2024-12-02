@@ -1,5 +1,6 @@
 package net.pointofviews.member.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,16 +12,21 @@ import net.pointofviews.member.domain.MemberFavorGenre;
 
 public interface MemberFavorGenreRepository extends JpaRepository<MemberFavorGenre, Long> {
 
-	List<MemberFavorGenre> findAllByMemberId(UUID memberId);
+	@Query(value = """
+		SELECT mfg.genreCode
+		  FROM MemberFavorGenre mfg
+		 WHERE mfg.member.id = :memberId
+	""")
+	List<String> findGenreCodeByMemberId(UUID memberId);
 
-	void deleteAllByMemberId(UUID member_id);
+	void deleteByMemberIdAndGenreCodeIn(UUID memberId, Collection<String> genreCodes);
 
 	@Query(value = """
 		SELECT cc.code.code
 		  FROM CommonCode cc
-		 WHERE cc.description = :codeName
-		   AND cc.groupCode.groupCode = '010'
+		 WHERE cc.description = :genreName
+		   AND cc.groupCode.groupCode = :groupCode
 	""")
-	String findGenreCodeByGenreName(@Param("codeName") String codeName);
+	String findGenreCodeByGenreName(@Param("genreName") String genreName, @Param("groupCode") String groupCode);
 
 }
