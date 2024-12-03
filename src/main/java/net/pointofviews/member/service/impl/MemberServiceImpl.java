@@ -9,6 +9,7 @@ import net.pointofviews.member.domain.RoleType;
 import net.pointofviews.member.domain.SocialType;
 import net.pointofviews.member.repository.MemberFavorGenreRepository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,12 +56,14 @@ public class MemberServiceImpl implements MemberService {
         }
 
         // 소셜 타입 검증
-        SocialType socialType;
-        try {
-            socialType = SocialType.valueOf(request.socialType().toUpperCase());
-        } catch (IllegalArgumentException e) {
+        if (!Arrays.stream(SocialType.values())
+                .map(Enum::name)
+                .toList()
+                .contains(request.socialType().toUpperCase())) {
             throw invalidSocialType();
         }
+
+        SocialType socialType = SocialType.valueOf(request.socialType().toUpperCase());
 
         Member member = Member.builder()
                 .email(request.email())
@@ -74,7 +77,7 @@ public class MemberServiceImpl implements MemberService {
         Member savedMember = memberRepository.save(member);
 
         // 관심 장르 저장
-        if (request.favorGenres() != null && !request.favorGenres().isEmpty()) {
+        if (!request.favorGenres().isEmpty()) {
             request.favorGenres().forEach(genreName -> {
                 String genreCode = commonCodeService.convertNameToCommonCode(
                         genreName,

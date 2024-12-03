@@ -28,10 +28,12 @@ public record CreateMemberRequest(
         String socialType,
 
         @Schema(description = "관심 장르 목록 (최대 3개)", example = "[\"로맨스\", \"코미디\", \"액션\"]")
+        @NotNull
         @Size(max = 3, message = "관심 장르는 최대 3개까지 선택 가능합니다")
         List<String> favorGenres,
 
         @Schema(description = "프로필 이미지 URL", example = "https://example.com/image.jpg")
+        @NotNull
         String profileImage
 ) {
 }
