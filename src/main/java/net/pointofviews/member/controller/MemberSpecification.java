@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.dto.request.*;
@@ -41,7 +42,7 @@ public interface MemberSpecification {
 			)
 		)
 	})
-	ResponseEntity<BaseResponse<Void>> withdraw();
+	ResponseEntity<BaseResponse<Void>> withdraw(@AuthenticationPrincipal MemberDetailsDto memberDetails);
 
 	// 회원 선호 장르 변경
 	@Tag(name = "Member", description = "회원 장르 변경 관련 API")

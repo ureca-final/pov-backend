@@ -26,9 +26,20 @@ public class AuthController implements AuthSpecification {
 
     @Override
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<CreateMemberResponse>> signup(@Valid @RequestBody CreateMemberRequest request) {
-        CreateMemberResponse response = memberService.signup(request);
-        return BaseResponse.created("/api/v1/auth/login", "회원가입이 완료되었습니다.");
+    public ResponseEntity<BaseResponse<LoginMemberResponse>> signup(
+            @Valid @RequestBody CreateMemberRequest request,
+            HttpServletResponse response) {
+
+        // 회원가입
+        CreateMemberResponse signupResponse = memberService.signup(request);
+
+        // 회원가입후 로그인 처리
+        LoginMemberRequest loginRequest = new LoginMemberRequest(
+                request.email(),
+                request.socialType()
+        );
+
+        return login(loginRequest, response);  // 기존 로그인 메서드 재사용
     }
 
     @Override

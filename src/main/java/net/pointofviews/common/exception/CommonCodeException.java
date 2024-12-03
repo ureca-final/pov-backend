@@ -14,6 +14,11 @@ public class CommonCodeException extends BusinessException {
         return new CommonCodeException(HttpStatus.NOT_FOUND, message);
     }
 
+    public static CommonCodeException genreNameNotFound(String genreName) {
+        String message = String.format("'%s'에 해당하는 장르 코드가 존재하지 않습니다.", genreName);
+        return new CommonCodeException(HttpStatus.NOT_FOUND, message);
+    }
+
     public static CommonCodeException commonCodeIdError(CommonCodeId value) {
         String message = String.format("잘못된 공통코드 입니다. code: %s, codeGroup: %s", value.getCode(), value.getGroupCode());
 

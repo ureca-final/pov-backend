@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import net.pointofviews.common.domain.SoftDeleteEntity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -52,5 +53,9 @@ public class Member extends SoftDeleteEntity {
 
     public void updateProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public void delete() {
+        this.setDeletedAt(LocalDateTime.now());
     }
 }
