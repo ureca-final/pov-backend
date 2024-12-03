@@ -1,21 +1,19 @@
 package net.pointofviews.review.service.impl;
 
+import static net.pointofviews.common.exception.S3Exception.*;
 import static net.pointofviews.movie.exception.MovieException.*;
 import static net.pointofviews.review.exception.ReviewException.*;
 
-import net.pointofviews.common.service.S3Service;
-import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
-import net.pointofviews.review.exception.ReviewImageException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import net.pointofviews.common.service.S3Service;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
@@ -23,6 +21,7 @@ import net.pointofviews.review.domain.ReviewKeywordLink;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
 import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
@@ -34,11 +33,6 @@ import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.ReviewMemberService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -112,7 +106,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 				.orElseThrow(() -> reviewNotFound(reviewId));
 
 		// 이미지 삭제 로직
-		List<String> imageUrls = extractImageUrlsFromHtml(review.getContents());
+		List<String> imageUrls = s3Service.extractImageUrlsFromHtml(review.getContents());
 		deleteReviewImages(imageUrls);
 
 
@@ -174,17 +168,17 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 				.sum();
 
 		if (totalSize > 10 * 1024 * 1024) {  // 총 파일 크기 10MB 제한
-			throw ReviewImageException.invalidTotalImageSize();
+			throw invalidTotalImageSize();
 		}
 
 		List<String> imageUrls = new ArrayList<>();
 
 		for (MultipartFile file : files) {
-			validateImageFile(file);
+			s3Service.validateImageFile(file);
 
 			String originalFilename = file.getOriginalFilename();
 			if (originalFilename != null && !originalFilename.isEmpty()) {
-				String uniqueFileName = createUniqueFileName(originalFilename);
+				String uniqueFileName = s3Service.createUniqueFileName(originalFilename);
 				String filePath = "reviews/" + uniqueFileName;
 
 				String imageUrl = s3Service.saveImage(file, filePath);
@@ -199,65 +193,11 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 	@Transactional
 	public void deleteReviewImages(List<String> imageUrls) {
 		if (imageUrls == null || imageUrls.isEmpty()) {
-			throw ReviewImageException.emptyImageUrls();
+			throw emptyImageUrls();
 		}
 
 		for (String imageUrl : imageUrls) {
 			s3Service.deleteImage(imageUrl);
 		}
-	}
-
-	private void validateImageFile(MultipartFile file) {
-		if (file.isEmpty()) {
-			throw ReviewImageException.emptyImage();
-		}
-
-		if (file.getSize() > 2 * 1024 * 1024) {
-			throw ReviewImageException.invalidImageSize();
-		}
-
-		String contentType = file.getContentType();
-		if (contentType == null || !(
-				contentType.equals("image/jpeg") || contentType.equals("image/jpg") || contentType.equals("image/png"))) {
-			throw ReviewImageException.invalidImageFormat();
-		}
-
-		// 이미지 확장자 검증 추가
-		String filename = file.getOriginalFilename();
-		if (filename != null && !isImageFile(filename)) {
-			throw ReviewImageException.invalidImageFormat();
-		}
-	}
-
-	private String createUniqueFileName(String originalFilename) {
-		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-		String baseName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
-		String uniquePrefix = UUID.randomUUID().toString();
-		return baseName + "_" + uniquePrefix + extension;
-	}
-
-	private List<String> extractImageUrlsFromHtml(String html) {
-		List<String> imageUrls = new ArrayList<>();
-		try {
-			Document doc = Jsoup.parse(html);
-			Elements imgTags = doc.select("img[src]");
-
-			for (Element img : imgTags) {
-				String imageUrl = img.attr("src");
-				if (imageUrl.contains("s3")) {
-					imageUrls.add(imageUrl);
-				}
-			}
-			return imageUrls;
-		} catch (Exception e) {
-			throw ReviewImageException.failedToParseHtml(e.getMessage());
-		}
-	}
-
-	private boolean isImageFile(String filename) {
-		String extension = filename.toLowerCase();
-		return extension.endsWith(".jpg") ||
-				extension.endsWith(".jpeg") ||
-				extension.endsWith(".png");
 	}
 }
