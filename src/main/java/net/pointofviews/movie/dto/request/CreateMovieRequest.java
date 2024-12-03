@@ -9,7 +9,7 @@ public record CreateMovieRequest(
         @Schema(description = "영화 제목", example = "Inception", requiredMode = Schema.RequiredMode.REQUIRED)
         String title,
 
-        @Schema(description = "영화 장르 목록", example = "[\"Sci-Fi\", \"Action\"]")
+        @Schema(description = "영화 장르 목록", example = "[\"SF\", \"액션\", \"모험\"]")
         List<String> genre,
 
         @Schema(description = "영화 감독", example = "Christopher Nolan")
@@ -33,7 +33,7 @@ public record CreateMovieRequest(
         @Schema(description = "영화 출시일", example = "2010-07-16", type = "string", format = "date")
         String released,
 
-        @Schema(description = "IMDb ID", example = "tt1375666")
-        String imdbId
+        @Schema(description = "TMDb ID", example = "27205")
+        String tmdbId
 ) {
 }
