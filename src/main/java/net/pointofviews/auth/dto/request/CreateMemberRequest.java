@@ -23,7 +23,7 @@ public record CreateMemberRequest(
         @NotNull
         LocalDate birth,
 
-        @Schema(description = "소셜 로그인 타입", example = "KAKAO")
+        @Schema(description = "소셜 로그인 타입", example = "GOOGLE")
         @NotBlank
         String socialType,
 

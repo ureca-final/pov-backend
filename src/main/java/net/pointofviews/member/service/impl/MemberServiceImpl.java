@@ -8,6 +8,7 @@ import net.pointofviews.member.domain.MemberFavorGenre;
 import net.pointofviews.member.domain.RoleType;
 import net.pointofviews.member.domain.SocialType;
 import net.pointofviews.member.repository.MemberFavorGenreRepository;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,18 +41,18 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
 
-	private final MemberRepository memberRepository;
-	private final MemberFavorGenreRepository memberFavorGenreRepository;
+    private final MemberRepository memberRepository;
+    private final MemberFavorGenreRepository memberFavorGenreRepository;
     private final CommonCodeService commonCodeService;
-	private final S3Service s3Service;
+    private final S3Service s3Service;
 
     @Override
     @Transactional
     public CreateMemberResponse signup(CreateMemberRequest request) {
         // 이메일 중복 검사
-		if (memberRepository.existsByEmail(request.email())) {
-			throw emailAlreadyExists();
-		}
+        if (memberRepository.existsByEmail(request.email())) {
+            throw emailAlreadyExists();
+        }
 
         // 소셜 타입 검증
         SocialType socialType;
@@ -95,24 +96,35 @@ public class MemberServiceImpl implements MemberService {
         );
     }
 
-	@Override
-	public LoginMemberResponse login(LoginMemberRequest request) {
-		// 이메일로 회원 조회
-		Member member = memberRepository.findByEmail(request.email())
-			.orElseThrow(MemberException::memberNotFound);
+    @Override
+    public LoginMemberResponse login(LoginMemberRequest request) {
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(request.email())
+                .orElseThrow(MemberException::memberNotFound);
 
-		if (!member.getSocialType().name().equals(request.socialType())) {
-			throw invalidSocialType();
-		}
+        if (!member.getSocialType().name().equals(request.socialType())) {
+            throw invalidSocialType();
+        }
 
-		// 응답 생성
-		return new LoginMemberResponse(
-			member.getId(),
-			member.getEmail(),
-			member.getNickname(),
-			member.getRoleType().name()
-		);
-	}
+        List<String> favorGenreNames = memberFavorGenreRepository.findGenreCodeByMemberId(member.getId())
+                .stream()
+                .map(genreCode -> commonCodeService.convertCommonCodeNameToName(
+                        genreCode,
+                        CodeGroupEnum.MOVIE_GENRE
+                ))
+                .toList();
+
+        // 응답 생성
+        return new LoginMemberResponse(
+                member.getId(),
+                member.getEmail(),
+                member.getNickname(),
+                member.getBirth(),
+                favorGenreNames,
+                member.getProfileImage(),
+                member.getRoleType().name()
+        );
+    }
 
     @Override
     @Transactional
@@ -123,106 +135,106 @@ public class MemberServiceImpl implements MemberService {
         member.delete();
     }
 
-	@Override
-	@Transactional
-	public PutMemberGenreListResponse updateGenre(Member loginMember, PutMemberGenreListRequest request) {
+    @Override
+    @Transactional
+    public PutMemberGenreListResponse updateGenre(Member loginMember, PutMemberGenreListRequest request) {
 
-		Member member = memberRepository.findById(loginMember.getId())
-			.orElseThrow(() -> memberNotFound(loginMember.getId()));
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
-		// 기존 및 요청한 장르 코드 추출
-		List<String> existingGenreCodes = memberFavorGenreRepository.findGenreCodeByMemberId(member.getId());
-		List<String> requestGenreCodes = request.genres().stream()
-			.map(this::extractRequestGenreCode)
-			.toList();
+        // 기존 및 요청한 장르 코드 추출
+        List<String> existingGenreCodes = memberFavorGenreRepository.findGenreCodeByMemberId(member.getId());
+        List<String> requestGenreCodes = request.genres().stream()
+                .map(this::extractRequestGenreCode)
+                .toList();
 
-		// 추가 및 삭제할 장르 코드 추출
-		Set<String> genresToAdd = findGenresToAdd(requestGenreCodes, existingGenreCodes);
-		Set<String> genresToDelete = findGenresToDelete(existingGenreCodes, requestGenreCodes);
+        // 추가 및 삭제할 장르 코드 추출
+        Set<String> genresToAdd = findGenresToAdd(requestGenreCodes, existingGenreCodes);
+        Set<String> genresToDelete = findGenresToDelete(existingGenreCodes, requestGenreCodes);
 
-		// 삭제 및 추가 작업 처리
-		if (!genresToDelete.isEmpty()) {
-			memberFavorGenreRepository.deleteByMemberIdAndGenreCodeIn(member.getId(), genresToDelete);
-		}
+        // 삭제 및 추가 작업 처리
+        if (!genresToDelete.isEmpty()) {
+            memberFavorGenreRepository.deleteByMemberIdAndGenreCodeIn(member.getId(), genresToDelete);
+        }
 
-		genresToAdd.forEach(genreCode -> {
-			MemberFavorGenre newFavorGenre = MemberFavorGenre.builder()
-				.member(member)
-				.genreCode(genreCode)
-				.build();
+        genresToAdd.forEach(genreCode -> {
+            MemberFavorGenre newFavorGenre = MemberFavorGenre.builder()
+                    .member(member)
+                    .genreCode(genreCode)
+                    .build();
 
-			memberFavorGenreRepository.save(newFavorGenre);
-		});
+            memberFavorGenreRepository.save(newFavorGenre);
+        });
 
-		return new PutMemberGenreListResponse(request.genres());
-	}
+        return new PutMemberGenreListResponse(request.genres());
+    }
 
-	private static Set<String> findGenresToAdd(List<String> requestGenreCodes, List<String> existingGenreCodes) {
-		return requestGenreCodes.stream()
-			.filter(genreCode -> !existingGenreCodes.contains(genreCode))
-			.collect(Collectors.toSet());
-	}
+    private static Set<String> findGenresToAdd(List<String> requestGenreCodes, List<String> existingGenreCodes) {
+        return requestGenreCodes.stream()
+                .filter(genreCode -> !existingGenreCodes.contains(genreCode))
+                .collect(Collectors.toSet());
+    }
 
-	private static Set<String> findGenresToDelete(List<String> existingGenreCodes, List<String> requestGenreCodes) {
-		return existingGenreCodes.stream()
-			.filter(genreCode -> !requestGenreCodes.contains(genreCode))
-			.collect(Collectors.toSet());
-	}
+    private static Set<String> findGenresToDelete(List<String> existingGenreCodes, List<String> requestGenreCodes) {
+        return existingGenreCodes.stream()
+                .filter(genreCode -> !requestGenreCodes.contains(genreCode))
+                .collect(Collectors.toSet());
+    }
 
-	private String extractRequestGenreCode(String genreName) {
-		String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
-		String genreCode = memberFavorGenreRepository.findGenreCodeByGenreName(genreName, groupCode);
+    private String extractRequestGenreCode(String genreName) {
+        String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
+        String genreCode = memberFavorGenreRepository.findGenreCodeByGenreName(genreName, groupCode);
 
-		if (genreCode == null) {
-			throw memberGenreBadRequest(genreName);
-		}
+        if (genreCode == null) {
+            throw memberGenreBadRequest(genreName);
+        }
 
-		return genreCode;
-	}
+        return genreCode;
+    }
 
-	@Override
-	@Transactional
-	public PutMemberImageResponse updateProfileImage(Member loginMember, MultipartFile file) {
+    @Override
+    @Transactional
+    public PutMemberImageResponse updateProfileImage(Member loginMember, MultipartFile file) {
 
-		Member member = memberRepository.findById(loginMember.getId())
-			.orElseThrow(() -> memberNotFound(loginMember.getId()));
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
-		s3Service.validateImageFile(file);
+        s3Service.validateImageFile(file);
 
-		String profileImage = s3Service.getProfileImage(member.getProfileImage());
+        String profileImage = s3Service.getProfileImage(member.getProfileImage());
 
-		if (profileImage != null) {
-			s3Service.deleteImage(profileImage);
-		}
+        if (profileImage != null) {
+            s3Service.deleteImage(profileImage);
+        }
 
-		String originalFileName = file.getOriginalFilename();
-		String uniqueFileName = s3Service.createUniqueFileName(originalFileName);
-		String filePath = "members/" + uniqueFileName;
+        String originalFileName = file.getOriginalFilename();
+        String uniqueFileName = s3Service.createUniqueFileName(originalFileName);
+        String filePath = "members/" + uniqueFileName;
 
-		String imageUrl = s3Service.saveImage(file, filePath);
-		member.updateProfileImage(imageUrl);
+        String imageUrl = s3Service.saveImage(file, filePath);
+        member.updateProfileImage(imageUrl);
 
-		return new PutMemberImageResponse(member.getProfileImage());
-	}
+        return new PutMemberImageResponse(member.getProfileImage());
+    }
 
-	@Override
-	@Transactional
-	public PutMemberNicknameResponse updateNickname(Member loginMember, PutMemberNicknameRequest request) {
+    @Override
+    @Transactional
+    public PutMemberNicknameResponse updateNickname(Member loginMember, PutMemberNicknameRequest request) {
 
-		Member member = memberRepository.findById(loginMember.getId())
-			.orElseThrow(() -> memberNotFound(loginMember.getId()));
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
-		if (memberRepository.existsByNickname(request.nickname())) {
-			throw nicknameDuplicate();
-		}
+        if (memberRepository.existsByNickname(request.nickname())) {
+            throw nicknameDuplicate();
+        }
 
-		member.updateNickname(request.nickname());
+        member.updateNickname(request.nickname());
 
-		return new PutMemberNicknameResponse(member.getNickname());
-	}
+        return new PutMemberNicknameResponse(member.getNickname());
+    }
 
-	@Override
-	public PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request) {
-		return null;
-	}
+    @Override
+    public PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request) {
+        return null;
+    }
 }
