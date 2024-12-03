@@ -8,9 +8,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import net.pointofviews.common.service.S3Service;
-import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
-import net.pointofviews.review.exception.ReviewImageException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +19,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import net.pointofviews.common.exception.S3Exception;
+import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.exception.MovieException;
@@ -30,6 +32,7 @@ import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
@@ -39,9 +42,6 @@ import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.impl.ReviewMemberServiceImpl;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewMemberServiceTest {
@@ -212,8 +212,10 @@ class ReviewMemberServiceTest {
 
 	@Nested
 	class DeleteReview {
+
 		@Nested
 		class Success {
+
 			@Test
 			void 리뷰_삭제_성공() {
 				// given
@@ -223,16 +225,22 @@ class ReviewMemberServiceTest {
 				given(movieRepository.findById(any())).willReturn(Optional.of(movie));
 				given(reviewRepository.findById(any())).willReturn(Optional.of(review));
 				given(review.getContents()).willReturn("""
-                <p>리뷰 내용</p>
-                <img src="https://s3-bucket.../image1.jpg" />
-                <img src="https://s3-bucket.../image2.jpg" />
-                """);
+					<p>리뷰 내용</p>
+					<img src="https://s3-bucket.../image1.jpg" />
+					<img src="https://s3-bucket.../image2.jpg" />
+					""");
+
+				given(s3Service.extractImageUrlsFromHtml(anyString()))
+					.willReturn(List.of(
+						"https://s3-bucket.../image1.jpg",
+						"https://s3-bucket.../image2.jpg"
+					));
 
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatCode(() -> reviewService.deleteReview(1L, 1L))
 							.doesNotThrowAnyException();
-					verify(s3Service, times(2)).deleteImage(any());
+					verify(s3Service, times(2)).deleteImage(anyString());
 					verify(review, times(1)).delete();
 				});
 			}
@@ -477,79 +485,8 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(files))
-							.isInstanceOf(ReviewImageException.class)
+							.isInstanceOf(S3Exception.class)
 							.hasMessage("전체 파일 크기가 10MB를 초과합니다.");
-				});
-			}
-
-			@Test
-			void 단일_파일_용량_초과시_ImageException_invalidImageSize_예외발생() {
-				// given
-				MockMultipartFile largeFile = new MockMultipartFile(
-						"large-image",
-						"large.jpg",
-						MediaType.IMAGE_JPEG_VALUE,
-						new byte[3 * 1024 * 1024] // 3MB 파일
-				);
-
-				// when & then
-				assertSoftly(softly -> {
-					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(largeFile)))
-							.isInstanceOf(ReviewImageException.class)
-							.hasMessage("파일 크기가 2MB를 초과합니다.");
-				});
-			}
-			@Test
-			void 빈_파일_업로드시_ImageException_emptyImage_예외발생() {
-				// given
-				MockMultipartFile emptyFile = new MockMultipartFile(
-						"empty-file",
-						"empty.jpg",
-						MediaType.IMAGE_JPEG_VALUE,
-						new byte[0]
-				);
-
-				// when & then
-				assertSoftly(softly -> {
-					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(emptyFile)))
-							.isInstanceOf(ReviewImageException.class)
-							.hasMessage("파일이 비어있습니다.");
-				});
-			}
-
-			@Test
-			void 지원하지_않는_ContentType으로_업로드시_ImageException_invalidImageFormat_예외발생() {
-				// given
-				MockMultipartFile invalidTypeFile = new MockMultipartFile(
-						"invalid-type",
-						"test.jpg",
-						"image/fake",
-						"test content".getBytes()
-				);
-
-				// when & then
-				assertSoftly(softly -> {
-					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(invalidTypeFile)))
-							.isInstanceOf(ReviewImageException.class)
-							.hasMessage("지원하지 않는 파일 형식입니다.");
-				});
-			}
-
-			@Test
-			void 지원하지_않는_확장자_업로드시_ImageException_invalidImageFormat_예외발생() {
-				// given
-				MockMultipartFile textFile = new MockMultipartFile(
-						"invalid-extension",
-						"test.txt",
-						MediaType.TEXT_PLAIN_VALUE,
-						"test content".getBytes()
-				);
-
-				// when & then
-				assertSoftly(softly -> {
-					softly.assertThatThrownBy(() -> reviewService.saveReviewImages(List.of(textFile)))
-							.isInstanceOf(ReviewImageException.class)
-							.hasMessage("지원하지 않는 파일 형식입니다.");
 				});
 			}
 		}
@@ -583,7 +520,7 @@ class ReviewMemberServiceTest {
 				// when & then
 				assertSoftly(softly -> {
 					softly.assertThatThrownBy(() -> reviewService.deleteReviewImages(List.of()))
-							.isInstanceOf(ReviewImageException.class)
+							.isInstanceOf(S3Exception.class)
 							.hasMessage("삭제할 이미지 URL이 없습니다.");
 				});
 			}

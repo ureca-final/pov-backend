@@ -51,6 +51,10 @@ public class Member extends SoftDeleteEntity {
         this.nickname = nickname;
     }
 
+    public void updateProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
     public void delete() {
         this.setDeletedAt(LocalDateTime.now());
     }

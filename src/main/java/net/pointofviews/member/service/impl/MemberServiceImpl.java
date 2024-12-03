@@ -14,14 +14,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
+import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
-import net.pointofviews.member.dto.request.PutMemberImageRequest;
 import net.pointofviews.member.dto.request.PutMemberNicknameRequest;
 import net.pointofviews.member.dto.request.PutMemberNoticeRequest;
 import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
@@ -42,6 +43,7 @@ public class MemberServiceImpl implements MemberService {
 	private final MemberRepository memberRepository;
 	private final MemberFavorGenreRepository memberFavorGenreRepository;
     private final CommonCodeService commonCodeService;
+	private final S3Service s3Service;
 
     @Override
     @Transactional
@@ -179,8 +181,28 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public PutMemberImageResponse updateImage(PutMemberImageRequest request) {
-		return null;
+	@Transactional
+	public PutMemberImageResponse updateProfileImage(Member loginMember, MultipartFile file) {
+
+		Member member = memberRepository.findById(loginMember.getId())
+			.orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+		s3Service.validateImageFile(file);
+
+		String profileImage = s3Service.getProfileImage(member.getProfileImage());
+
+		if (profileImage != null) {
+			s3Service.deleteImage(profileImage);
+		}
+
+		String originalFileName = file.getOriginalFilename();
+		String uniqueFileName = s3Service.createUniqueFileName(originalFileName);
+		String filePath = "members/" + uniqueFileName;
+
+		String imageUrl = s3Service.saveImage(file, filePath);
+		member.updateProfileImage(imageUrl);
+
+		return new PutMemberImageResponse(member.getProfileImage());
 	}
 
 	@Override

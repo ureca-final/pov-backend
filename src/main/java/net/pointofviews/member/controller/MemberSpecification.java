@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberSpecification {
 	// 회원 탈퇴
@@ -70,16 +71,20 @@ public interface MemberSpecification {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "⭕ SUCCESS"
 		),
-		@ApiResponse(responseCode = "404", description = "❌ FAIL",
+		@ApiResponse(responseCode = "500", description = "❌ FAIL",
 			content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
 				examples = @ExampleObject(value = """
 					{
-					  "message": "프로필 이미지 변경에 실패했습니다."
-					}""")
+					  "message": "S3 업로드 실패: {ex.Message}"
+					}
+					""")
 			)
 		)
 	})
-	ResponseEntity<BaseResponse<PutMemberImageResponse>> putImage(@Valid @RequestBody PutMemberImageRequest request);
+	ResponseEntity<BaseResponse<PutMemberImageResponse>> putProfileImage(
+		@AuthenticationPrincipal(expression = "member") Member loginMember,
+		@RequestPart(value = "profileImage") MultipartFile file
+	);
 
 	// 회원 닉네임 변경
 	@Tag(name = "Member", description = "회원 닉네임 변경 관련 API")
