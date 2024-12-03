@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
+import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,7 @@ public interface CurationSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadCurationResponse>> readCuration(
+    ResponseEntity<BaseResponse<ReadCurationMoviesResponse>> readCuration(
             @PathVariable Long curationId
     );
 
