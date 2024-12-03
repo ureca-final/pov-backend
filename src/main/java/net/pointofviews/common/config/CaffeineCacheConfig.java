@@ -30,15 +30,4 @@ public class CaffeineCacheConfig {
                 .recordStats());
         return cacheManager;
     }
-
-    @Bean(name = "MovieCurationCacheManager")
-    public CaffeineCacheManager MovieCurationCacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("curationMovies");
-        cacheManager.setCaffeine(Caffeine.newBuilder()
-//                .expireAfterWrite(10, TimeUnit.MINUTES) // TTL 고민중
-                        .maximumSize(1000) // 캐시 최대 크기 설정
-                        .recordStats()
-        );
-        return cacheManager;
-    }
 }

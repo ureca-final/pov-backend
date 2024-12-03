@@ -2,14 +2,12 @@ package net.pointofviews.curation.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.curation.domain.Curation;
-import net.pointofviews.curation.domain.CurationCategory;
-import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
-import net.pointofviews.curation.exception.CurationNotFoundException;
+import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
-import net.pointofviews.curation.service.CurationMovieCacheService;
+import net.pointofviews.curation.service.CurationMovieRedisService;
 import net.pointofviews.curation.service.CurationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +22,7 @@ import java.util.stream.Collectors;
 public class CurationServiceImpl implements CurationService {
 
     private final CurationRepository curationRepository;
-    private final CurationMovieCacheService curationMovieCacheService;
+    private final CurationMovieRedisService curationMovieRedisService;
 
     @Override
     public ReadCurationListResponse readAllCurations() {
@@ -46,9 +44,9 @@ public class CurationServiceImpl implements CurationService {
     @Override
     public ReadCurationMoviesResponse readCuration(Long curationId) {
         Curation curation = curationRepository.findById(curationId)
-                .orElseThrow(CurationNotFoundException::new);
+                .orElseThrow(CurationException::CurationNotFound);
 
-        Set<Long> movieIds = curationMovieCacheService.readMoviesForCuration(curationId);
+        Set<Long> movieIds = curationMovieRedisService.readMoviesForCuration(curationId);
 
         ReadCurationResponse curationResponse = new ReadCurationResponse(
                 curation.getId(),

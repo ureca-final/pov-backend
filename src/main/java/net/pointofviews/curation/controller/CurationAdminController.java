@@ -6,15 +6,10 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
-import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.curation.service.CurationAdminService;
-import net.pointofviews.curation.service.CurationMovieCacheService;
-import net.pointofviews.curation.service.CurationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/movies/curations")
