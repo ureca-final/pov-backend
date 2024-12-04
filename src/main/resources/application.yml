@@ -23,7 +23,7 @@ spring:
 
   data:
     redis:
-      host: 127.0.0.1
+      host: pov-redis-01-ro.6g1sxr.ng.0001.apn2.cache.amazonaws.com
       port: 6379
       lettuce:
         pool:
