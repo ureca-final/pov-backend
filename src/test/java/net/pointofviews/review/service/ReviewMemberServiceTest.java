@@ -298,7 +298,8 @@ class ReviewMemberServiceTest {
 					"https://example.com/thumbnail1.jpg",
 					LocalDateTime.of(2024, 12, 25, 0, 0),
 					10L,
-					true
+					true,
+					false
 				);
 
 				ReadReviewResponse review2 = new ReadReviewResponse(
@@ -311,6 +312,7 @@ class ReviewMemberServiceTest {
 					"https://example.com/thumbnail2.jpg",
 					LocalDateTime.of(2023, 12, 25, 0, 0),
 					20L,
+					false,
 					false
 				);
 
@@ -407,6 +409,7 @@ class ReviewMemberServiceTest {
 					softly.assertThat(result.profileImage()).isEqualTo(member.getProfileImage());
 					softly.assertThat(result.thumbnail()).isEqualTo(review.getThumbnail());
 					softly.assertThat(result.likeAmount()).isEqualTo(10L);
+					softly.assertThat(result.spoiler()).isFalse();
 					softly.assertThat(result.isLiked()).isTrue();
 					softly.assertThat(result.keywords()).contains("흥미진진", "몰입감");
 				});

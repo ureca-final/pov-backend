@@ -204,7 +204,7 @@ public class MemberServiceImpl implements MemberService {
 
         s3Service.validateImageFile(file);
 
-        String profileImage = s3Service.getProfileImage(member.getProfileImage());
+		String profileImage = s3Service.getImage(member.getProfileImage());
 
         if (profileImage != null) {
             s3Service.deleteImage(profileImage);
