@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
+import net.pointofviews.movie.dto.response.SearchFilteredMovieDetailResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
-import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
 import net.pointofviews.movie.service.MovieApiSearchService;
 import net.pointofviews.movie.service.MovieContentService;
@@ -148,8 +148,8 @@ public class MovieAdminController implements MovieAdminSpecification {
 
     @Override
     @GetMapping("/tmdb-search/{tmdbId}")
-    public ResponseEntity<BaseResponse<SearchMovieDetailApiResponse>> searchTMDbMovieList(@PathVariable String tmdbId) {
-        SearchMovieDetailApiResponse response = movieApiSearchService.searchDetailsMovie(tmdbId);
+    public ResponseEntity<BaseResponse<SearchFilteredMovieDetailResponse>> searchTMDbMovie(@PathVariable String tmdbId) {
+        SearchFilteredMovieDetailResponse response = movieApiSearchService.searchDetailsMovie(tmdbId);
 
         return BaseResponse.ok("OK", response);
     }

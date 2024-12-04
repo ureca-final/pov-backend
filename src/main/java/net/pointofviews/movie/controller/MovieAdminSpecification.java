@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
+import net.pointofviews.movie.dto.response.SearchFilteredMovieDetailResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
-import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -227,7 +227,7 @@ public interface MovieAdminSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<SearchMovieDetailApiResponse>> searchTMDbMovieList(
+    ResponseEntity<BaseResponse<SearchFilteredMovieDetailResponse>> searchTMDbMovie(
             @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
 
     @Operation(
