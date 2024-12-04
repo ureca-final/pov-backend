@@ -49,6 +49,60 @@ class MovieTMDbSearchServiceTest {
     private MockRestServiceServer server;
 
     @Nested
+    class SearchLimit10Credit {
+
+        @Nested
+        class Success {
+
+            @Test
+            @SneakyThrows
+            void 영화_크레딧_배우_최대_10명과_갑독_찾기() {
+                // given
+                String movieId = "27205";
+                SearchCreditApiResponse mockResponse = createMockSearchCreditResponse();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String validJsonResponse = objectMapper.writeValueAsString(mockResponse);
+                String koreanIsoCode = ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE;
+                URI uri = URI.create("https://api.themoviedb.org/3/movie/" + movieId + "/credits?language=" + koreanIsoCode);
+
+                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
+
+                // when
+                SearchCreditApiResponse result = movieTMDbSearchService.searchLimit10Credit(movieId);
+
+                // then
+                assertThat(result.cast()).hasSize(10);
+                assertThat(result.crew()).hasSize(1);
+                assertThat(result.crew().get(0).job()).isEqualToIgnoringCase("director");
+                assertThat(result.id()).isEqualTo(mockResponse.id());
+            }
+        }
+
+        private SearchCreditApiResponse createMockSearchCreditResponse() {
+            List<SearchCreditApiResponse.CastResponse> castList = List.of(
+                    new SearchCreditApiResponse.CastResponse(2, 1, "Actor1", "Actor1", "/profile1.jpg", 1, "Character1", 1),
+                    new SearchCreditApiResponse.CastResponse(2, 2, "Actor2", "Actor2", "/profile2.jpg", 2, "Character2", 2),
+                    new SearchCreditApiResponse.CastResponse(2, 3, "Actor3", "Actor3", "/profile3.jpg", 3, "Character3", 3),
+                    new SearchCreditApiResponse.CastResponse(2, 4, "Actor4", "Actor4", "/profile4.jpg", 4, "Character4", 4),
+                    new SearchCreditApiResponse.CastResponse(2, 5, "Actor5", "Actor5", "/profile5.jpg", 5, "Character5", 5),
+                    new SearchCreditApiResponse.CastResponse(2, 6, "Actor6", "Actor6", "/profile6.jpg", 6, "Character6", 6),
+                    new SearchCreditApiResponse.CastResponse(2, 7, "Actor7", "Actor7", "/profile7.jpg", 7, "Character7", 7),
+                    new SearchCreditApiResponse.CastResponse(2, 8, "Actor8", "Actor8", "/profile8.jpg", 8, "Character8", 8),
+                    new SearchCreditApiResponse.CastResponse(2, 9, "Actor9", "Actor9", "/profile9.jpg", 9, "Character9", 9),
+                    new SearchCreditApiResponse.CastResponse(2, 10, "Actor10", "Actor10", "/profile10.jpg", 10, "Character10", 10),
+                    new SearchCreditApiResponse.CastResponse(2, 11, "Actor11", "Actor11", "/profile11.jpg", 11, "Character11", 11)
+            );
+
+            List<SearchCreditApiResponse.CrewResponse> crewList = List.of(
+                    new SearchCreditApiResponse.CrewResponse(2, 100, "Director1", "Director1", 90.0, "/director1.jpg", "Directing", "Director"),
+                    new SearchCreditApiResponse.CrewResponse(2, 101, "Producer1", "Producer1", 80.0, "/producer1.jpg", "Producing", "Producer")
+            );
+
+            return new SearchCreditApiResponse(27205, castList, crewList);
+        }
+    }
+
+    @Nested
     class SearchCredit {
 
         @Nested
