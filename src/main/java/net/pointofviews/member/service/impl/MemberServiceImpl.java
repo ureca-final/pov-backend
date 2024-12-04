@@ -2,12 +2,6 @@ package net.pointofviews.member.service.impl;
 
 import static net.pointofviews.member.exception.MemberException.*;
 
-import net.pointofviews.common.domain.CodeGroupEnum;
-import net.pointofviews.common.service.CommonCodeService;
-import net.pointofviews.member.domain.MemberFavorGenre;
-import net.pointofviews.member.domain.RoleType;
-import net.pointofviews.member.domain.SocialType;
-import net.pointofviews.member.repository.MemberFavorGenreRepository;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,8 +14,13 @@ import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
+import net.pointofviews.member.domain.MemberFavorGenre;
+import net.pointofviews.member.domain.RoleType;
+import net.pointofviews.member.domain.SocialType;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
 import net.pointofviews.member.dto.request.PutMemberNicknameRequest;
 import net.pointofviews.member.dto.request.PutMemberNoticeRequest;
@@ -30,6 +29,7 @@ import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.dto.response.PutMemberNoticeResponse;
 import net.pointofviews.member.exception.MemberException;
+import net.pointofviews.member.repository.MemberFavorGenreRepository;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.member.service.MemberService;
 
@@ -189,7 +189,7 @@ public class MemberServiceImpl implements MemberService {
 
 		s3Service.validateImageFile(file);
 
-		String profileImage = s3Service.getProfileImage(member.getProfileImage());
+		String profileImage = s3Service.getImage(member.getProfileImage());
 
 		if (profileImage != null) {
 			s3Service.deleteImage(profileImage);
