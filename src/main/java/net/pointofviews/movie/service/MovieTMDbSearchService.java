@@ -2,11 +2,8 @@ package net.pointofviews.movie.service;
 
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.impl.CommonCodeServiceImpl;
-import net.pointofviews.common.utils.ISOCodeToKoreanConverter;
-import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
-import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
-import net.pointofviews.movie.dto.response.SearchMovieApiResponse;
-import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
+import net.pointofviews.common.utils.LocaleUtils;
+import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.exception.MovieException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +15,7 @@ import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -42,7 +40,7 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                         .path("/search/movie")
                         .queryParam("query", query)
                         .queryParam("page", page)
-                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
+                        .queryParam("language", LocaleUtils.KOREAN_LANGUAGE_CODE)
                         .build())
                 .header("Authorization", "Bearer " + TMDbApiKey)
                 .retrieve()
@@ -63,7 +61,7 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                 .uri(uriBuilder -> uriBuilder
                         .path("/movie/")
                         .path(movieId)
-                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
+                        .queryParam("language", LocaleUtils.KOREAN_LANGUAGE_CODE)
                         .build())
                 .header("Authorization", "Bearer " + TMDbApiKey)
                 .retrieve()
@@ -71,23 +69,6 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                         HttpStatusCode::is4xxClientError,
                         this::handleClientError)
                 .body(SearchMovieDetailApiResponse.class);
-    }
-
-    @Override
-    public SearchCreditApiResponse searchCredit(String movieId) {
-        return restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/movie/")
-                        .path(movieId)
-                        .path("/credits")
-                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
-                        .build())
-                .header("Authorization", "Bearer " + TMDbApiKey)
-                .retrieve()
-                .onStatus(
-                        HttpStatusCode::is4xxClientError,
-                        this::handleClientError)
-                .body(SearchCreditApiResponse.class);
     }
 
     @Override
@@ -100,6 +81,48 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                 .toList();
 
         return new SearchCreditApiResponse(response.id(), limitCastList, directors);
+    }
+
+    @Override
+    public SearchReleaseApiResponse searchReleaseDate(String movieId) {
+        SearchReleaseApiResponse response = searchApiReleaseDate(movieId);
+
+        SearchReleaseApiResponse.Result bestResult = response.results().stream()
+                .min(Comparator.comparingInt(result -> {
+                    if ("kr".equalsIgnoreCase(result.iso_3166_1())) {
+                        return 1;
+                    } else if ("us".equalsIgnoreCase(result.iso_3166_1())) {
+                        return 2;
+                    } else {
+                        return 3;
+                    }
+                }))
+                .orElse(null);
+
+        if (bestResult == null) {
+            return new SearchReleaseApiResponse(response.id(), List.of());
+        }
+
+        return new SearchReleaseApiResponse(
+                response.id(),
+                List.of(new SearchReleaseApiResponse.Result(bestResult.iso_3166_1(), bestResult.release_dates()))
+        );
+    }
+
+
+    private SearchReleaseApiResponse searchApiReleaseDate(String movieId) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .path("/release_dates")
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchReleaseApiResponse.class);
     }
 
     private void handleClientError(HttpRequest request, ClientHttpResponse response) {
@@ -128,5 +151,21 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
             genreId.clear();
             genreId.addAll(stringGenre);
         }
+    }
+
+    private SearchCreditApiResponse searchCredit(String movieId) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .path("/credits")
+                        .queryParam("language", LocaleUtils.KOREAN_LANGUAGE_CODE)
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchCreditApiResponse.class);
     }
 }
