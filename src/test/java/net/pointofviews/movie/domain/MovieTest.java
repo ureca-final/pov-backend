@@ -31,7 +31,7 @@ class MovieTest {
                 String country = "USA";
                 LocalDate released = LocalDate.of(2010, 7, 16);
                 Integer tmdbId = 27205;
-                boolean isAdult = false;
+                KoreanFilmRating filmRating = KoreanFilmRating.ALL;
 
                 // when
                 Movie movie = Movie.builder()
@@ -42,7 +42,7 @@ class MovieTest {
                         .released(released)
                         .tmdbId(tmdbId)
                         .backdrop(backdrop)
-                        .isAdult(isAdult)
+                        .filmRating(filmRating)
                         .build();
 
                 // then
@@ -54,8 +54,8 @@ class MovieTest {
                     softly.assertThat(movie.getCountry()).isEqualTo(country);
                     softly.assertThat(movie.getReleased()).isEqualTo(released);
                     softly.assertThat(movie.getTmdbId()).isEqualTo(tmdbId);
-                    softly.assertThat(movie.isAdult()).isEqualTo(isAdult);
                     softly.assertThat(movie.getBackdrop()).isEqualTo(backdrop);
+                    softly.assertThat(movie.getFilmRating()).isEqualTo(filmRating);
                 });
 
             }
@@ -96,7 +96,8 @@ class MovieTest {
                         .country("USA")
                         .released(LocalDate.now())
                         .tmdbId(27205)
-                        .isAdult(false)
+                        .backdrop("inception-backdrop.jpg")
+                        .filmRating(KoreanFilmRating.ALL)
                         .build();
 
                 Review review = mock(Review.class);
