@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
@@ -33,6 +34,28 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                 ORDER BY r.createdAt DESC
             """)
     Slice<ReadReviewResponse> findReviewsWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
+
+    @Query(value = """
+            	SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
+            			r.id,
+            			mv.title,
+            			r.title,
+            			r.contents,
+            			m.nickname,
+            			m.profileImage,
+            			mv.poster,
+            			r.createdAt,
+            			(SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id),
+            			CASE WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.isLiked = true) THEN true ELSE false END,
+            			r.isSpoiler
+            	 )
+            	 FROM Review r
+            	 JOIN r.member m
+            	 JOIN r.movie mv
+            	 WHERE m.id = :memberId
+                ORDER BY r.createdAt DESC
+            """)
+    Slice<ReadReviewResponse> findReviewsWithLikesByMemberId(@Param("memberId") UUID memberId, Pageable pageable);
 
     @Query(value = """
             	SELECT r
