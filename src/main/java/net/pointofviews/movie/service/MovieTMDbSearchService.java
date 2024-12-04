@@ -56,7 +56,32 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
     }
 
     @Override
-    public SearchMovieDetailApiResponse searchDetailsMovie(String movieId) {
+    public SearchFilteredMovieDetailResponse searchDetailsMovie(String movieId) {
+        SearchMovieDetailApiResponse movieDetails = searchApiDetailsMovie(movieId);
+        SearchCreditApiResponse movieCredits = searchLimit10Credit(movieId);
+        SearchReleaseApiResponse movieReleases = searchReleaseDate(movieId);
+
+        SearchReleaseApiResponse.Result.ReleaseDate releaseDate = movieReleases.results().stream()
+                .findFirst()
+                .flatMap(result -> result.release_dates().stream().findFirst())
+                .orElse(null);
+
+        List<String> genres = movieDetails.genres().stream()
+                .map(SearchMovieDetailApiResponse.TMDbGenreResponse::name)
+                .toList();
+
+        String released = null;
+        String filmRating = null;
+
+        if (releaseDate != null) {
+            released = releaseDate.release_date();
+            filmRating = releaseDate.certification();
+        }
+
+        return SearchFilteredMovieDetailResponse.of(movieDetails, released, filmRating, genres, movieCredits);
+    }
+
+    private SearchMovieDetailApiResponse searchApiDetailsMovie(String movieId) {
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/movie/")
@@ -73,14 +98,14 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
 
     @Override
     public SearchCreditApiResponse searchLimit10Credit(String movieId) {
-        SearchCreditApiResponse response = searchCredit(movieId);
+        SearchCreditApiResponse response = searchApiCredit(movieId);
         List<SearchCreditApiResponse.CastResponse> limitCastList = response.cast()
                 .subList(0, Math.min(response.cast().size(), 10));
         List<SearchCreditApiResponse.CrewResponse> directors = response.crew().stream()
                 .filter(crew -> "director".equalsIgnoreCase(crew.job()))
                 .toList();
 
-        return new SearchCreditApiResponse(response.id(), limitCastList, directors);
+        return new SearchCreditApiResponse(limitCastList, directors);
     }
 
     @Override
@@ -109,7 +134,6 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
         );
     }
 
-
     private SearchReleaseApiResponse searchApiReleaseDate(String movieId) {
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -123,6 +147,22 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                         HttpStatusCode::is4xxClientError,
                         this::handleClientError)
                 .body(SearchReleaseApiResponse.class);
+    }
+
+    private SearchCreditApiResponse searchApiCredit(String movieId) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .path("/credits")
+                        .queryParam("language", LocaleUtils.KOREAN_LANGUAGE_CODE)
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchCreditApiResponse.class);
     }
 
     private void handleClientError(HttpRequest request, ClientHttpResponse response) {
@@ -151,21 +191,5 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
             genreId.clear();
             genreId.addAll(stringGenre);
         }
-    }
-
-    private SearchCreditApiResponse searchCredit(String movieId) {
-        return restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/movie/")
-                        .path(movieId)
-                        .path("/credits")
-                        .queryParam("language", LocaleUtils.KOREAN_LANGUAGE_CODE)
-                        .build())
-                .header("Authorization", "Bearer " + TMDbApiKey)
-                .retrieve()
-                .onStatus(
-                        HttpStatusCode::is4xxClientError,
-                        this::handleClientError)
-                .body(SearchCreditApiResponse.class);
     }
 }
