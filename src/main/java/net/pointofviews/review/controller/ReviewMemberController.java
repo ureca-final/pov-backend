@@ -1,5 +1,6 @@
 package net.pointofviews.review.controller;
 
+import net.pointofviews.review.controller.specification.ReviewMemberSpecification;
 import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springframework.data.domain.Pageable;

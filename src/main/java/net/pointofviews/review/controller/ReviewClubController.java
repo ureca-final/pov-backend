@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
+import net.pointofviews.review.controller.specification.ReviewClubSpecification;
 import net.pointofviews.review.dto.response.ReadMyClubInfoListResponse;
 import net.pointofviews.review.dto.response.ReadMyClubReviewsResponse;
 import net.pointofviews.review.service.ReviewClubService;

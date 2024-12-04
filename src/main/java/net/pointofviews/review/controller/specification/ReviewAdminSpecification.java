@@ -1,4 +1,4 @@
-package net.pointofviews.review.controller;
+package net.pointofviews.review.controller.specification;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

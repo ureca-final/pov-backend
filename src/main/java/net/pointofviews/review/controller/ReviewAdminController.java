@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
+import net.pointofviews.review.controller.specification.ReviewAdminSpecification;
 import net.pointofviews.review.service.ReviewAdminService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/movies")
-public class ReviewAdminController implements ReviewAdminSpecification{
+public class ReviewAdminController implements ReviewAdminSpecification {
 
     private final ReviewAdminService reviewAdminService;
 

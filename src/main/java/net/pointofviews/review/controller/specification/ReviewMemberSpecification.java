@@ -1,4 +1,4 @@
-package net.pointofviews.review.controller;
+package net.pointofviews.review.controller.specification;
 
 import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;

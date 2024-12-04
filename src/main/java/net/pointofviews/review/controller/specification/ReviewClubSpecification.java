@@ -1,4 +1,4 @@
-package net.pointofviews.review.controller;
+package net.pointofviews.review.controller.specification;
 
 import java.util.UUID;
 
