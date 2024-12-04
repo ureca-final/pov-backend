@@ -81,8 +81,8 @@ public class ReviewMemberController implements ReviewMemberSpecification {
 	}
 
 	@Override
-	@GetMapping("/reviews/{reviewId}")
-	public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@PathVariable Long reviewId) {
+	@GetMapping("/{movieId}/reviews/{reviewId}")
+	public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@PathVariable Long movieId, @PathVariable Long reviewId) {
 		ReadReviewDetailResponse response = reviewMemberService.findReviewDetail(reviewId);
 
 		return BaseResponse.ok("리뷰가 성공적으로 상세 조회되었습니다.", response);
