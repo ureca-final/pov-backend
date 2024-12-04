@@ -12,6 +12,7 @@ import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
+import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -230,8 +231,8 @@ public interface MovieAdminSpecification {
             @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
 
     @Operation(
-            summary = "영화 TMDB 상세 검색",
-            description = "TMDB id를 이용해 영화를 상세 검색하기 위한 API."
+            summary = "영화 TMDB 크레딧 검색",
+            description = "TMDB id를 이용해 영화의 크레딧을 검색하기 위한 API."
     )
     @ApiResponses({
             @ApiResponse(
@@ -252,5 +253,30 @@ public interface MovieAdminSpecification {
             )
     })
     ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCreditsLimit10(
+            @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
+
+    @Operation(
+            summary = "영화 TMDB 개봉 정보 검색",
+            description = "TMDB id를 이용해 영화 개봉 정보를 검색하기 위한 API."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "검색 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<SearchReleaseApiResponse>> searchTMDbReleases(
             @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
 }
