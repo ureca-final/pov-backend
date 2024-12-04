@@ -34,7 +34,8 @@ public class Movie {
 
     private Integer tmdbId;
 
-    private boolean isAdult;
+    @Enumerated(EnumType.STRING)
+    private KoreanFilmRating filmRating;
 
     @OneToMany(mappedBy = "movie")
     private final List<Review> reviews = new ArrayList<>();
@@ -44,7 +45,7 @@ public class Movie {
 
     @Builder
     private Movie(String title, String plot, String poster,
-                  String country, LocalDate released, Integer tmdbId, String backdrop, boolean isAdult) {
+                  String country, LocalDate released, Integer tmdbId, String backdrop, KoreanFilmRating filmRating) {
         Assert.notNull(title, "title must not be null");
         this.title = title;
         this.plot = plot;
@@ -53,7 +54,7 @@ public class Movie {
         this.released = released;
         this.tmdbId = tmdbId;
         this.backdrop = backdrop;
-        this.isAdult = isAdult;
+        this.filmRating = filmRating;
     }
 
     public void addReview(Review review) {
