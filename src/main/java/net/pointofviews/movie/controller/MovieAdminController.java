@@ -6,6 +6,7 @@ import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
+import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
 import net.pointofviews.movie.service.MovieApiSearchService;
 import net.pointofviews.movie.service.MovieContentService;
 import org.springframework.http.ResponseEntity;
@@ -157,6 +158,12 @@ public class MovieAdminController implements MovieAdminSpecification {
     @GetMapping("/tmdb-search/{tmdbId}/credits")
     public ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCreditsLimit10(@PathVariable String tmdbId) {
         return BaseResponse.ok("OK", movieApiSearchService.searchLimit10Credit(tmdbId));
+    }
+
+    @Override
+    @GetMapping("/tmdb-search/{tmdbId}/releases")
+    public ResponseEntity<BaseResponse<SearchReleaseApiResponse>> searchTMDbReleases(@PathVariable String tmdbId) {
+        return BaseResponse.ok("OK", movieApiSearchService.searchReleaseDate(tmdbId));
     }
 
     // 유튜브 도메인 유효성 검사
