@@ -3,7 +3,9 @@ package net.pointofviews.movie.controller;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import net.pointofviews.movie.service.MovieApiSearchService;
 import net.pointofviews.movie.service.MovieContentService;
 import org.springframework.http.ResponseEntity;
@@ -143,9 +145,24 @@ public class MovieAdminController implements MovieAdminSpecification {
         return BaseResponse.ok("OK", searchMovieApiListResponse);
     }
 
+    @Override
+    @GetMapping("/tmdb-search/{tmdbId}")
+    public ResponseEntity<BaseResponse<SearchMovieDetailApiResponse>> searchTMDbMovieList(@PathVariable String tmdbId) {
+        SearchMovieDetailApiResponse response = movieApiSearchService.searchDetailsMovie(tmdbId);
+
+        return BaseResponse.ok("OK", response);
+    }
+
+    @Override
+    @GetMapping("/tmdb-search/{tmdbId}/credits")
+    public ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCredits(@PathVariable String tmdbId) {
+        return BaseResponse.ok("OK", movieApiSearchService.searchCredit(tmdbId));
+    }
+
     // 유튜브 도메인 유효성 검사
     private boolean isValidYouTubeUrl(String url) {
         String youtubeRegex = "^(https?://)?(www\\.)?(youtube\\.com|youtu\\.be)/.+$";
+
         return url.matches(youtubeRegex);
     }
 }

@@ -4,11 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import net.pointofviews.member.domain.MemberFavorGenre;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import net.pointofviews.member.domain.MemberFavorGenre;
 
 public interface MemberFavorGenreRepository extends JpaRepository<MemberFavorGenre, Long> {
 

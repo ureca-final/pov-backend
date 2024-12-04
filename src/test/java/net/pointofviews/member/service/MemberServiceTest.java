@@ -5,10 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
@@ -18,10 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 
+import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
+import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
-import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.exception.CommonCodeException;
+import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.domain.MemberFavorGenre;
 import net.pointofviews.member.domain.RoleType;
@@ -29,6 +33,7 @@ import net.pointofviews.member.domain.SocialType;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
 import net.pointofviews.member.dto.request.PutMemberNicknameRequest;
 import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
+import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberFavorGenreRepository;
@@ -47,8 +52,175 @@ class MemberServiceTest {
 	@Mock
 	private MemberFavorGenreRepository memberFavorGenreRepository;
 
-	@Test
-	void signup() {
+	@Mock
+	private CommonCodeService commonCodeService;
+
+	@Mock
+	private S3Service s3Service;
+
+	@Nested
+	class Signup {
+		@Nested
+		class Success {
+			@Test
+			void 회원가입_성공_장르선택있음() {
+				// given
+				String email = "test@example.com";
+				String nickname = "testuser";
+				LocalDate birth = LocalDate.of(2000, 1, 1);
+				SocialType socialType = SocialType.NAVER;
+				String profileImage = "https://example.com/image.jpg";
+				List<String> genres = List.of("로맨스", "코미디", "액션");
+
+				CreateMemberRequest request = new CreateMemberRequest(
+					email,
+					nickname,
+					birth,
+					socialType.name(),
+					genres,
+					profileImage
+				);
+
+				UUID memberId = UUID.randomUUID();
+				Member savedMember = mock(Member.class);
+				given(savedMember.getId()).willReturn(memberId);
+				given(savedMember.getEmail()).willReturn(email);
+				given(savedMember.getNickname()).willReturn(nickname);
+
+				given(memberRepository.existsByEmail(email)).willReturn(false);
+				given(memberRepository.save(any(Member.class))).willReturn(savedMember);
+				given(commonCodeService.convertNameToCommonCode(eq("로맨스"), any())).willReturn("14");
+				given(commonCodeService.convertNameToCommonCode(eq("코미디"), any())).willReturn("04");
+				given(commonCodeService.convertNameToCommonCode(eq("액션"), any())).willReturn("01");
+
+				// when
+				CreateMemberResponse response = memberService.signup(request);
+
+				// then
+				assertSoftly(softly -> {
+					softly.assertThat(response.id()).isEqualTo(memberId);
+					softly.assertThat(response.email()).isEqualTo(email);
+					softly.assertThat(response.nickname()).isEqualTo(nickname);
+					verify(memberRepository, times(1)).existsByEmail(email);
+					verify(memberRepository, times(1)).save(any(Member.class));
+					verify(memberFavorGenreRepository, times(3)).save(any(MemberFavorGenre.class));
+					verify(commonCodeService, times(3)).convertNameToCommonCode(anyString(), any());
+				});
+			}
+
+			@Test
+			void 회원가입_성공_장르선택없음() {
+				// given
+				String email = "test@example.com";
+				String nickname = "testuser";
+				LocalDate birth = LocalDate.of(2000, 1, 1);
+				SocialType socialType = SocialType.NAVER;
+				String profileImage = "https://example.com/image.jpg";
+
+				CreateMemberRequest request = new CreateMemberRequest(
+					email,
+					nickname,
+					birth,
+					socialType.name(),
+					null,  // 장르 선택 없음
+					profileImage
+				);
+
+				UUID memberId = UUID.randomUUID();
+				Member savedMember = mock(Member.class);
+				given(savedMember.getId()).willReturn(memberId);
+				given(savedMember.getEmail()).willReturn(email);
+				given(savedMember.getNickname()).willReturn(nickname);
+
+				given(memberRepository.existsByEmail(email)).willReturn(false);
+				given(memberRepository.save(any(Member.class))).willReturn(savedMember);
+
+				// when
+				CreateMemberResponse response = memberService.signup(request);
+
+				// then
+				assertSoftly(softly -> {
+					softly.assertThat(response.id()).isEqualTo(memberId);
+					softly.assertThat(response.email()).isEqualTo(email);
+					softly.assertThat(response.nickname()).isEqualTo(nickname);
+					verify(memberRepository, times(1)).existsByEmail(email);
+					verify(memberRepository, times(1)).save(any(Member.class));
+					verify(memberFavorGenreRepository, never()).save(any(MemberFavorGenre.class));
+					verify(commonCodeService, never()).convertNameToCommonCode(anyString(), any());
+				});
+			}
+		}
+
+		@Nested
+		class Failure {
+			@Test
+			void 이미_존재하는_이메일_MemberException_emailAlreadyExists_예외발생() {
+				// given
+				String email = "existing@example.com";
+				CreateMemberRequest request = new CreateMemberRequest(
+					email,
+					"nickname",
+					LocalDate.of(2000, 1, 1),
+					SocialType.NAVER.name(),
+					List.of(),
+					"https://example.com/image.jpg"
+				);
+
+				given(memberRepository.existsByEmail(email)).willReturn(true);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> memberService.signup(request))
+						.isInstanceOf(MemberException.class)
+						.hasMessage("이미 존재하는 이메일입니다.");
+				});
+			}
+
+			@Test
+			void 잘못된_소셜타입_MemberException_invalidSocialType_예외발생() {
+				// given
+				CreateMemberRequest request = new CreateMemberRequest(
+					"test@example.com",
+					"nickname",
+					LocalDate.of(2000, 1, 1),
+					"INVALID_TYPE",
+					List.of(),
+					"https://example.com/image.jpg"
+				);
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> memberService.signup(request))
+						.isInstanceOf(MemberException.class)
+						.hasMessage("잘못된 소셜 로그인 타입입니다.");
+				});
+			}
+
+			@Test
+			void 존재하지_않는_장르명_예외발생() {
+				// given
+				CreateMemberRequest request = new CreateMemberRequest(
+					"test@example.com",
+					"nickname",
+					LocalDate.of(2000, 1, 1),
+					SocialType.NAVER.name(),
+					List.of("로맨틱"),  // 존재하지 않는 장르명
+					"https://example.com/image.jpg"
+				);
+
+				given(memberRepository.existsByEmail(anyString())).willReturn(false);
+				given(memberRepository.save(any(Member.class))).willReturn(mock(Member.class));
+				given(commonCodeService.convertNameToCommonCode(anyString(), any()))
+					.willThrow(CommonCodeException.genreNameNotFound("로맨틱"));
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> memberService.signup(request))
+						.isInstanceOf(CommonCodeException.class)
+						.hasMessage("'로맨틱'에 해당하는 장르 코드가 존재하지 않습니다.");
+				});
+			}
+		}
 	}
 
 	@Nested
@@ -61,7 +233,7 @@ class MemberServiceTest {
 			void 로그인_성공() {
 				// given
 				String email = "test@example.com";
-				String socialType = "GOOGLE";
+				SocialType socialType = SocialType.GOOGLE;
 
 				Member member = mock(Member.class);
 				given(member.getId()).willReturn(UUID.randomUUID());
@@ -72,7 +244,7 @@ class MemberServiceTest {
 
 				given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
 
-				LoginMemberRequest request = new LoginMemberRequest(email, socialType);
+				LoginMemberRequest request = new LoginMemberRequest(email, socialType.name());
 
 				// when
 				LoginMemberResponse response = memberService.login(request);
@@ -98,7 +270,7 @@ class MemberServiceTest {
 					.willReturn(Optional.empty());
 
 				LoginMemberRequest request = new LoginMemberRequest(
-					email, "GOOGLE"
+					email, SocialType.GOOGLE.name()
 				);
 
 				// when & then
@@ -118,7 +290,7 @@ class MemberServiceTest {
 				given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
 
 				LoginMemberRequest request = new LoginMemberRequest(
-					email, "NAVER"  // 다른 소셜 타입으로 요청
+					email, SocialType.NAVER.name()  // 다른 소셜 타입으로 요청
 				);
 
 				// when & then
@@ -131,8 +303,53 @@ class MemberServiceTest {
 		}
 	}
 
-	@Test
-	void deleteMember() {
+	@Nested
+	class DeleteMember {
+		@Nested
+		class Success {
+			@Test
+			void 회원_탈퇴_성공() {
+				// given
+				Member member = Member.builder()
+					.email("test@example.com")
+					.nickname("testuser")
+					.birth(LocalDate.of(2000, 1, 1))
+					.socialType(SocialType.NAVER)
+					.profileImage("profile.jpg")
+					.roleType(RoleType.USER)
+					.build();
+
+				given(memberRepository.findById(any())).willReturn(Optional.of(member));
+
+				// when
+				memberService.deleteMember(member);
+
+				// then
+				assertSoftly(softly -> {
+					softly.assertThat(member.getDeletedAt()).isNotNull();
+					verify(memberRepository, times(1)).findById(any());
+				});
+			}
+		}
+
+		@Nested
+		class Failure {
+			@Test
+			void 존재하지_않는_회원_MemberException_memberNotFound_예외발생() {
+				// given
+				Member member = mock(Member.class);
+				given(member.getId()).willReturn(UUID.randomUUID());
+				given(memberRepository.findById(any(UUID.class)))
+					.willReturn(Optional.empty());
+
+				// when & then
+				assertSoftly(softly -> {
+					softly.assertThatThrownBy(() -> memberService.deleteMember(member))
+						.isInstanceOf(MemberException.class)
+						.hasMessage("회원(Id: %s)이 존재하지 않습니다.", member.getId());
+				});
+			}
+		}
 	}
 
 	@Nested
@@ -152,11 +369,8 @@ class MemberServiceTest {
 
 				List<String> newGenres = List.of("액션", "코미디", "범죄");
 				PutMemberGenreListRequest request = new PutMemberGenreListRequest(newGenres);
-				String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
 
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("액션", groupCode)).willReturn("01");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("코미디", groupCode)).willReturn("04");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("범죄", groupCode)).willReturn("05");
+				given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "04", "05");
 
 				// when -- 테스트하고자 하는 행동
 				PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -183,11 +397,8 @@ class MemberServiceTest {
 
 				List<String> newGenres = List.of("코미디", "범죄", "다큐멘터리");
 				PutMemberGenreListRequest request = new PutMemberGenreListRequest(newGenres);
-				String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
 
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("코미디", groupCode)).willReturn("04");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("범죄", groupCode)).willReturn("05");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("다큐멘터리", groupCode)).willReturn("06");
+				given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("04", "05", "06");
 
 				// when -- 테스트하고자 하는 행동
 				PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -215,11 +426,8 @@ class MemberServiceTest {
 
 				List<String> newGenres = List.of("액션", "코미디", "범죄");
 				PutMemberGenreListRequest request = new PutMemberGenreListRequest(newGenres);
-				String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
 
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("액션", groupCode)).willReturn("01");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("코미디", groupCode)).willReturn("02");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("범죄", groupCode)).willReturn("03");
+				given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "02", "03");
 
 				// when -- 테스트하고자 하는 행동
 				PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -268,15 +476,11 @@ class MemberServiceTest {
 			void 유효하지_않은_장르_MemberException_memberGenreBadRequest_예외발생() {
 				// given -- 테스트의 상태 설정
 				Member member = mock(Member.class);
-				PutMemberGenreListRequest request = new PutMemberGenreListRequest(List.of("액션", "코미디", "시사교양"));
+				List<String> newGenres = List.of("액션", "코미디", "시사교양");
+				PutMemberGenreListRequest request = new PutMemberGenreListRequest(newGenres);
 
 				given(memberRepository.findById(any())).willReturn(Optional.of(member));
-
-				String groupCode = CodeGroupEnum.MOVIE_GENRE.getCode();
-
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("액션", groupCode)).willReturn("01");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("코미디", groupCode)).willReturn("04");
-				given(memberFavorGenreRepository.findGenreCodeByGenreName("시사교양", groupCode)).willReturn(null);
+				given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "04", null);
 
 				// when -- 테스트하고자 하는 행동
 				MemberException exception = assertThrows(MemberException.class, () ->
@@ -292,8 +496,85 @@ class MemberServiceTest {
 		}
 	}
 
-	@Test
-	void updateImage() {
+	@Nested
+	class UpdateProfileImage {
+
+		@Nested
+		class Success {
+
+			@Test
+			void 기존_프로필_존재_시_삭제_후_프로필_이미지_변경() {
+				// given -- 테스트의 상태 설정
+				Member member = mock(Member.class);
+				given(memberRepository.findById(any())).willReturn(Optional.of(member));
+
+				MockMultipartFile file = new MockMultipartFile(
+					"profileImage",
+					"profileImage.jpg",
+					MediaType.IMAGE_JPEG_VALUE,
+					"profileImage".getBytes()
+				);
+
+				given(s3Service.getProfileImage(any())).willReturn("https://s3-bucket.../oldProfileImage.jpg");
+				given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../profileImage.jpg");
+
+				// when -- 테스트하고자 하는 행동
+				PutMemberImageResponse result = memberService.updateProfileImage(member, file);
+
+				// then -- 예상되는 변화 및 결과
+				verify(s3Service, times(1)).deleteImage(any());
+				verify(member).updateProfileImage(any());
+			}
+
+			@Test
+			void 기존_프로필_null_일_시_프로필_이미지_변경() {
+				// given -- 테스트의 상태 설정
+				Member member = mock(Member.class);
+				given(memberRepository.findById(any())).willReturn(Optional.of(member));
+
+				MockMultipartFile file = new MockMultipartFile(
+					"profileImage",
+					"profileImage.jpg",
+					MediaType.IMAGE_JPEG_VALUE,
+					"profileImage".getBytes()
+				);
+
+				given(s3Service.getProfileImage(any())).willReturn(null);
+				given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../profileImage.jpg");
+
+				// when -- 테스트하고자 하는 행동
+				PutMemberImageResponse result = memberService.updateProfileImage(member, file);
+
+				// then -- 예상되는 변화 및 결과
+				verify(s3Service, times(0)).deleteImage(any());
+				verify(member).updateProfileImage(any());
+			}
+		}
+
+		@Nested
+		class Failure {
+
+			@Test
+			void 존재하지_않는_회원_MemberException_memberNotFound_예외발생() {
+				// given -- 테스트의 상태 설정
+				Member member = mock(Member.class);
+				MockMultipartFile file = mock(MockMultipartFile.class);
+
+				given(member.getId()).willReturn(UUID.randomUUID());
+				given(memberRepository.findById(any())).willReturn(Optional.empty());
+
+				// when -- 테스트하고자 하는 행동
+				MemberException exception = assertThrows(MemberException.class, () ->
+					memberService.updateProfileImage(member, file)
+				);
+
+				// then -- 예상되는 변화 및 결과
+				assertSoftly(softly -> {
+					softly.assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+					softly.assertThat(exception.getMessage()).isEqualTo("회원(Id: %s)이 존재하지 않습니다.", member.getId());
+				});
+			}
+		}
 	}
 
 	@Nested

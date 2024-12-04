@@ -5,22 +5,24 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.Assert;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Award {
+public class People {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Movie movie;
 
-    private String name;
-
     @Builder
-    private Award(String name, Movie movie) {
+    private People(String name, Movie movie) {
+        Assert.notNull(name, "name must not be null");
         this.name = name;
         this.movie = movie;
     }

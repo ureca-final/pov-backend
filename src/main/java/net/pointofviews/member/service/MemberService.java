@@ -1,5 +1,7 @@
 package net.pointofviews.member.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
@@ -13,11 +15,11 @@ public interface MemberService {
 
     LoginMemberResponse login(LoginMemberRequest request);
 
-    void deleteMember();
+    void deleteMember(Member loginMember);
 
     PutMemberGenreListResponse updateGenre(Member loginMember, PutMemberGenreListRequest request);
 
-    PutMemberImageResponse updateImage(PutMemberImageRequest request);
+    PutMemberImageResponse updateProfileImage(Member loginMember, MultipartFile file);
 
     PutMemberNicknameResponse updateNickname(Member loginMember, PutMemberNicknameRequest request);
 

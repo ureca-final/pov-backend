@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -201,4 +203,32 @@ public interface MovieAdminSpecification {
             @Parameter(description = "검색할 영화 제목", example = "Inception") String query,
             @Parameter(description = "요청 페이지", example = "1") int page
     );
+
+    @Operation(
+            summary = "영화 TMDB 상세 검색",
+            description = "TMDB id를 이용해 영화를 상세 검색하기 위한 API."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "검색 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<SearchMovieDetailApiResponse>> searchTMDbMovieList(
+            @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
+
+    ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCredits(
+            @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
 }

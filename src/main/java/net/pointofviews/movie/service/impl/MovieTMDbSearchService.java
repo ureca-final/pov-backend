@@ -1,6 +1,12 @@
 package net.pointofviews.movie.service.impl;
 
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.impl.CommonCodeServiceImpl;
+import net.pointofviews.common.utils.ISOCodeToKoreanConverter;
+import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieApiResponse;
+import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.service.MovieApiSearchService;
 import org.apache.commons.lang3.StringUtils;
@@ -8,33 +14,36 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-@Component
+@Service
 public class MovieTMDbSearchService implements MovieApiSearchService {
 
     @Value("${TMDb.access}")
     private String TMDbApiKey;
 
     private final RestClient restClient;
+    private final CommonCodeServiceImpl commonCodeService;
 
-    public MovieTMDbSearchService(RestClient.Builder restClient) {
-        this.restClient = restClient.build();
+    public MovieTMDbSearchService(RestClient.Builder restClient, CommonCodeServiceImpl commonCodeService) {
+        this.restClient = restClient.baseUrl("https://api.themoviedb.org/3")
+                .build();
+        this.commonCodeService = commonCodeService;
     }
 
     @Override
     public SearchMovieApiListResponse searchMovie(String query, int page) {
-        return restClient.get()
+        SearchMovieApiListResponse response = restClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .scheme("https")
-                        .host("api.themoviedb.org")
-                        .path("/3/search/movie")
+                        .path("/search/movie")
                         .queryParam("query", query)
                         .queryParam("page", page)
-                        .queryParam("language", "ko-KR")
+                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
                         .build())
                 .header("Authorization", "Bearer " + TMDbApiKey)
                 .retrieve()
@@ -42,6 +51,45 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                         HttpStatusCode::is4xxClientError,
                         this::handleClientError)
                 .body(SearchMovieApiListResponse.class);
+
+        List<SearchMovieApiResponse> results = response.results();
+
+        transformMovieGenreResponse(results);
+        return response;
+    }
+
+    @Override
+    public SearchMovieDetailApiResponse searchDetailsMovie(String movieId) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchMovieDetailApiResponse.class);
+    }
+
+    @Override
+    public SearchCreditApiResponse searchCredit(String movieId) {
+
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .path("/credits")
+                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchCreditApiResponse.class);
     }
 
     private void handleClientError(HttpRequest request, ClientHttpResponse response) {
@@ -55,6 +103,20 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
             throw MovieException.tmdbBadRequest(message);
         } catch (IOException e) {
             throw new RuntimeException("외부 응답 읽기 실패", e);
+        }
+    }
+
+    private void transformMovieGenreResponse(List<SearchMovieApiResponse> results) {
+        for (SearchMovieApiResponse result : results) {
+            List<String> genreId = result.genre_ids();
+
+            List<String> stringGenre = new ArrayList<>();
+            for (String s : genreId) {
+                stringGenre.add(commonCodeService.convertCommonCodeNameToName(s, CodeGroupEnum.MOVIE_GENRE));
+            }
+
+            genreId.clear();
+            genreId.addAll(stringGenre);
         }
     }
 }
