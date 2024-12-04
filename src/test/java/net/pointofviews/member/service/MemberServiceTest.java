@@ -479,8 +479,8 @@ class MemberServiceTest {
                         "profileImage".getBytes()
                 );
 
-                given(s3Service.getProfileImage(any())).willReturn("https://s3-bucket.../oldProfileImage.jpg");
-                given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../profileImage.jpg");
+				given(s3Service.getImage(any())).willReturn("https://s3-bucket.../oldProfileImage.jpg");
+				given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../profileImage.jpg");
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberImageResponse result = memberService.updateProfileImage(member, file);
@@ -503,8 +503,8 @@ class MemberServiceTest {
                         "profileImage".getBytes()
                 );
 
-                given(s3Service.getProfileImage(any())).willReturn(null);
-                given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../profileImage.jpg");
+				given(s3Service.getImage(any())).willReturn(null);
+				given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../profileImage.jpg");
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberImageResponse result = memberService.updateProfileImage(member, file);

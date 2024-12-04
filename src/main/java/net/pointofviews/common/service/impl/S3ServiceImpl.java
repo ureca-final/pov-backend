@@ -69,7 +69,7 @@ public class S3ServiceImpl implements S3Service {
 	}
 
 	@Override
-	public String getProfileImage(String filePath) {
+	public String getImage(String filePath) {
 		return amazonS3.getUrl(bucketName, filePath).toString();
 	}
 

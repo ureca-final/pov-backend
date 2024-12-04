@@ -10,7 +10,7 @@ public interface S3Service {
 
 	void deleteImage(String imageAddress);
 
-	String getProfileImage(String filePath);
+	String getImage(String filePath);
 
 	void validateImageFile(MultipartFile file);
 

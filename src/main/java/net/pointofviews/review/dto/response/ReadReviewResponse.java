@@ -39,7 +39,11 @@ public record ReadReviewResponse(
 	Long likeAmount,
 
 	@Schema(description = "좋아요 여부", example = "true")
-	boolean isLiked
+	boolean isLiked,
+
+	@Schema(description = "스포일러 여부", example = "true")
+	boolean spoiler
+
 ) {
 }
 

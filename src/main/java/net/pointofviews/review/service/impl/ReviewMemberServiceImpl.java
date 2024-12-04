@@ -149,6 +149,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 			review.getCreatedAt(),
 			likeAmount,
 			isLiked,
+			review.isSpoiler(),
 			keywords
 		);
 
