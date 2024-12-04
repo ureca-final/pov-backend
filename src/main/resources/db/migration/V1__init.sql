@@ -7,16 +7,13 @@ CREATE TABLE common_code_group (
 );
 
 CREATE TABLE movie (
-                       has_award bit not null,
                        id bigint auto_increment primary key,
                        released date null,
                        country varchar(255) null,
-                       director varchar(255) null,
                        tmdb_id int null,
                        plot varchar(255) null,
                        poster varchar(255) null,
                        title varchar(255) null,
-                       writer varchar(255) null,
                        is_adult bit not null,
                        backdrop varchar(255) null
 );
@@ -60,21 +57,23 @@ CREATE TABLE common_code (
                              group_code varchar(255) not null,
                              is_active bit not null ,
                              PRIMARY KEY (group_code, code),
-                             CONSTRAINT FKhkusbmskjw1jk5pjh8sui9cnp FOREIGN KEY (group_code) REFERENCES common_code_group (group_code)
+                             CONSTRAINT FK_common_code_group FOREIGN KEY (group_code) REFERENCES common_code_group (group_code)
 );
 
-CREATE TABLE actor (
+CREATE TABLE people (
                        id bigint auto_increment primary key,
                        movie_id bigint null,
                        name varchar(255) null,
-                       CONSTRAINT FKj1v8ubnn1t4547r4q725paa8h FOREIGN KEY (movie_id) REFERENCES movie (id)
+                       CONSTRAINT FK_people_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
-CREATE TABLE award (
-                       id bigint auto_increment primary key,
-                       movie_id bigint null,
-                       name varchar(255) null,
-                       CONSTRAINT FK3jo1qobhxrpnricjwo30hemsi FOREIGN KEY (movie_id) REFERENCES movie (id)
+CREATE TABLE movie_people (
+                              id bigint auto_increment primary key,
+                              movie_id bigint not null,
+                              people_id bigint not null,
+                              role varchar(255) null,
+                              CONSTRAINT FK_movie_people_movie FOREIGN KEY (movie_id) REFERENCES movie (id),
+                              CONSTRAINT FK_movie_people_people FOREIGN KEY (people_id) REFERENCES people (id)
 );
 
 CREATE TABLE member_club (
@@ -83,15 +82,15 @@ CREATE TABLE member_club (
                              id bigint not null primary key,
                              club_id binary(16) null,
                              member_id binary(16) null,
-                             CONSTRAINT FK73tthgfalulir41hmwmuwieyc FOREIGN KEY (club_id) REFERENCES club (id),
-                             CONSTRAINT FKbwpq58hyksntm0wcrunw2hcqe FOREIGN KEY (member_id) REFERENCES member (id)
+                             CONSTRAINT FK_member_club_club FOREIGN KEY (club_id) REFERENCES club (id),
+                             CONSTRAINT FK_member_club_member FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
 CREATE TABLE club_favor_genre (
                                   genre_code varchar(2) null,
                                   id bigint auto_increment primary key,
                                   club_id binary(16) null,
-                                  CONSTRAINT FK7oxhernp72286u3dwppqcwk1b FOREIGN KEY (club_id) REFERENCES club (id)
+                                  CONSTRAINT FK_club_favor_genre_club FOREIGN KEY (club_id) REFERENCES club (id)
 );
 
 CREATE TABLE club_movie (
@@ -99,8 +98,8 @@ CREATE TABLE club_movie (
                             id bigint not null primary key,
                             movie_id bigint null,
                             club_id binary(16) null,
-                            CONSTRAINT FK8kry8ai0frhjchbeb7v9yoogv FOREIGN KEY (movie_id) REFERENCES movie (id),
-                            CONSTRAINT FKqil3i0k4is2mxynctcuon9oyu FOREIGN KEY (club_id) REFERENCES club (id)
+                            CONSTRAINT FK_club_movie_movie FOREIGN KEY (movie_id) REFERENCES movie (id),
+                            CONSTRAINT FK_club_movie_club FOREIGN KEY (club_id) REFERENCES club (id)
 );
 
 CREATE TABLE curation (
@@ -112,7 +111,7 @@ CREATE TABLE curation (
                           title varchar(255) null,
                           category enum ('ACTOR', 'AWARD', 'COUNTRY', 'DIRECTOR', 'GENRE', 'OTHER', 'RELEASE') null,
                           start_time datetime(6) null,
-                          CONSTRAINT FKdlnps7qqivebgquql0rxw9qri FOREIGN KEY (member_id) REFERENCES member (id)
+                          CONSTRAINT FK_curation_member FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
 CREATE TABLE entry (
@@ -122,15 +121,15 @@ CREATE TABLE entry (
                        id bigint auto_increment primary key,
                        premiere_id bigint null,
                        member_id binary(16) null,
-                       CONSTRAINT FKant1v9nuotv4eueo2lbpga8vj FOREIGN KEY (member_id) REFERENCES member (id),
-                       CONSTRAINT FKbqtcl89r826gm2jf92jjci0x9 FOREIGN KEY (premiere_id) REFERENCES premiere (id)
+                       CONSTRAINT FK_entry_member FOREIGN KEY (member_id) REFERENCES member (id),
+                       CONSTRAINT FK_entry_premiere FOREIGN KEY (premiere_id) REFERENCES premiere (id)
 );
 
 CREATE TABLE member_favor_genre (
                                     genre_code varchar(2) null,
                                     id bigint auto_increment primary key,
                                     member_id binary(16) null,
-                                    CONSTRAINT FKiaxiyt0n6b6l4v6lg57xmvfv4 FOREIGN KEY (member_id) REFERENCES member (id)
+                                    CONSTRAINT FK_member_favor_genre_member FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
 CREATE TABLE movie_content (
@@ -138,14 +137,14 @@ CREATE TABLE movie_content (
                                movie_id bigint null,
                                content varchar(255) null,
                                content_type enum ('IMAGE', 'YOUTUBE') null,
-                               CONSTRAINT FKsxi6kjwd6w964wk4urng1ptsf FOREIGN KEY (movie_id) REFERENCES movie (id)
+                               CONSTRAINT FK_movie_content_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
 CREATE TABLE movie_genre (
                              genre_code varchar(2) null,
                              id bigint auto_increment primary key,
                              movie_id bigint null,
-                             CONSTRAINT FKp6vjabv2e2435at1hnuxg64yv FOREIGN KEY (movie_id) REFERENCES movie (id)
+                             CONSTRAINT FK_movie_genre_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
 CREATE TABLE movie_like (
@@ -154,14 +153,14 @@ CREATE TABLE movie_like (
                             movie_id bigint null,
                             member_id binary(16) null,
                             is_liked   boolean default false,
-                            CONSTRAINT FK221ilwmr0s5y3m371cfbjhmgs FOREIGN KEY (member_id) REFERENCES member (id),
-                            CONSTRAINT FKdglb6nfnx6ge9ogjlb6dqb63m FOREIGN KEY (movie_id) REFERENCES movie (id)
+                            CONSTRAINT FK_movie_like_member FOREIGN KEY (member_id) REFERENCES member (id),
+                            CONSTRAINT FK_movie_like_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
 CREATE TABLE movie_like_count (
                                   like_count bigint null,
                                   movie_id bigint not null primary key,
-                                  CONSTRAINT FKo0i0dph7pki64cfui19lt12xc FOREIGN KEY (movie_id) REFERENCES movie (id)
+                                  CONSTRAINT FK_movie_like_count_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
 create table payment
@@ -174,7 +173,7 @@ create table payment
     member_id   binary(16)   null,
     payment_key varchar(255) null,
     vendor      varchar(255) null,
-    constraint FK4pswry4r5sx6j57cdeulh1hx8
+    constraint FK_payment_member
         foreign key (member_id) references member (id)
 );
 
@@ -188,9 +187,9 @@ create table payment_transaction
     transaction_key varchar(255)                          null,
     status          enum ('FAILED', 'PENDING', 'SUCCESS') null,
     type            enum ('CANCEL', 'PAY', 'REFUND')      null,
-    constraint UK8qrrs01smxp31txlwy36q7mam
+    constraint UK_payment_transaction
         unique (payment_id),
-    constraint FKhs69kx826yrnvhanj0m0dcegn
+    constraint FK_payment_transaction_payment
         foreign key (payment_id) references payment (id)
 );
 
@@ -203,9 +202,9 @@ create table temp_payment
     member_id  binary(16)      null,
     order_id   varchar(255)    null,
     type       enum ('NORMAL') null,
-    constraint UKjnp2rmi61sdvkti7ido11w140
+    constraint UK_temp_payment_member
         unique (member_id),
-    constraint FKqupcsmm2a74886you7gwa4fqp
+    constraint FK_temp_payment_member
         foreign key (member_id) references member (id)
 );
 
@@ -214,8 +213,8 @@ CREATE TABLE recommended_movie (
                                    id bigint auto_increment primary key,
                                    movie_id bigint null,
                                    member_id binary(16) null,
-                                   CONSTRAINT FKcsfw03338yfc99j83utsivmxg FOREIGN KEY (movie_id) REFERENCES movie (id),
-                                   CONSTRAINT FKtkysi9psfmiakp04m8suvn1ac FOREIGN KEY (member_id) REFERENCES member (id)
+                                   CONSTRAINT FK_recommended_movie_movie FOREIGN KEY (movie_id) REFERENCES movie (id),
+                                   CONSTRAINT FK_recommended_movie_member FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
 create table review
@@ -233,7 +232,7 @@ create table review
     preference  varchar(255) null,
     thumbnail   varchar(255) null,
     movie_id    bigint      not null,
-    CONSTRAINT FKk0ccx5i4ci2wd70vegug074w1 FOREIGN KEY (member_id) REFERENCES member (id),
+    CONSTRAINT FK_review_member FOREIGN KEY (member_id) REFERENCES member (id),
     CONSTRAINT FK_review_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
@@ -241,7 +240,7 @@ CREATE TABLE review_keyword_link (
                                      review_keyword_code varchar(2) null,
                                      id bigint auto_increment primary key,
                                      review_id bigint null,
-                                     CONSTRAINT FK8vdr4cgq8fwp3b4ve89e7oiqr FOREIGN KEY (review_id) REFERENCES review (id)
+                                     CONSTRAINT FK_review_keyword_link_review FOREIGN KEY (review_id) REFERENCES review (id)
 );
 
 CREATE TABLE review_like (
@@ -250,14 +249,14 @@ CREATE TABLE review_like (
                              review_id bigint null,
                              member_id binary(16) null,
                              is_liked   boolean default false,
-                             CONSTRAINT FK68am9vk1s1e8n1v873meqkk0k FOREIGN KEY (review_id) REFERENCES review (id),
-                             CONSTRAINT FKf19ep4u0vm5vietilw2kp9jo2 FOREIGN KEY (member_id) REFERENCES member (id)
+                             CONSTRAINT FK_review_like_review FOREIGN KEY (review_id) REFERENCES review (id),
+                             CONSTRAINT FK_review_like_member FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
 CREATE TABLE review_like_count (
                                    review_id bigint not null primary key,
                                    review_like_count bigint null,
-                                   CONSTRAINT FKa4lkj3hwstfenynlujdqpx2sx FOREIGN KEY (review_id) REFERENCES review (id)
+                                   CONSTRAINT FK_review_like_count_review FOREIGN KEY (review_id) REFERENCES review (id)
 );
 
 create table notice
@@ -284,7 +283,7 @@ create table notice_receive
     member_id   binary(16)   null,
     notice_content text         null,
     notice_title   varchar(255) null,
-    constraint FKtqfpe9qomg6roy9o0y3458wcb
+    constraint FK_notice_receive_member
         foreign key (member_id) references member (id)
 );
 
@@ -296,7 +295,7 @@ create table notice_send
         primary key,
     notice_id             bigint      null,
     notice_content_detail text        null,
-    constraint FK6pksr0fsrrngct93esdrccn1f
+    constraint FK_notice_send_notice
         foreign key (notice_id) references notice (id)
 );
 

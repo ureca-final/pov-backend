@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
-class ActorTest {
+class PeopleTest {
 
     @Nested
     class Constructor {
@@ -29,18 +29,18 @@ class ActorTest {
                 BDDMockito.given(movie.getTitle()).willReturn("Inception");
 
                 // when
-                Actor actor = Actor.builder()
+                People people = People.builder()
                         .name(name)
                         .movie(movie)
                         .build();
 
                 // then
                 SoftAssertions.assertSoftly(softly -> {
-                    softly.assertThat(actor).isNotNull();
-                    softly.assertThat(actor.getName()).isEqualTo(name);
-                    softly.assertThat(actor.getMovie()).isNotNull(); // Movie가 설정되었는지 확인
-                    softly.assertThat(actor.getMovie().getId()).isEqualTo(1L);
-                    softly.assertThat(actor.getMovie().getTitle()).isEqualTo("Inception");
+                    softly.assertThat(people).isNotNull();
+                    softly.assertThat(people.getName()).isEqualTo(name);
+                    softly.assertThat(people.getMovie()).isNotNull(); // Movie가 설정되었는지 확인
+                    softly.assertThat(people.getMovie().getId()).isEqualTo(1L);
+                    softly.assertThat(people.getMovie().getTitle()).isEqualTo("Inception");
                 });
 
             }
@@ -53,7 +53,7 @@ class ActorTest {
             void 이름_없음_IllegalArgumentException_예외발생() {
                 // when & then
                 assertThatThrownBy(() -> {
-                    Actor.builder()
+                    People.builder()
                             .name(null)
                             .movie(Mockito.mock(Movie.class))
                             .build(); // 이름이 null인 경우

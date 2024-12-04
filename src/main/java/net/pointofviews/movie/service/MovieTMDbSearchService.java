@@ -2,6 +2,8 @@ package net.pointofviews.movie.service;
 
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.impl.CommonCodeServiceImpl;
+import net.pointofviews.common.utils.ISOCodeToKoreanConverter;
+import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
@@ -28,7 +30,8 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
     private final CommonCodeServiceImpl commonCodeService;
 
     public MovieTMDbSearchService(RestClient.Builder restClient, CommonCodeServiceImpl commonCodeService) {
-        this.restClient = restClient.build();
+        this.restClient = restClient.baseUrl("https://api.themoviedb.org/3")
+                .build();
         this.commonCodeService = commonCodeService;
     }
 
@@ -36,12 +39,10 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
     public SearchMovieApiListResponse searchMovie(String query, int page) {
         SearchMovieApiListResponse response = restClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .scheme("https")
-                        .host("api.themoviedb.org")
-                        .path("/3/search/movie")
+                        .path("/search/movie")
                         .queryParam("query", query)
                         .queryParam("page", page)
-                        .queryParam("language", "ko-KR")
+                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
                         .build())
                 .header("Authorization", "Bearer " + TMDbApiKey)
                 .retrieve()
@@ -52,7 +53,7 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
 
         List<SearchMovieApiResponse> results = response.results();
 
-        transformMovieResponse(results);
+        transformMovieGenreResponse(results);
         return response;
     }
 
@@ -60,11 +61,9 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
     public SearchMovieDetailApiResponse searchDetailsMovie(String movieId) {
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .scheme("https")
-                        .host("api.themoviedb.org")
-                        .path("/3/movie/")
+                        .path("/movie/")
                         .path(movieId)
-                        .queryParam("language", "ko-KR")
+                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
                         .build())
                 .header("Authorization", "Bearer " + TMDbApiKey)
                 .retrieve()
@@ -72,6 +71,24 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                         HttpStatusCode::is4xxClientError,
                         this::handleClientError)
                 .body(SearchMovieDetailApiResponse.class);
+    }
+
+    @Override
+    public SearchCreditApiResponse searchCredit(String movieId) {
+
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .path("/credits")
+                        .queryParam("language", ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE)
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchCreditApiResponse.class);
     }
 
     private void handleClientError(HttpRequest request, ClientHttpResponse response) {
@@ -88,7 +105,7 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
         }
     }
 
-    private void transformMovieResponse(List<SearchMovieApiResponse> results) {
+    private void transformMovieGenreResponse(List<SearchMovieApiResponse> results) {
         for (SearchMovieApiResponse result : results) {
             List<String> genreId = result.genre_ids();
 
@@ -101,5 +118,4 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
             genreId.addAll(stringGenre);
         }
     }
-
 }

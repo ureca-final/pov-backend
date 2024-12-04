@@ -22,10 +22,6 @@ public class Movie {
 
     private String title;
 
-    private String director;
-
-    private String writer;
-
     private String plot;
 
     private String poster;
@@ -38,26 +34,24 @@ public class Movie {
 
     private Integer tmdbId;
 
-    private boolean hasAward;
-
     private boolean isAdult;
 
     @OneToMany(mappedBy = "movie")
     private final List<Review> reviews = new ArrayList<>();
 
+    @OneToMany(mappedBy = "movie")
+    private final List<MovieGenre> genres = new ArrayList<>();
+
     @Builder
-    private Movie(String title, String director, String writer, String plot, String poster,
-                  String country, LocalDate released, Integer tmdbId, boolean hasAward, String backdrop, boolean isAdult) {
+    private Movie(String title, String plot, String poster,
+                  String country, LocalDate released, Integer tmdbId, String backdrop, boolean isAdult) {
         Assert.notNull(title, "title must not be null");
         this.title = title;
-        this.director = director;
-        this.writer = writer;
         this.plot = plot;
         this.poster = poster;
         this.country = country;
         this.released = released;
         this.tmdbId = tmdbId;
-        this.hasAward = hasAward;
         this.backdrop = backdrop;
         this.isAdult = isAdult;
     }

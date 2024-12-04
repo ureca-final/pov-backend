@@ -3,6 +3,7 @@ package net.pointofviews.movie.controller;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import net.pointofviews.movie.service.MovieApiSearchService;
@@ -150,6 +151,12 @@ public class MovieAdminController implements MovieAdminSpecification {
         SearchMovieDetailApiResponse response = movieApiSearchService.searchDetailsMovie(tmdbId);
 
         return BaseResponse.ok("OK", response);
+    }
+
+    @Override
+    @GetMapping("/tmdb-search/{tmdbId}/credits")
+    public ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCredits(@PathVariable String tmdbId) {
+        return BaseResponse.ok("OK", movieApiSearchService.searchCredit(tmdbId));
     }
 
     // 유튜브 도메인 유효성 검사
