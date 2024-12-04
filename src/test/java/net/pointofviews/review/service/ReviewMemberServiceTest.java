@@ -298,7 +298,8 @@ class ReviewMemberServiceTest {
 					"https://example.com/thumbnail1.jpg",
 					LocalDateTime.of(2024, 12, 25, 0, 0),
 					10L,
-					true
+					true,
+					false
 				);
 
 				ReadReviewResponse review2 = new ReadReviewResponse(
@@ -311,6 +312,7 @@ class ReviewMemberServiceTest {
 					"https://example.com/thumbnail2.jpg",
 					LocalDateTime.of(2023, 12, 25, 0, 0),
 					20L,
+					false,
 					false
 				);
 
