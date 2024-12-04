@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.impl.CommonCodeServiceImpl;
-import net.pointofviews.common.utils.ISOCodeToKoreanConverter;
+import net.pointofviews.common.utils.LocaleUtils;
 import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiResponse;
@@ -62,7 +62,7 @@ class MovieTMDbSearchServiceTest {
                 SearchCreditApiResponse mockResponse = createMockSearchCreditResponse();
                 ObjectMapper objectMapper = new ObjectMapper();
                 String validJsonResponse = objectMapper.writeValueAsString(mockResponse);
-                String koreanIsoCode = ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE;
+                String koreanIsoCode = LocaleUtils.KOREAN_LANGUAGE_CODE;
                 URI uri = URI.create("https://api.themoviedb.org/3/movie/" + movieId + "/credits?language=" + koreanIsoCode);
 
                 server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
@@ -99,36 +99,6 @@ class MovieTMDbSearchServiceTest {
             );
 
             return new SearchCreditApiResponse(27205, castList, crewList);
-        }
-    }
-
-    @Nested
-    class SearchCredit {
-
-        @Nested
-        class Success {
-
-            @Test
-            @SneakyThrows
-            void 영화_크레딧_검색() {
-                // given
-                SearchCreditApiResponse mockResponseList = mock(SearchCreditApiResponse.class);
-                ObjectMapper objectMapper = new ObjectMapper();
-                String validJsonResponse = objectMapper.writeValueAsString(mockResponseList);
-                String movieId = "27205";
-                String koreanIsoCode = ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE;
-
-                URI uri = URI.create("https://api.themoviedb.org/3/movie/" + movieId + "/credits?language=" + koreanIsoCode);
-
-                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
-
-                // when
-                SearchCreditApiResponse result = movieTMDbSearchService.searchCredit(movieId);
-
-                // then
-                assertThat(result).isNotNull();
-                assertThat(result.cast()).hasSize(0);
-            }
         }
     }
 
