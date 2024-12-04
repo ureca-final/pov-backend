@@ -229,6 +229,28 @@ public interface MovieAdminSpecification {
     ResponseEntity<BaseResponse<SearchMovieDetailApiResponse>> searchTMDbMovieList(
             @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
 
-    ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCredits(
+    @Operation(
+            summary = "영화 TMDB 상세 검색",
+            description = "TMDB id를 이용해 영화를 상세 검색하기 위한 API."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "검색 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCreditsLimit10(
             @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
 }

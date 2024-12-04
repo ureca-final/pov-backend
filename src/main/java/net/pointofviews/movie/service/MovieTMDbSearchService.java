@@ -75,7 +75,6 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
 
     @Override
     public SearchCreditApiResponse searchCredit(String movieId) {
-
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/movie/")
@@ -89,6 +88,18 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                         HttpStatusCode::is4xxClientError,
                         this::handleClientError)
                 .body(SearchCreditApiResponse.class);
+    }
+
+    @Override
+    public SearchCreditApiResponse searchLimit10Credit(String movieId) {
+        SearchCreditApiResponse response = searchCredit(movieId);
+        List<SearchCreditApiResponse.CastResponse> limitCastList = response.cast()
+                .subList(0, Math.min(response.cast().size(), 10));
+        List<SearchCreditApiResponse.CrewResponse> directors = response.crew().stream()
+                .filter(crew -> "director".equalsIgnoreCase(crew.job()))
+                .toList();
+
+        return new SearchCreditApiResponse(response.id(), limitCastList, directors);
     }
 
     private void handleClientError(HttpRequest request, ClientHttpResponse response) {

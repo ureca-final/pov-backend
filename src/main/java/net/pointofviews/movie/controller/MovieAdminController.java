@@ -155,8 +155,8 @@ public class MovieAdminController implements MovieAdminSpecification {
 
     @Override
     @GetMapping("/tmdb-search/{tmdbId}/credits")
-    public ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCredits(@PathVariable String tmdbId) {
-        return BaseResponse.ok("OK", movieApiSearchService.searchCredit(tmdbId));
+    public ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCreditsLimit10(@PathVariable String tmdbId) {
+        return BaseResponse.ok("OK", movieApiSearchService.searchLimit10Credit(tmdbId));
     }
 
     // 유튜브 도메인 유효성 검사

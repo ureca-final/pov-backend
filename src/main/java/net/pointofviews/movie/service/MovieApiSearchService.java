@@ -10,4 +10,6 @@ public interface MovieApiSearchService {
     SearchMovieDetailApiResponse searchDetailsMovie(String movieId);
 
     SearchCreditApiResponse searchCredit(String movieId);
+
+    SearchCreditApiResponse searchLimit10Credit(String movieId);
 }
