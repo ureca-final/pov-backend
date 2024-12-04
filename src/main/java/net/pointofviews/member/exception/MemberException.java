@@ -2,8 +2,9 @@ package net.pointofviews.member.exception;
 
 import java.util.UUID;
 
-import net.pointofviews.common.exception.BusinessException;
 import org.springframework.http.HttpStatus;
+
+import net.pointofviews.common.exception.BusinessException;
 
 public class MemberException extends BusinessException {
 
@@ -17,6 +18,10 @@ public class MemberException extends BusinessException {
 
     public static MemberException memberNotFound(UUID memberId) {
         return new MemberException(HttpStatus.NOT_FOUND, String.format("회원(Id: %s)이 존재하지 않습니다.", memberId));
+    }
+
+    public static MemberException adminNotFound(UUID memberId) {
+        return new MemberException(HttpStatus.NOT_FOUND, String.format("관리자(Id: %s)가 존재하지 않습니다.", memberId));
     }
 
     public static MemberException invalidSocialType() {
