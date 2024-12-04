@@ -36,8 +36,12 @@ public record ReadReviewDetailResponse(
 	@Schema(description = "좋아요 여부", example = "true")
 	boolean isLiked,
 
+	@Schema(description = "스포일러 여부", example = "true")
+	boolean spoiler,
+
 	@Schema(description = "키워드", example = "[\"흥미진진\", \"몰입감\"]")
 	List<String> keywords
+
 ) {
 }
 

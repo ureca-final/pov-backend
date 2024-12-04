@@ -409,6 +409,7 @@ class ReviewMemberServiceTest {
 					softly.assertThat(result.profileImage()).isEqualTo(member.getProfileImage());
 					softly.assertThat(result.thumbnail()).isEqualTo(review.getThumbnail());
 					softly.assertThat(result.likeAmount()).isEqualTo(10L);
+					softly.assertThat(result.spoiler()).isFalse();
 					softly.assertThat(result.isLiked()).isTrue();
 					softly.assertThat(result.keywords()).contains("흥미진진", "몰입감");
 				});
