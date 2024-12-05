@@ -5,6 +5,7 @@ import net.pointofviews.club.domain.MemberClub;
 import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
+import net.pointofviews.fixture.ReviewFixture;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberRepository;
@@ -24,7 +25,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.HttpStatus;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -141,33 +141,8 @@ class ReviewClubServiceTest {
 
                 given(clubRepository.findById(any())).willReturn(Optional.of(club));
 
-                ReadReviewResponse review1 = new ReadReviewResponse(
-                        1L,
-                        "영화제목1",
-                        "리뷰제목1",
-                        "리뷰내용1",
-                        "작성자1",
-                        "https://example.com/profileImage1.jpg",
-                        "https://example.com/thumbnail1.jpg",
-                        LocalDateTime.of(2024, 12, 25, 0, 0),
-                        10L,
-                        true,
-                        false
-                );
-
-                ReadReviewResponse review2 = new ReadReviewResponse(
-                        2L,
-                        "영화제목2",
-                        "리뷰제목2",
-                        "리뷰내용2",
-                        "작성자2",
-                        "https://example.com/profileImage2.jpg",
-                        "https://example.com/thumbnail2.jpg",
-                        LocalDateTime.of(2023, 12, 25, 0, 0),
-                        20L,
-                        false,
-                        false
-                );
+                ReadReviewResponse review1 = ReviewFixture.readReviewResponse();
+                ReadReviewResponse review2 = ReviewFixture.readReviewResponse();
 
                 List<ReadReviewResponse> reviewList = List.of(review1, review2);
                 Slice<ReadReviewResponse> reviews = new SliceImpl<>(reviewList);
@@ -184,8 +159,8 @@ class ReviewClubServiceTest {
                     softly.assertThat(result.clubId()).isEqualTo(clubId);
                     softly.assertThat(result.reviews()).isEqualTo(reviews);
                     softly.assertThat(result.reviews().getSize()).isEqualTo(2);
-                    softly.assertThat(result.reviews().getContent().get(0)).isEqualTo(review1);
-                    softly.assertThat(result.reviews().getContent().get(1)).isEqualTo(review2);
+                    softly.assertThat(result.reviews().getContent()).contains(review1, review2);
+                    softly.assertThat(result.reviews().getContent().get(1).createdAt()).isBefore(result.reviews().getContent().get(0).createdAt());
                 });
             }
 
