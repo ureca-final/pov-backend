@@ -33,7 +33,7 @@ import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSiz
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
 import static net.pointofviews.movie.exception.MovieException.movieNotFound;
 import static net.pointofviews.review.exception.ReviewException.reviewNotFound;
-import static net.pointofviews.review.exception.ReviewException.unauthorizedReviewDelete;
+import static net.pointofviews.review.exception.ReviewException.unauthorizedReview;
 
 @Service
 @Slf4j
@@ -52,7 +52,9 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
     @Override
     @Transactional
-    public void saveReview(Long movieId, CreateReviewRequest request) {
+    public void saveReview(Long movieId, CreateReviewRequest request, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> movieNotFound(movieId));
@@ -64,6 +66,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
                 .preference(request.preference())
                 .isSpoiler(request.spoiler())
                 .movie(movie)
+                .member(member)
                 .build();
 
         reviewRepository.save(review);
@@ -92,13 +95,20 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
     @Override
     @Transactional
-    public void updateReview(Long movieId, Long reviewId, PutReviewRequest request) {
+    public void updateReview(Long movieId, Long reviewId, PutReviewRequest request, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
         if (movieRepository.findById(movieId).isEmpty()) {
             throw movieNotFound(movieId);
         }
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> reviewNotFound(reviewId));
+
+        if (!review.getMember().getId().equals(member.getId())) {
+            throw unauthorizedReview();
+        }
 
         review.update(request.title(), request.contents());
     }
@@ -117,7 +127,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
                 .orElseThrow(() -> reviewNotFound(reviewId));
 
         if (!review.getMember().getId().equals(member.getId())) {
-            throw unauthorizedReviewDelete();
+            throw unauthorizedReview();
         }
 
         // 이미지 삭제 로직

@@ -33,8 +33,8 @@ public class ReviewMemberController implements ReviewMemberSpecification {
 
     @Override
     @PostMapping("/{movieId}/reviews")
-    public ResponseEntity<BaseResponse<Void>> createReview(@PathVariable Long movieId, @Valid @RequestBody CreateReviewRequest request) {
-        reviewMemberService.saveReview(movieId, request);
+    public ResponseEntity<BaseResponse<Void>> createReview(@PathVariable Long movieId, @Valid @RequestBody CreateReviewRequest request, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
+        reviewMemberService.saveReview(movieId, request, memberDetailsDto.member());
         return BaseResponse.created("/movies/" + movieId + "/reviews", "리뷰가 성공적으로 등록되었습니다.");
     }
 
@@ -51,9 +51,10 @@ public class ReviewMemberController implements ReviewMemberSpecification {
     public ResponseEntity<BaseResponse<Void>> putReview(
             @PathVariable Long movieId,
             @PathVariable Long reviewId,
-            @RequestBody PutReviewRequest request
+            @RequestBody PutReviewRequest request,
+            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     ) {
-        reviewMemberService.updateReview(movieId, reviewId, request);
+        reviewMemberService.updateReview(movieId, reviewId, request, memberDetailsDto.member());
         return BaseResponse.ok("리뷰가 성공적으로 수정되었습니다.");
     }
 

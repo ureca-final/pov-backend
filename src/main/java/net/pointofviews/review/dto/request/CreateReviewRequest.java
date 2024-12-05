@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "리뷰 등록 요청 DTO")
 public record CreateReviewRequest(
@@ -25,6 +26,7 @@ public record CreateReviewRequest(
 	String preference,
 
 	@Schema(description = "키워드", example = "[\"흥미진진\", \"몰입감\"]")
+	@NotNull
 	List<String> keywords,
 
 	@Schema(description = "스포일러 여부", example = "true")

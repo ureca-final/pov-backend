@@ -50,6 +50,18 @@ public interface ReviewMemberSpecification {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인이 필요한 서비스입니다.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                {
+                    "message": "로그인이 필요한 서비스입니다."
+                }
+                """)
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "리뷰 등록 실패",
                     content = @Content(
@@ -63,7 +75,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> createReview(Long movieId, CreateReviewRequest request);
+    ResponseEntity<BaseResponse<Void>> createReview(Long movieId, CreateReviewRequest request, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 교정",
@@ -108,6 +120,30 @@ public interface ReviewMemberSpecification {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인이 필요한 서비스입니다.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                {
+                    "message": "로그인이 필요한 서비스입니다."
+                }
+                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "리뷰 수정 권한이 없습니다.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                {
+                    "message": "리뷰 수정 권한이 없습니다."
+                }
+                """)
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "리뷰 수정 실패",
                     content = @Content(
@@ -121,7 +157,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> putReview(Long movieId, Long reviewId, PutReviewRequest request);
+    ResponseEntity<BaseResponse<Void>> putReview(Long movieId, Long reviewId, PutReviewRequest request, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 삭제",

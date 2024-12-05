@@ -15,11 +15,11 @@ import java.util.List;
 
 public interface ReviewMemberService {
 
-	void saveReview(Long movieId, CreateReviewRequest request);
+	void saveReview(Long movieId, CreateReviewRequest request, Member loginMember);
 
 	ProofreadReviewResponse proofreadReview(Long movieId, ProofreadReviewRequest request);
 
-	void updateReview(Long movieId, Long reviewId, PutReviewRequest request);
+	void updateReview(Long movieId, Long reviewId, PutReviewRequest request, Member loginMember);
 
 	void deleteReview(Long movieId, Long reviewId, Member loginMember);
 

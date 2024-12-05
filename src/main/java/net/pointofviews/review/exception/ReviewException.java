@@ -14,7 +14,7 @@ public class ReviewException extends BusinessException {
 		return new ReviewException(HttpStatus.NOT_FOUND, String.format("리뷰(Id: %d)는 존재하지 않습니다.", reviewId));
 	}
 
-	public static ReviewException unauthorizedReviewDelete() {
-		return new ReviewException(HttpStatus.FORBIDDEN, "리뷰 삭제 권한이 없습니다.");
+	public static ReviewException unauthorizedReview() {
+		return new ReviewException(HttpStatus.FORBIDDEN, "리뷰에 대한 권한이 없습니다.");
 	}
 }
