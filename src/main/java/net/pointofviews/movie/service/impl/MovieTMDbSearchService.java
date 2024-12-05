@@ -1,4 +1,4 @@
-package net.pointofviews.movie.service;
+package net.pointofviews.movie.service.impl;
 
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.impl.CommonCodeServiceImpl;
@@ -8,6 +8,7 @@ import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import net.pointofviews.movie.exception.MovieException;
+import net.pointofviews.movie.service.MovieApiSearchService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;

@@ -10,6 +10,7 @@ import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
 import net.pointofviews.movie.exception.MovieException;
+import net.pointofviews.movie.service.impl.MovieTMDbSearchService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

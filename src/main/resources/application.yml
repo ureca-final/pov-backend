@@ -20,6 +20,20 @@ spring:
     multipart:
       max-file-size: 10MB      # 단일 파일 크기 제한
       max-request-size: 50MB   # 전체 요청 크기 제한
+
+  data:
+    redis:
+      host: pov-redis-01-ro.6g1sxr.ng.0001.apn2.cache.amazonaws.com
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+      timeout: 3000ms
+    cache:
+      type: redis
+
 springdoc:
   api-docs:
     path: /api/v3/api-docs

@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Tag(name = "Movie-Member", description = "회원 영화 관련 API")
 public interface MovieMemberSpecification {
@@ -51,5 +53,5 @@ public interface MovieMemberSpecification {
                     )
             )
     })
-    ResponseEntity<?> createMovieLike(Long movieId);
+    ResponseEntity<?> putMovieLike(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto, Long movieId);
 }
