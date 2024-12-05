@@ -1,9 +1,10 @@
-package net.pointofviews.movie.service;
+package net.pointofviews.movie.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.repository.MovieRepository;
+import net.pointofviews.movie.service.MovieMemberService;
 import org.springframework.stereotype.Service;
 
 import static net.pointofviews.movie.exception.MovieException.movieNotFound;
