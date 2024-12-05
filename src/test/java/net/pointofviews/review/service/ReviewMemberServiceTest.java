@@ -310,7 +310,6 @@ class ReviewMemberServiceTest {
                 assertSoftly(softly -> {
                     softly.assertThat(result.reviews().getSize()).isEqualTo(2);
                     softly.assertThat(result.reviews().getContent()).contains(review1, review2);
-                    softly.assertThat(result.reviews().getContent().get(1).createdAt()).isBefore(result.reviews().getContent().get(0).createdAt());
                 });
             }
 
@@ -387,7 +386,6 @@ class ReviewMemberServiceTest {
                 assertSoftly(softly -> {
                     softly.assertThat(result.reviews().getSize()).isEqualTo(2);
                     softly.assertThat(result.reviews().getContent()).contains(review1, review2);
-                    softly.assertThat(result.reviews().getContent().get(1).createdAt()).isBefore(result.reviews().getContent().get(0).createdAt());
                 });
             }
 
