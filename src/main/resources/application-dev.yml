@@ -5,6 +5,17 @@ spring:
     username: ${DB_ADMIN_USERNAME}
     password: ${DB_ADMIN_PASSWORD}
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+      timeout: 3000ms
+
 cloud:
   aws:
     credentials:
