@@ -61,7 +61,6 @@ public interface CurationAdminSpecification {
             )
     })
     ResponseEntity<?> createCuration(
-//            @RequestHeader(value = "Authorization", required = true) String authorization,
             @Valid @RequestBody CreateCurationRequest createCurationRequest
     );
 

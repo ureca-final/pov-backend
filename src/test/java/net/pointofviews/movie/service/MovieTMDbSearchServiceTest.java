@@ -7,6 +7,7 @@ import net.pointofviews.common.service.impl.CommonCodeServiceImpl;
 import net.pointofviews.common.utils.LocaleUtils;
 import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.exception.MovieException;
+import net.pointofviews.movie.service.impl.MovieTMDbSearchService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
