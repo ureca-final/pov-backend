@@ -6,6 +6,7 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
+import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.curation.service.CurationService;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +28,8 @@ public class CurationController implements CurationSpecification{
 
     @GetMapping("/{curationId}")
     @Override
-    public ResponseEntity<BaseResponse<ReadCurationResponse>> readCuration(Long curationId) {
-        ReadCurationResponse response = curationService.readCuration(curationId);
+    public ResponseEntity<BaseResponse<ReadCurationMoviesResponse>> readCuration(@PathVariable Long curationId) {
+        ReadCurationMoviesResponse response = curationService.readCuration(curationId);
         return BaseResponse.ok("큐레이션 조회에 성공하였습니다.", response);
     }
 

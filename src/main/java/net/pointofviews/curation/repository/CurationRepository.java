@@ -20,4 +20,5 @@ public interface CurationRepository extends JpaRepository<Curation, Long> {
     );
 
 
+    boolean existsById(Long id);
 }

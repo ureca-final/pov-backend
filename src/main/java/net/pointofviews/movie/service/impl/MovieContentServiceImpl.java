@@ -1,4 +1,4 @@
-package net.pointofviews.movie.service;
+package net.pointofviews.movie.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +8,7 @@ import net.pointofviews.movie.domain.MovieContent;
 import net.pointofviews.movie.domain.MovieContentType;
 import net.pointofviews.movie.repository.MovieContentRepository;
 import net.pointofviews.movie.repository.MovieRepository;
+import net.pointofviews.movie.service.MovieContentService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
