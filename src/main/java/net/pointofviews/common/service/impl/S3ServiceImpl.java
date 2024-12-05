@@ -1,28 +1,21 @@
 package net.pointofviews.common.service.impl;
 
-import static net.pointofviews.common.exception.S3Exception.*;
-
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.common.service.S3Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import net.pointofviews.common.service.S3Service;
+import java.io.ByteArrayInputStream;
+import java.util.UUID;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static net.pointofviews.common.exception.S3Exception.*;
 
 @Service
 @Slf4j
@@ -69,6 +62,29 @@ public class S3ServiceImpl implements S3Service {
 	}
 
 	@Override
+	public void deleteFolder(String folderPath) {
+		try {
+			ObjectListing objectListing = amazonS3.listObjects(bucketName, folderPath);
+			while (true) {
+				for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+					amazonS3.deleteObject(bucketName, objectSummary.getKey());
+					log.info("Deleted object: {}", objectSummary.getKey());
+				}
+
+				if (objectListing.isTruncated()) {
+					objectListing = amazonS3.listNextBatchOfObjects(objectListing);
+				} else {
+					break;
+				}
+			}
+			log.info("S3에서 이미지 폴더 삭제 성공: {}", folderPath);
+		} catch (Exception e) {
+			log.error("S3에서 이미지 폴더 삭제 중 오류 발생: {}", folderPath, e);
+			throw failedToDelete(e.getMessage());
+		}
+	}
+
+	@Override
 	public String getImage(String filePath) {
 		return amazonS3.getUrl(bucketName, filePath).toString();
 	}
@@ -102,25 +118,6 @@ public class S3ServiceImpl implements S3Service {
 		String baseName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
 		String uniquePrefix = UUID.randomUUID().toString();
 		return baseName + "_" + uniquePrefix + extension;
-	}
-
-	@Override
-	public List<String> extractImageUrlsFromHtml(String html) {
-		List<String> imageUrls = new ArrayList<>();
-		try {
-			Document doc = Jsoup.parse(html);
-			Elements imgTags = doc.select("img[src]");
-
-			for (Element img : imgTags) {
-				String imageUrl = img.attr("src");
-				if (imageUrl.contains("s3")) {
-					imageUrls.add(imageUrl);
-				}
-			}
-			return imageUrls;
-		} catch (Exception e) {
-			throw failedToParseHtml(e.getMessage());
-		}
 	}
 
 	@Override

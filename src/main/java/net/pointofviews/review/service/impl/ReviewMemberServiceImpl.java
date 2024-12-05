@@ -1,6 +1,7 @@
 package net.pointofviews.review.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
@@ -26,13 +27,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.pointofviews.common.exception.S3Exception.emptyImageUrls;
 import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSize;
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
 import static net.pointofviews.movie.exception.MovieException.movieNotFound;
 import static net.pointofviews.review.exception.ReviewException.reviewNotFound;
+import static net.pointofviews.review.exception.ReviewException.unauthorizedReviewDelete;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReviewMemberServiceImpl implements ReviewMemberService {
@@ -96,7 +98,10 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
     @Override
     @Transactional
-    public void deleteReview(Long movieId, Long reviewId) {
+    public void deleteReview(Long movieId, Long reviewId, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
         if (movieRepository.findById(movieId).isEmpty()) {
             throw movieNotFound(movieId);
         }
@@ -104,10 +109,12 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> reviewNotFound(reviewId));
 
-        // 이미지 삭제 로직
-        List<String> imageUrls = s3Service.extractImageUrlsFromHtml(review.getContents());
-        deleteReviewImages(imageUrls);
+        if (!review.getMember().getId().equals(member.getId())) {
+            throw unauthorizedReviewDelete();
+        }
 
+        // 이미지 삭제 로직
+        deleteReviewImagesFolder(movieId, loginMember);
 
         review.delete(); // soft delete 처리
     }
@@ -172,7 +179,10 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files) {
+    public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files, Long movieId, Member loginMember)
+    {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
         long totalSize = files.stream()
                 .mapToLong(MultipartFile::getSize)
@@ -187,14 +197,16 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         for (MultipartFile file : files) {
             s3Service.validateImageFile(file);
 
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename != null && !originalFilename.isEmpty()) {
-                String uniqueFileName = s3Service.createUniqueFileName(originalFilename);
-                String filePath = "reviews/" + uniqueFileName;
+            String originalFileName = file.getOriginalFilename();
+            String uniqueFileName = s3Service.createUniqueFileName(originalFileName);
+            String filePath = String.format("users/%s/movie/%d/%s",
+                    member.getId(),
+                    movieId,
+                    uniqueFileName);
 
-                String imageUrl = s3Service.saveImage(file, filePath);
-                imageUrls.add(imageUrl);
-            }
+            String imageUrl = s3Service.saveImage(file, filePath);
+
+            imageUrls.add(imageUrl);
         }
 
         return new CreateReviewImageListResponse(imageUrls);
@@ -202,13 +214,18 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
     @Override
     @Transactional
-    public void deleteReviewImages(List<String> imageUrls) {
-        if (imageUrls == null || imageUrls.isEmpty()) {
-            throw emptyImageUrls();
+    public void deleteReviewImagesFolder(Long movieId, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        if (!movieRepository.existsById(movieId)) {
+            throw movieNotFound(movieId);
         }
 
-        for (String imageUrl : imageUrls) {
-            s3Service.deleteImage(imageUrl);
-        }
+        String folderPath = String.format("users/%s/movie/%d",
+                member.getId(),
+                movieId);
+
+        s3Service.deleteFolder(folderPath);
     }
 }
