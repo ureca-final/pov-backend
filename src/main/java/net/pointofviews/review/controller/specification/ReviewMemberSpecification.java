@@ -300,7 +300,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> putReviewLike(Long movieId, Long reviewId);
+    ResponseEntity<BaseResponse<Void>> putReviewLike(Long movieId, Long reviewId, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 이미지 업로드",

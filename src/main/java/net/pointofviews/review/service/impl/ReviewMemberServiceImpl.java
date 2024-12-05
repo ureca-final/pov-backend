@@ -2,6 +2,8 @@ package net.pointofviews.review.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
@@ -45,6 +47,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final ReviewLikeCountRepository reviewLikeCountRepository;
     private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
+    private final CommonCodeService commonCodeService;
     private final S3Service s3Service;
 
     @Override
@@ -66,15 +69,19 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         reviewRepository.save(review);
 
         // 키워드 저장
-        if (request.keywords() != null && !request.keywords().isEmpty()) {
-            for (String keyword : request.keywords()) {
-                ReviewKeywordLink keywordLink = ReviewKeywordLink.builder()
-                        .review(review)
-                        .reviewKeywordCode(keyword)
-                        .build();
+        if (!request.keywords().isEmpty()) {
+            request.keywords().forEach(keywordName -> {
+                String keywordCode = commonCodeService.convertCommonCodeNameToCommonCode(
+                        keywordName,
+                        CodeGroupEnum.REVIEW_KEYWORD
+                );
 
-                reviewKeywordLinkRepository.save(keywordLink);
-            }
+                ReviewKeywordLink reviewKeywordLink = ReviewKeywordLink.builder()
+                        .review(review)
+                        .reviewKeywordCode(keywordCode)
+                        .build();
+                reviewKeywordLinkRepository.save(reviewKeywordLink);
+            });
         }
     }
 
@@ -174,8 +181,18 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public void updateReviewLike(Long reviewId, Long likedId) {
+    @Transactional
+    public void updateReviewLike(Long movieId, Long reviewId, Member loginMember) {
+        // 영화, 리뷰 존재 확인
+        if (!movieRepository.existsById(movieId)) {
+            throw movieNotFound(movieId);
+        }
 
+        if (!reviewRepository.existsById(reviewId)) {
+            throw reviewNotFound(reviewId);
+        }
+
+        // redis에 좋아요 저장
     }
 
     @Override

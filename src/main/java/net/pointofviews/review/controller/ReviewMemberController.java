@@ -7,7 +7,6 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.controller.specification.ReviewMemberSpecification;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
-import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
