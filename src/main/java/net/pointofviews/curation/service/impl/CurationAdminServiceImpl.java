@@ -6,10 +6,10 @@ import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
-import net.pointofviews.curation.exception.CurationNotFoundException;
+import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
 import net.pointofviews.curation.service.CurationAdminService;
-import net.pointofviews.curation.service.CurationService;
+import net.pointofviews.curation.service.CurationMovieRedisService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +21,11 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class CurationAdminServiceImpl implements CurationAdminService {
     private final CurationRepository curationRepository;
+    private final CurationMovieRedisService curationMovieRedisService;
 
     @Override
     @Transactional
-    public ReadCurationResponse saveCuration(CreateCurationRequest request) {
+    public void saveCuration(CreateCurationRequest request) {
 
         Curation curation = Curation.builder()
                 .theme(request.theme())
@@ -36,14 +37,8 @@ public class CurationAdminServiceImpl implements CurationAdminService {
 
         Curation savedCuration = curationRepository.save(curation);
 
-        return new ReadCurationResponse(
-                savedCuration.getId(),
-                savedCuration.getTheme(),
-                savedCuration.getCategory(),
-                savedCuration.getTitle(),
-                savedCuration.getDescription(),
-                savedCuration.getStartTime()
-        );
+        // 캐싱 영화 ID 저장
+        curationMovieRedisService.saveMoviesToCuration(savedCuration.getId(), request.movieIds());
     }
 
     @Override
@@ -68,38 +63,33 @@ public class CurationAdminServiceImpl implements CurationAdminService {
 
     @Override
     @Transactional
-    public ReadCurationResponse updateCuration(Long curationId, CreateCurationRequest request) {
+    public void updateCuration(Long curationId, CreateCurationRequest request) {
         Curation curation = curationRepository.findById(curationId)
-                .orElseThrow(CurationNotFoundException::new);
+                .orElseThrow(CurationException::CurationNotFound);
 
         curation.updateCuration(
                 request.theme(),
                 request.category(),
                 request.title(),
+
                 request.description(),
                 request.startTime()
         );
 
-        Curation updatedCuration = curationRepository.save(curation);
-
-        return new ReadCurationResponse(
-                updatedCuration.getId(),
-                updatedCuration.getTheme(),
-                updatedCuration.getCategory(),
-                updatedCuration.getTitle(),
-                updatedCuration.getDescription(),
-                updatedCuration.getStartTime()
-        );
+        // 영화 목록 캐싱 갱신
+        curationMovieRedisService.updateMoviesToCuration(curationId, request.movieIds());
     }
 
     @Override
     @Transactional
     public void deleteCuration(Long curationId) {
 
-        if(curationRepository.findById(curationId).isEmpty()){
-            throw new CurationNotFoundException();
+        if(!curationRepository.existsById(curationId)) {
+            throw CurationException.CurationNotFound();
         };
 
         curationRepository.deleteById(curationId);
+        curationMovieRedisService.deleteAllMoviesForCuration(curationId);
     }
+
 }

@@ -6,8 +6,8 @@ import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
 
 public interface CurationAdminService {
-    ReadCurationResponse saveCuration(CreateCurationRequest request);
+    void saveCuration(CreateCurationRequest request);
     ReadCurationListResponse searchCurations(String theme, CurationCategory category);
-    ReadCurationResponse updateCuration(Long curationId, CreateCurationRequest request);
+    void updateCuration(Long curationId, CreateCurationRequest request);
     void deleteCuration(Long curationId);
 }
