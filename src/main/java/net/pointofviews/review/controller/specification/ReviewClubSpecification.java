@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@Tag(name = "ClubReview", description = "클럽 리뷰 관련 API")
+@Tag(name = "ReviewClub-Member", description = "클럽 리뷰 관련 API")
 public interface ReviewClubSpecification {
 
     @Operation(

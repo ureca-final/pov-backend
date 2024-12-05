@@ -30,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@Tag(name = "Review", description = "리뷰 관련 사용자 API")
+@Tag(name = "Review-Member", description = "리뷰 관련 사용자 API")
 public interface ReviewMemberSpecification {
 
     @Operation(
