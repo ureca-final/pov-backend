@@ -2,12 +2,13 @@ package net.pointofviews.movie.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MoviePeople {
-
+public class MovieCast {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,5 +19,7 @@ public class MoviePeople {
     @ManyToOne(fetch = FetchType.LAZY)
     private Movie movie;
 
-    private String role;
+    private String roleName;
+
+    private Integer displayOrder;
 }
