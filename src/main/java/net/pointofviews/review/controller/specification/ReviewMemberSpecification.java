@@ -1,9 +1,11 @@
 package net.pointofviews.review.controller.specification;
 
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -22,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -233,6 +236,25 @@ public interface ReviewMemberSpecification {
     ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(
             @Parameter(description = "영화 ID", example = "1") Long movieId,
             @Parameter(description = "리뷰 ID", example = "1") Long reviewId
+    );
+
+    @Operation(
+            summary = "내 리뷰 조회",
+            description = "사용자가 작성한 모든 리뷰를 최신 순으로 조회하는 API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "내 리뷰 조회"
+            ),
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "아직 작성한 리뷰 없음"
+            )
+    })
+    ResponseEntity<BaseResponse<ReadReviewListResponse>> readMyReviews(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @PageableDefault Pageable pageable
     );
 
     @Operation(
