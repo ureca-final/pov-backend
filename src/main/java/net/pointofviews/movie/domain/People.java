@@ -17,13 +17,19 @@ public class People {
 
     private String name;
 
+    private String imageUrl;
+
+    private Integer tmdbId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Movie movie;
 
     @Builder
-    private People(String name, Movie movie) {
+    private People(String name, Movie movie, String imageUrl, Integer tmdbId) {
         Assert.notNull(name, "name must not be null");
         this.name = name;
         this.movie = movie;
+        this.imageUrl = imageUrl;
+        this.tmdbId = tmdbId;
     }
 }

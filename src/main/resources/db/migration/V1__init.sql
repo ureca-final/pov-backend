@@ -69,21 +69,33 @@ CREATE TABLE common_code
 
 CREATE TABLE people
 (
-    id       bigint auto_increment primary key,
-    movie_id bigint       null,
-    name     varchar(255) null,
+    id        bigint auto_increment primary key,
+    movie_id  bigint       null,
+    name      varchar(255) null,
+    image_url varchar(255) null,
+    tmdb_id int null,
     CONSTRAINT FK_people_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
 );
 
-CREATE TABLE movie_people
-(
-    id        bigint auto_increment primary key,
-    movie_id  bigint       not null,
-    people_id bigint       not null,
-    role      varchar(255) null,
-    CONSTRAINT FK_movie_people_movie FOREIGN KEY (movie_id) REFERENCES movie (id),
-    CONSTRAINT FK_movie_people_people FOREIGN KEY (people_id) REFERENCES people (id)
+CREATE TABLE movie_crew (
+                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            people_id BIGINT NOT NULL,
+                            movie_id BIGINT NOT NULL,
+                            role VARCHAR(255),
+                            CONSTRAINT fk_movie_crew_people FOREIGN KEY (people_id) REFERENCES people (id) ON DELETE CASCADE,
+                            CONSTRAINT fk_movie_crew_movie FOREIGN KEY (movie_id) REFERENCES movie (id) ON DELETE CASCADE
 );
+
+CREATE TABLE movie_cast (
+                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            people_id BIGINT NOT NULL,
+                            movie_id BIGINT NOT NULL,
+                            role_name VARCHAR(255),
+                            display_order INT,
+                            CONSTRAINT fk_movie_cast_people FOREIGN KEY (people_id) REFERENCES people (id) ON DELETE CASCADE,
+                            CONSTRAINT fk_movie_cast_movie FOREIGN KEY (movie_id) REFERENCES movie (id) ON DELETE CASCADE
+);
+
 
 CREATE TABLE member_club
 (
