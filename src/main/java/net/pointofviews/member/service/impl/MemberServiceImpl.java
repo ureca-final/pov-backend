@@ -111,7 +111,7 @@ public class MemberServiceImpl implements MemberService {
 
         List<String> favorGenreNames = memberFavorGenreRepository.findGenreCodeByMemberId(member.getId())
                 .stream()
-                .map(genreCode -> commonCodeService.convertCommonCodeNameToName(
+                .map(genreCode -> commonCodeService.convertCommonCodeToName(
                         genreCode,
                         CodeGroupEnum.MOVIE_GENRE
                 ))

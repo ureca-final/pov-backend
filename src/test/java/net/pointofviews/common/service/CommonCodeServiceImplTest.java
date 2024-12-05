@@ -109,4 +109,100 @@ class CommonCodeServiceImplTest {
             }
         }
     }
+
+    @Nested
+    class ConvertNameToCommonCode {
+        @Nested
+        class Success {
+            @Test
+            void 한글_장르명을_코드로_변환() {
+                // given
+                String genreName = "액션";
+                String genreCode = "01";
+
+                CommonCodeGroup genreGroupCode = CommonCodeGroup.builder()
+                        .codeGroupEnum(CodeGroupEnum.MOVIE_GENRE)
+                        .build();
+
+                CommonCode actionGenreCode = CommonCode.builder()
+                        .code(genreCode)
+                        .name("28")
+                        .description(genreName)
+                        .groupCode(genreGroupCode)
+                        .build();
+                List<CommonCode> codes = List.of(actionGenreCode);
+
+                given(commonCodeCacheService.findAll()).willReturn(codes);
+
+                // when
+                String convertedCode = commonCodeService.convertNameToCommonCode(genreName, CodeGroupEnum.MOVIE_GENRE);
+
+                // then
+                assertThat(convertedCode).isEqualTo(genreCode);
+            }
+        }
+
+        @Nested
+        class Failure {
+            @Test
+            void 존재하지_않는_장르명_조회시_CommonCodeException() {
+                // given
+                String invalidGenreName = "없는장르";
+
+                // when & then
+                Assertions.assertThatThrownBy(
+                                () -> commonCodeService.convertNameToCommonCode(invalidGenreName, CodeGroupEnum.MOVIE_GENRE)
+                        ).isInstanceOf(CommonCodeException.class)
+                        .hasMessage(CommonCodeException.genreNameNotFound(invalidGenreName).getMessage());
+            }
+        }
+    }
+
+    @Nested
+    class ConvertCommonCodeToName {
+        @Nested
+        class Success {
+            @Test
+            void 코드를_한글_장르명으로_변환() {
+                // given
+                String genreCode = "01";
+                String genreName = "액션";
+
+                CommonCodeGroup genreGroupCode = CommonCodeGroup.builder()
+                        .codeGroupEnum(CodeGroupEnum.MOVIE_GENRE)
+                        .build();
+
+                CommonCode actionGenreCode = CommonCode.builder()
+                        .code(genreCode)
+                        .name("28")
+                        .description(genreName)
+                        .groupCode(genreGroupCode)
+                        .build();
+                List<CommonCode> codes = List.of(actionGenreCode);
+
+                given(commonCodeCacheService.findAll()).willReturn(codes);
+
+                // when
+                String convertedName = commonCodeService.convertCommonCodeToName(genreCode, CodeGroupEnum.MOVIE_GENRE);
+
+                // then
+                assertThat(convertedName).isEqualTo(genreName);
+            }
+        }
+
+        @Nested
+        class Failure {
+            @Test
+            void 존재하지_않는_코드_조회시_CommonCodeException() {
+                // given
+                String invalidCode = "99";
+
+                // when & then
+                Assertions.assertThatThrownBy(
+                                () -> commonCodeService.convertCommonCodeToName(invalidCode, CodeGroupEnum.MOVIE_GENRE)
+                        ).isInstanceOf(CommonCodeException.class)
+                        .hasMessage(CommonCodeException.commonCodeNotFound(invalidCode).getMessage());
+            }
+        }
+    }
 }

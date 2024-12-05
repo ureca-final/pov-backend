@@ -41,6 +41,19 @@ public class CommonCodeServiceImpl implements CommonCodeService {
 
     @Override
     @Transactional(readOnly = true)
+    public String convertCommonCodeToName(String numberCode, CodeGroupEnum codeGroupEnum) {
+        Map<String, String> genreCodeMap = findAllByCodeGroupEnum(codeGroupEnum).stream()
+                .collect(Collectors.toMap(
+                        code -> code.getCode().getCode(),
+                        CommonCode::getDescription
+                ));
+
+        return Optional.ofNullable(genreCodeMap.get(numberCode))
+                .orElseThrow(() -> CommonCodeException.commonCodeNotFound(numberCode));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<CommonCode> findAllByCodeGroupEnum(CodeGroupEnum codeGroupEnum) {
         List<CommonCode> commonCodeList = commonCodeCacheServiceImpl.findAll();
 
