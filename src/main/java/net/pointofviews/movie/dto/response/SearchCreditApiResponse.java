@@ -6,9 +6,6 @@ import java.util.List;
 
 @Schema(description = "TMDB 영화 출연진 및 제작진 정보 응답 DTO")
 public record SearchCreditApiResponse(
-        @Schema(description = "영화 ID", example = "27205")
-        int id,
-
         @Schema(description = "출연진 목록")
         List<CastResponse> cast,
 

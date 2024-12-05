@@ -14,7 +14,7 @@ public record SearchMovieDetailApiResponse(
         @Schema(description = "영화 배경 이미지 경로", example = "/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg")
         String backdrop_path,
 
-        @ArraySchema(arraySchema = @Schema(description = "영화와 관련된 장르 목록"), minItems = 1)
+        @ArraySchema(arraySchema = @Schema(description = "영화와 관련된 장르 목록"))
         List<TMDbGenreResponse> genres,
 
         @Schema(description = "영화의 고유 ID", example = "27205")
@@ -42,10 +42,13 @@ public record SearchMovieDetailApiResponse(
         String status,
 
         @Schema(description = "영화 제목", example = "인셉션")
-        String title
+        String title,
+
+        @ArraySchema(arraySchema = @Schema(description = "영화 제작 국가 목록", example = "[\"US\", \"GB\"]"))
+        List<String> origin_country
 ) {
     @Schema(description = "장르 정보")
-    private record TMDbGenreResponse(
+    public record TMDbGenreResponse(
             @Schema(description = "장르의 고유 ID", example = "28")
             Integer id,
 

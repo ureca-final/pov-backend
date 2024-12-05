@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.impl.CommonCodeServiceImpl;
-import net.pointofviews.common.utils.ISOCodeToKoreanConverter;
-import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
-import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
-import net.pointofviews.movie.dto.response.SearchMovieApiResponse;
-import net.pointofviews.movie.dto.response.SearchMovieDetailApiResponse;
+import net.pointofviews.common.utils.LocaleUtils;
+import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.service.impl.MovieTMDbSearchService;
 import org.assertj.core.api.Assertions;
@@ -22,17 +19,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -47,35 +45,188 @@ class MovieTMDbSearchServiceTest {
     private CommonCodeServiceImpl commonCodeService;
 
     @Autowired
-    private MockRestServiceServer server;
+    private MockRestServiceServer mockServer;
 
     @Nested
-    class SearchCredit {
+    class SearchReleaseDate {
 
         @Nested
         class Success {
 
             @Test
             @SneakyThrows
-            void 영화_크레딧_검색() {
+            void 출시정보_검색_KR_존재() {
                 // given
-                SearchCreditApiResponse mockResponseList = mock(SearchCreditApiResponse.class);
-                ObjectMapper objectMapper = new ObjectMapper();
-                String validJsonResponse = objectMapper.writeValueAsString(mockResponseList);
-                String movieId = "27205";
-                String koreanIsoCode = ISOCodeToKoreanConverter.KOREAN_LANGUAGE_CODE;
+                String movieId = "12345";
+                SearchReleaseApiResponse mockResponse = new SearchReleaseApiResponse(
+                        12345,
+                        List.of(
+                                new SearchReleaseApiResponse.Result("KR", List.of(new SearchReleaseApiResponse.Result.ReleaseDate("12", "ko", "2023-12-01", 3, null))),
+                                new SearchReleaseApiResponse.Result("US", List.of(new SearchReleaseApiResponse.Result.ReleaseDate("PG-13", "en", "2023-12-02", 3, null)))
+                        )
+                );
 
-                URI uri = URI.create("https://api.themoviedb.org/3/movie/" + movieId + "/credits?language=" + koreanIsoCode);
-
-                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
+                mockApiResponse(movieId, mockResponse);
 
                 // when
-                SearchCreditApiResponse result = movieTMDbSearchService.searchCredit(movieId);
+                SearchReleaseApiResponse response = movieTMDbSearchService.searchReleaseDate(movieId);
 
                 // then
-                assertThat(result).isNotNull();
-                assertThat(result.cast()).hasSize(0);
+                assertThat(response.results()).hasSize(1);
+                assertThat(response.results().get(0).iso_3166_1()).isEqualTo("KR");
+                assertThat(response.results().get(0).release_dates()).hasSize(1);
+                assertThat(response.results().get(0).release_dates().get(0).certification()).isEqualTo("12");
             }
+
+            @Test
+            @SneakyThrows
+            void 출시정보_검색_KR_US_존재_여러결과() {
+                // given
+                String movieId = "12345";
+                SearchReleaseApiResponse mockResponse = new SearchReleaseApiResponse(
+                        12345,
+                        List.of(
+                                new SearchReleaseApiResponse.Result("US", List.of(new SearchReleaseApiResponse.Result.ReleaseDate("PG-13", "en", "2023-12-02", 3, null))),
+                                new SearchReleaseApiResponse.Result("KR", List.of(new SearchReleaseApiResponse.Result.ReleaseDate("12", "ko", "2023-12-01", 3, null))),
+                                new SearchReleaseApiResponse.Result("FR", List.of(new SearchReleaseApiResponse.Result.ReleaseDate("Tous publics", "fr", "2023-12-03", 3, null)))
+                        )
+                );
+
+                mockApiResponse(movieId, mockResponse);
+
+                // when
+                SearchReleaseApiResponse response = movieTMDbSearchService.searchReleaseDate(movieId);
+
+                // then
+                assertThat(response.results()).hasSize(1);
+                assertThat(response.results().get(0).iso_3166_1()).isEqualTo("KR");
+            }
+
+            @Test
+            @SneakyThrows
+            void 출시정보_검색_KR_부재_US_존재() {
+                // given
+                String movieId = "12345";
+                SearchReleaseApiResponse mockResponse = new SearchReleaseApiResponse(
+                        12345,
+                        List.of(
+                                new SearchReleaseApiResponse.Result("US", List.of(new SearchReleaseApiResponse.Result.ReleaseDate("PG-13", "en", "2023-12-02", 3, null)))
+                        )
+                );
+
+                mockApiResponse(movieId, mockResponse);
+
+                // when
+                SearchReleaseApiResponse response = movieTMDbSearchService.searchReleaseDate(movieId);
+
+                // then
+                assertThat(response.results()).hasSize(1);
+                assertThat(response.results().get(0).iso_3166_1()).isEqualTo("US");
+                assertThat(response.results().get(0).release_dates()).hasSize(1);
+                assertThat(response.results().get(0).release_dates().get(0).certification()).isEqualTo("PG-13");
+            }
+
+            @Test
+            @SneakyThrows
+            void 출시정보_검색_KR_US_부재() {
+                // given
+                String movieId = "12345";
+                SearchReleaseApiResponse mockResponse = new SearchReleaseApiResponse(
+                        12345,
+                        List.of(
+                                new SearchReleaseApiResponse.Result("FR", List.of(new SearchReleaseApiResponse.Result.ReleaseDate("Tous publics", "fr", "2023-12-03", 3, null)))
+                        )
+                );
+
+                mockApiResponse(movieId, mockResponse);
+
+                // when
+                SearchReleaseApiResponse response = movieTMDbSearchService.searchReleaseDate(movieId);
+
+                // then
+                assertThat(response.results()).hasSize(1);
+                assertThat(response.results().get(0).iso_3166_1()).isEqualTo("FR");
+                assertThat(response.results().get(0).release_dates()).hasSize(1);
+                assertThat(response.results().get(0).release_dates().get(0).certification()).isEqualTo("Tous publics");
+            }
+
+            @Test
+            @SneakyThrows
+            void 출시정보_검색_정보없음() {
+                // given
+                String movieId = "12345";
+                SearchReleaseApiResponse mockResponse = new SearchReleaseApiResponse(12345, List.of());
+
+                mockApiResponse(movieId, mockResponse);
+
+                // when
+                SearchReleaseApiResponse response = movieTMDbSearchService.searchReleaseDate(movieId);
+
+                // then
+                assertThat(response.results()).isEmpty();
+            }
+        }
+
+        private void mockApiResponse(String movieId, SearchReleaseApiResponse mockResponse) throws Exception {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String validJsonResponse = objectMapper.writeValueAsString(mockResponse);
+            URI uri = URI.create("https://api.themoviedb.org/3/movie/" + movieId + "/release_dates");
+
+            mockServer.expect(requestTo(uri))
+                    .andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
+        }
+    }
+
+    @Nested
+    class SearchLimit10Credit {
+
+        @Nested
+        class Success {
+
+            @Test
+            @SneakyThrows
+            void 영화_크레딧_배우_최대_10명과_갑독_찾기() {
+                // given
+                String movieId = "27205";
+                String koreanIsoCode = LocaleUtils.KOREAN_LANGUAGE_CODE;
+                SearchCreditApiResponse mockResponse = createMockSearchCreditResponse();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String validJsonResponse = objectMapper.writeValueAsString(mockResponse);
+                URI uri = URI.create("https://api.themoviedb.org/3/movie/" + movieId + "/credits?language=" + koreanIsoCode);
+
+                mockServer.expect(requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
+
+                // when
+                SearchCreditApiResponse result = movieTMDbSearchService.searchLimit10Credit(movieId);
+
+                // then
+                assertThat(result.cast()).hasSize(10);
+                assertThat(result.crew()).hasSize(1);
+                assertThat(result.crew().get(0).job()).isEqualToIgnoringCase("director");
+            }
+        }
+
+        private SearchCreditApiResponse createMockSearchCreditResponse() {
+            List<SearchCreditApiResponse.CastResponse> castList = List.of(
+                    new SearchCreditApiResponse.CastResponse(2, 1, "Actor1", "Actor1", "/profile1.jpg", 1, "Character1", 1),
+                    new SearchCreditApiResponse.CastResponse(2, 2, "Actor2", "Actor2", "/profile2.jpg", 2, "Character2", 2),
+                    new SearchCreditApiResponse.CastResponse(2, 3, "Actor3", "Actor3", "/profile3.jpg", 3, "Character3", 3),
+                    new SearchCreditApiResponse.CastResponse(2, 4, "Actor4", "Actor4", "/profile4.jpg", 4, "Character4", 4),
+                    new SearchCreditApiResponse.CastResponse(2, 5, "Actor5", "Actor5", "/profile5.jpg", 5, "Character5", 5),
+                    new SearchCreditApiResponse.CastResponse(2, 6, "Actor6", "Actor6", "/profile6.jpg", 6, "Character6", 6),
+                    new SearchCreditApiResponse.CastResponse(2, 7, "Actor7", "Actor7", "/profile7.jpg", 7, "Character7", 7),
+                    new SearchCreditApiResponse.CastResponse(2, 8, "Actor8", "Actor8", "/profile8.jpg", 8, "Character8", 8),
+                    new SearchCreditApiResponse.CastResponse(2, 9, "Actor9", "Actor9", "/profile9.jpg", 9, "Character9", 9),
+                    new SearchCreditApiResponse.CastResponse(2, 10, "Actor10", "Actor10", "/profile10.jpg", 10, "Character10", 10),
+                    new SearchCreditApiResponse.CastResponse(2, 11, "Actor11", "Actor11", "/profile11.jpg", 11, "Character11", 11)
+            );
+
+            List<SearchCreditApiResponse.CrewResponse> crewList = List.of(
+                    new SearchCreditApiResponse.CrewResponse(2, 100, "Director1", "Director1", 90.0, "/director1.jpg", "Directing", "Director"),
+                    new SearchCreditApiResponse.CrewResponse(2, 101, "Producer1", "Producer1", 80.0, "/producer1.jpg", "Producing", "Producer")
+            );
+
+            return new SearchCreditApiResponse(castList, crewList);
         }
     }
 
@@ -100,7 +251,7 @@ class MovieTMDbSearchServiceTest {
                 int page = 1;
                 URI uri = URI.create("https://api.themoviedb.org/3/search/movie?query=" + query + "&page=" + page + "&language=ko-KR");
 
-                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
+                mockServer.expect(requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
                 given(commonCodeService.convertCommonCodeNameToName("28", CodeGroupEnum.MOVIE_GENRE)).willReturn(convertedGenreCode);
 
                 // when
@@ -124,7 +275,7 @@ class MovieTMDbSearchServiceTest {
                 int wrongPage = 0;
                 URI uri = URI.create("https://api.themoviedb.org/3/search/movie?query=" + query + "&page=" + wrongPage + "&language=ko-KR");
                 String errorResponse = "{\"success\":false,\"status_code\":22,\"status_message\":\"Invalid page: Pages start at 1 and max at 500. They are expected to be an integer.\"}";
-                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withBadRequest()
+                mockServer.expect(requestTo(uri)).andRespond(withBadRequest()
                         .body(errorResponse)
                         .contentType(MediaType.APPLICATION_JSON));
 
@@ -142,7 +293,7 @@ class MovieTMDbSearchServiceTest {
                 int wrongPage = 501;
                 URI uri = URI.create("https://api.themoviedb.org/3/search/movie?query=" + query + "&page=" + wrongPage + "&language=ko-KR");
                 String errorResponse = "{\"success\":false,\"status_code\":22,\"status_message\":\"Invalid page: Pages start at 1 and max at 500. They are expected to be an integer.\"}";
-                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withBadRequest()
+                mockServer.expect(requestTo(uri)).andRespond(withBadRequest()
                         .body(errorResponse)
                         .contentType(MediaType.APPLICATION_JSON));
 
@@ -167,7 +318,7 @@ class MovieTMDbSearchServiceTest {
                     }
                 };
 
-                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(request -> mockResponse);
+                mockServer.expect(requestTo(uri)).andRespond(request -> mockResponse);
 
                 // when && then
                 Assertions.assertThatThrownBy(
@@ -189,20 +340,74 @@ class MovieTMDbSearchServiceTest {
             @SneakyThrows
             void TMDb_영화_상세_조회() {
                 // given
-                String tmdbMovieId = "27205";
-                SearchMovieDetailApiResponse response = mock(SearchMovieDetailApiResponse.class);
+                String movieId = "27205";
+                String koreanIsoCode = LocaleUtils.KOREAN_LANGUAGE_CODE;
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                String validJsonResponse = objectMapper.writeValueAsString(response);
-                URI uri = URI.create("https://api.themoviedb.org/3/movie/" + tmdbMovieId + "?language=ko-KR");
+                SearchMovieDetailApiResponse movieDetails = mock(SearchMovieDetailApiResponse.class);
+                given(movieDetails.id()).willReturn(27205);
+                given(movieDetails.title()).willReturn("Inception");
+                given(movieDetails.overview()).willReturn("타인의 꿈에 들어가 생각을 훔치는 특수 보안요원 코브...");
 
-                server.expect(MockRestRequestMatchers.requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
+                SearchCreditApiResponse movieCredits = mock(SearchCreditApiResponse.class);
+                given(movieCredits.cast()).willReturn(new ArrayList<>());
+                given(movieCredits.crew()).willReturn(new ArrayList<>());
+
+                SearchReleaseApiResponse movieReleases = mock(SearchReleaseApiResponse.class);
+                SearchReleaseApiResponse.Result releaseResult = mock(SearchReleaseApiResponse.Result.class);
+                SearchReleaseApiResponse.Result.ReleaseDate releaseDate = mock(SearchReleaseApiResponse.Result.ReleaseDate.class);
+                given(releaseDate.release_date()).willReturn("2010-07-15");
+                given(releaseDate.certification()).willReturn("12");
+                given(releaseResult.release_dates()).willReturn(List.of(releaseDate));
+                given(movieReleases.results()).willReturn(List.of(releaseResult));
+
+                mockServer.expect(requestTo("https://api.themoviedb.org/3/movie/" + movieId + "?language=" + koreanIsoCode))
+                        .andRespond(withSuccess(new ObjectMapper().writeValueAsString(movieDetails), MediaType.APPLICATION_JSON));
+                mockServer.expect(requestTo("https://api.themoviedb.org/3/movie/" + movieId + "/credits?language=" + koreanIsoCode))
+                        .andRespond(withSuccess(new ObjectMapper().writeValueAsString(movieCredits), MediaType.APPLICATION_JSON));
+                mockServer.expect(requestTo("https://api.themoviedb.org/3/movie/" + movieId + "/release_dates"))
+                        .andRespond(withSuccess(new ObjectMapper().writeValueAsString(movieReleases), MediaType.APPLICATION_JSON));
 
                 // when
-                SearchMovieDetailApiResponse result = movieTMDbSearchService.searchDetailsMovie(tmdbMovieId);
+                SearchFilteredMovieDetailResponse result = movieTMDbSearchService.searchDetailsMovie(movieId);
 
                 // then
                 Assertions.assertThat(result).isNotNull();
+                Assertions.assertThat(result.tmdbId()).isEqualTo(27205);
+                Assertions.assertThat(result.title()).isEqualTo("Inception");
+            }
+
+            @Test
+            @SneakyThrows
+            void TMDb_영화_상세_조회_Releases_null() {
+                // given
+                String movieId = "27205";
+                String koreanIsoCode = LocaleUtils.KOREAN_LANGUAGE_CODE;
+
+                SearchMovieDetailApiResponse movieDetails = mock(SearchMovieDetailApiResponse.class);
+                given(movieDetails.id()).willReturn(27205);
+                given(movieDetails.title()).willReturn("Inception");
+                given(movieDetails.overview()).willReturn("타인의 꿈에 들어가 생각을 훔치는 특수 보안요원 코브...");
+
+                SearchCreditApiResponse movieCredits = mock(SearchCreditApiResponse.class);
+                given(movieCredits.cast()).willReturn(new ArrayList<>());
+                given(movieCredits.crew()).willReturn(new ArrayList<>());
+
+                SearchReleaseApiResponse movieReleases = mock(SearchReleaseApiResponse.class);
+
+                mockServer.expect(requestTo("https://api.themoviedb.org/3/movie/" + movieId + "?language=" + koreanIsoCode))
+                        .andRespond(withSuccess(new ObjectMapper().writeValueAsString(movieDetails), MediaType.APPLICATION_JSON));
+                mockServer.expect(requestTo("https://api.themoviedb.org/3/movie/" + movieId + "/credits?language=" + koreanIsoCode))
+                        .andRespond(withSuccess(new ObjectMapper().writeValueAsString(movieCredits), MediaType.APPLICATION_JSON));
+                mockServer.expect(requestTo("https://api.themoviedb.org/3/movie/" + movieId + "/release_dates"))
+                        .andRespond(withSuccess(new ObjectMapper().writeValueAsString(movieReleases), MediaType.APPLICATION_JSON));
+
+                // when
+                SearchFilteredMovieDetailResponse result = movieTMDbSearchService.searchDetailsMovie(movieId);
+
+                // then
+                Assertions.assertThat(result).isNotNull();
+                Assertions.assertThat(result.tmdbId()).isEqualTo(27205);
+                Assertions.assertThat(result.title()).isEqualTo("Inception");
             }
         }
     }

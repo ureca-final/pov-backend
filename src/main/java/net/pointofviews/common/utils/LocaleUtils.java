@@ -2,8 +2,8 @@ package net.pointofviews.common.utils;
 
 import java.util.Locale;
 
-public class ISOCodeToKoreanConverter {
-    private ISOCodeToKoreanConverter() {
+public class LocaleUtils {
+    private LocaleUtils() {
         throw new UnsupportedOperationException("Utility class");
     }
 
