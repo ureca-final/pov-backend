@@ -1,24 +1,25 @@
 package net.pointofviews.review.controller;
 
-import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
-import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.member.domain.Member;
+import net.pointofviews.review.controller.specification.ReviewMemberSpecification;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
+import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import net.pointofviews.review.dto.response.ProofreadReviewResponse;
 import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
 import net.pointofviews.review.dto.response.ReadReviewListResponse;
 import net.pointofviews.review.service.ReviewMemberService;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -80,12 +81,27 @@ public class ReviewMemberController implements ReviewMemberSpecification {
 	}
 
 	@Override
-	@GetMapping("/reviews/{reviewId}")
-	public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@PathVariable Long reviewId) {
+	@GetMapping("/{movieId}/reviews/{reviewId}")
+	public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@PathVariable Long movieId, @PathVariable Long reviewId) {
 		ReadReviewDetailResponse response = reviewMemberService.findReviewDetail(reviewId);
 
 		return BaseResponse.ok("리뷰가 성공적으로 상세 조회되었습니다.", response);
 	}
+
+	@Override
+	@GetMapping("/reviews/my")
+	public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMyReviews(
+			@AuthenticationPrincipal(expression = "member") Member loginMember,
+            @PageableDefault Pageable pageable
+    ) {
+        ReadReviewListResponse response = reviewMemberService.findReviewByMember(loginMember, pageable);
+
+		if (response.reviews().isEmpty()) {
+			return BaseResponse.noContent();
+		}
+
+        return BaseResponse.ok("내 리뷰 조회가 성공적으로 조회되었습니다.", response);
+    }
 
 	@Override
 	@PutMapping("/{movieId}/reviews/{reviewId}/likes")
