@@ -12,5 +12,9 @@ public interface CommonCodeService {
 
     String convertCommonCodeToName(String numberCode, CodeGroupEnum codeGroupEnum);
 
+    String convertCommonCodeNameToCommonCode(String name, CodeGroupEnum codeGroupEnum);
+
+    String convertCommonCodeDescriptionToCode(String description, CodeGroupEnum codeGroupEnum);
+
     List<CommonCode> findAllByCodeGroupEnum(CodeGroupEnum codeGroupEnum);
 }

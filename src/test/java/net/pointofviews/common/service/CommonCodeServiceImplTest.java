@@ -153,7 +153,7 @@ class CommonCodeServiceImplTest {
                 Assertions.assertThatThrownBy(
                                 () -> commonCodeService.convertNameToCommonCode(invalidGenreName, CodeGroupEnum.MOVIE_GENRE)
                         ).isInstanceOf(CommonCodeException.class)
-                        .hasMessage(CommonCodeException.genreNameNotFound(invalidGenreName).getMessage());
+                        .hasMessage(CommonCodeException.NameNotFound(invalidGenreName).getMessage());
             }
         }
     }
@@ -202,6 +202,54 @@ class CommonCodeServiceImplTest {
                                 () -> commonCodeService.convertCommonCodeToName(invalidCode, CodeGroupEnum.MOVIE_GENRE)
                         ).isInstanceOf(CommonCodeException.class)
                         .hasMessage(CommonCodeException.commonCodeNotFound(invalidCode).getMessage());
+            }
+        }
+    }
+
+    @Nested
+    class ConvertCommonCodeNameToCommonCode {
+        @Nested
+        class Success {
+            @Test
+            void 키워드명을_코드로_변환() {
+                // given
+                String keywordName = "감동적인";
+                String keywordCode = "01";
+
+                CommonCodeGroup keywordGroupCode = CommonCodeGroup.builder()
+                        .codeGroupEnum(CodeGroupEnum.REVIEW_KEYWORD)
+                        .build();
+
+                CommonCode reviewKeywordCode = CommonCode.builder()
+                        .code(keywordCode)
+                        .name(keywordName)
+                        .description("긍정")
+                        .groupCode(keywordGroupCode)
+                        .build();
+                List<CommonCode> codes = List.of(reviewKeywordCode);
+
+                given(commonCodeCacheService.findAll()).willReturn(codes);
+
+                // when
+                String convertedCode = commonCodeService.convertCommonCodeNameToCommonCode(keywordName, CodeGroupEnum.REVIEW_KEYWORD);
+
+                // then
+                assertThat(convertedCode).isEqualTo(keywordCode);
+            }
+        }
+
+        @Nested
+        class Failure {
+            @Test
+            void 존재하지_않는_키워드명_조회시_CommonCodeException() {
+                // given
+                String invalidKeywordName = "존재하지않는키워드";
+
+                // when & then
+                Assertions.assertThatThrownBy(
+                                () -> commonCodeService.convertCommonCodeNameToCommonCode(invalidKeywordName, CodeGroupEnum.REVIEW_KEYWORD)
+                        ).isInstanceOf(CommonCodeException.class)
+                        .hasMessage(CommonCodeException.NameNotFound(invalidKeywordName).getMessage());
             }
         }
     }

@@ -8,28 +8,23 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MovieCrew {
+public class MovieCountry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    private People people;
+    private Country country;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Movie movie;
 
-    private String role;
-
-    public MovieCrew(String role) {
-        this.role = role;
+    public MovieCountry(Country country) {
+        this.country = country;
+        country.updateMovieCountry(this);
     }
 
     public void updateMovie(Movie movie) {
         this.movie = movie;
-    }
-
-    public void updatePeople(People people) {
-        this.people = people;
     }
 }

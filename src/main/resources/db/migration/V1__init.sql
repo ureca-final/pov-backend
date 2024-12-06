@@ -11,7 +11,6 @@ CREATE TABLE movie
 (
     id          bigint auto_increment primary key,
     released    date         null,
-    country     varchar(255) null,
     tmdb_id     int          null,
     plot        varchar(255) null,
     poster      varchar(255) null,
@@ -27,7 +26,7 @@ CREATE TABLE club
     max_participants int          null,
     created_at       datetime(6)  null,
     description      varchar(255) null,
-    name             varchar(255) null,
+    name             varchar(255) null unique,
     club_image       varchar(255) null
 );
 
@@ -70,30 +69,30 @@ CREATE TABLE common_code
 CREATE TABLE people
 (
     id        bigint auto_increment primary key,
-    movie_id  bigint       null,
     name      varchar(255) null,
     image_url varchar(255) null,
-    tmdb_id int null,
-    CONSTRAINT FK_people_movie FOREIGN KEY (movie_id) REFERENCES movie (id)
+    tmdb_id   int          null unique
 );
 
-CREATE TABLE movie_crew (
-                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            people_id BIGINT NOT NULL,
-                            movie_id BIGINT NOT NULL,
-                            role VARCHAR(255),
-                            CONSTRAINT fk_movie_crew_people FOREIGN KEY (people_id) REFERENCES people (id) ON DELETE CASCADE,
-                            CONSTRAINT fk_movie_crew_movie FOREIGN KEY (movie_id) REFERENCES movie (id) ON DELETE CASCADE
+CREATE TABLE movie_crew
+(
+    id        BIGINT AUTO_INCREMENT PRIMARY KEY,
+    people_id BIGINT NOT NULL,
+    movie_id  BIGINT NOT NULL,
+    role      VARCHAR(255),
+    CONSTRAINT fk_movie_crew_people FOREIGN KEY (people_id) REFERENCES people (id) ON DELETE CASCADE,
+    CONSTRAINT fk_movie_crew_movie FOREIGN KEY (movie_id) REFERENCES movie (id) ON DELETE CASCADE
 );
 
-CREATE TABLE movie_cast (
-                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            people_id BIGINT NOT NULL,
-                            movie_id BIGINT NOT NULL,
-                            role_name VARCHAR(255),
-                            display_order INT,
-                            CONSTRAINT fk_movie_cast_people FOREIGN KEY (people_id) REFERENCES people (id) ON DELETE CASCADE,
-                            CONSTRAINT fk_movie_cast_movie FOREIGN KEY (movie_id) REFERENCES movie (id) ON DELETE CASCADE
+CREATE TABLE movie_cast
+(
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    people_id     BIGINT NOT NULL,
+    movie_id      BIGINT NOT NULL,
+    role_name     VARCHAR(255),
+    display_order INT,
+    CONSTRAINT fk_movie_cast_people FOREIGN KEY (people_id) REFERENCES people (id) ON DELETE CASCADE,
+    CONSTRAINT fk_movie_cast_movie FOREIGN KEY (movie_id) REFERENCES movie (id) ON DELETE CASCADE
 );
 
 
@@ -333,4 +332,19 @@ create table notice_send
     constraint FK_notice_send_notice
         foreign key (notice_id) references notice (id)
 );
+
+create table country
+(
+    id   int auto_increment primary key,
+    name varchar(255) not null
+);
+
+create table movie_country
+(
+    id         int auto_increment primary key,
+    country_id int    not null,
+    movie_id   bigint not null,
+    constraint FK_country foreign key (country_id) references country (id),
+    constraint FK_movie foreign key (movie_id) references movie (id)
+)
 

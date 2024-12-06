@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<?> handlerRuntimeException(RuntimeException ex) {
-		log.error("[Error] RuntimeException - Message: {}", ex.getMessage());
+		log.error("[Error] RuntimeException - Message: {}", ex.getMessage(), ex);
 
 		return BaseResponse.internalServerError(ex.getMessage(), null);
 	}

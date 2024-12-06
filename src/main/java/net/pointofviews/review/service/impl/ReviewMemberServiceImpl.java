@@ -1,6 +1,9 @@
 package net.pointofviews.review.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
@@ -23,16 +26,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static net.pointofviews.common.exception.S3Exception.emptyImageUrls;
 import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSize;
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
 import static net.pointofviews.movie.exception.MovieException.movieNotFound;
 import static net.pointofviews.review.exception.ReviewException.reviewNotFound;
+import static net.pointofviews.review.exception.ReviewException.unauthorizedReview;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReviewMemberServiceImpl implements ReviewMemberService {
@@ -43,11 +47,14 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final ReviewLikeCountRepository reviewLikeCountRepository;
     private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
+    private final CommonCodeService commonCodeService;
     private final S3Service s3Service;
 
     @Override
     @Transactional
-    public void saveReview(Long movieId, CreateReviewRequest request) {
+    public void saveReview(Long movieId, CreateReviewRequest request, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> movieNotFound(movieId));
@@ -59,20 +66,25 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
                 .preference(request.preference())
                 .isSpoiler(request.spoiler())
                 .movie(movie)
+                .member(member)
                 .build();
 
         reviewRepository.save(review);
 
         // 키워드 저장
-        if (request.keywords() != null && !request.keywords().isEmpty()) {
-            for (String keyword : request.keywords()) {
-                ReviewKeywordLink keywordLink = ReviewKeywordLink.builder()
-                        .review(review)
-                        .reviewKeywordCode(keyword)
-                        .build();
+        if (!request.keywords().isEmpty()) {
+            request.keywords().forEach(keywordName -> {
+                String keywordCode = commonCodeService.convertCommonCodeNameToCommonCode(
+                        keywordName,
+                        CodeGroupEnum.REVIEW_KEYWORD
+                );
 
-                reviewKeywordLinkRepository.save(keywordLink);
-            }
+                ReviewKeywordLink reviewKeywordLink = ReviewKeywordLink.builder()
+                        .review(review)
+                        .reviewKeywordCode(keywordCode)
+                        .build();
+                reviewKeywordLinkRepository.save(reviewKeywordLink);
+            });
         }
     }
 
@@ -83,7 +95,10 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
     @Override
     @Transactional
-    public void updateReview(Long movieId, Long reviewId, PutReviewRequest request) {
+    public void updateReview(Long movieId, Long reviewId, PutReviewRequest request, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
         if (movieRepository.findById(movieId).isEmpty()) {
             throw movieNotFound(movieId);
         }
@@ -91,12 +106,54 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> reviewNotFound(reviewId));
 
-        review.update(request.title(), request.contents());
+        if (!review.getMember().getId().equals(member.getId())) {
+            throw unauthorizedReview();
+        }
+
+        // 키워드 변경 로직
+        Map<String, String> keywordCodeMap = request.keywords().stream()
+                .collect(Collectors.toMap(
+                        keyword -> keyword,
+                        keyword -> commonCodeService.convertCommonCodeNameToCommonCode(keyword, CodeGroupEnum.REVIEW_KEYWORD)
+                ));
+
+        List<ReviewKeywordLink> existingLinks = reviewKeywordLinkRepository.findAllByReview(review);
+        Set<String> existingCodes = existingLinks.stream()
+                .map(ReviewKeywordLink::getReviewKeywordCode)
+                .collect(Collectors.toSet());
+
+        Set<String> newCodes = new HashSet<>(keywordCodeMap.values());
+
+        // 삭제할 키워드 찾기
+        List<ReviewKeywordLink> linksToDelete = existingLinks.stream()
+                .filter(link -> !newCodes.contains(link.getReviewKeywordCode()))
+                .collect(Collectors.toList());
+
+        // 추가할 키워드 찾기
+        Set<String> codesToAdd = newCodes.stream()
+                .filter(code -> !existingCodes.contains(code))
+                .collect(Collectors.toSet());
+
+        reviewKeywordLinkRepository.deleteAll(linksToDelete);
+
+        codesToAdd.forEach(code -> {
+            ReviewKeywordLink newLink = ReviewKeywordLink.builder()
+                    .review(review)
+                    .reviewKeywordCode(code)
+                    .build();
+            reviewKeywordLinkRepository.save(newLink);
+        });
+
+
+        review.update(request.title(), request.contents(), request.preference(), request.spoiler());
     }
 
     @Override
     @Transactional
-    public void deleteReview(Long movieId, Long reviewId) {
+    public void deleteReview(Long movieId, Long reviewId, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
         if (movieRepository.findById(movieId).isEmpty()) {
             throw movieNotFound(movieId);
         }
@@ -104,10 +161,12 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> reviewNotFound(reviewId));
 
-        // 이미지 삭제 로직
-        List<String> imageUrls = s3Service.extractImageUrlsFromHtml(review.getContents());
-        deleteReviewImages(imageUrls);
+        if (!review.getMember().getId().equals(member.getId())) {
+            throw unauthorizedReview();
+        }
 
+        // 이미지 삭제 로직
+        deleteReviewImagesFolder(movieId, loginMember);
 
         review.delete(); // soft delete 처리
     }
@@ -167,12 +226,24 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public void updateReviewLike(Long reviewId, Long likedId) {
+    @Transactional
+    public void updateReviewLike(Long movieId, Long reviewId, Member loginMember) {
+        // 영화, 리뷰 존재 확인
+        if (!movieRepository.existsById(movieId)) {
+            throw movieNotFound(movieId);
+        }
 
+        if (!reviewRepository.existsById(reviewId)) {
+            throw reviewNotFound(reviewId);
+        }
+
+        // redis에 좋아요 저장
     }
 
     @Override
-    public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files) {
+    public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files, Long movieId, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
         long totalSize = files.stream()
                 .mapToLong(MultipartFile::getSize)
@@ -187,14 +258,16 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         for (MultipartFile file : files) {
             s3Service.validateImageFile(file);
 
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename != null && !originalFilename.isEmpty()) {
-                String uniqueFileName = s3Service.createUniqueFileName(originalFilename);
-                String filePath = "reviews/" + uniqueFileName;
+            String originalFileName = file.getOriginalFilename();
+            String uniqueFileName = s3Service.createUniqueFileName(originalFileName);
+            String filePath = String.format("users/%s/movie/%d/%s",
+                    member.getId(),
+                    movieId,
+                    uniqueFileName);
 
-                String imageUrl = s3Service.saveImage(file, filePath);
-                imageUrls.add(imageUrl);
-            }
+            String imageUrl = s3Service.saveImage(file, filePath);
+
+            imageUrls.add(imageUrl);
         }
 
         return new CreateReviewImageListResponse(imageUrls);
@@ -202,13 +275,18 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
 
     @Override
     @Transactional
-    public void deleteReviewImages(List<String> imageUrls) {
-        if (imageUrls == null || imageUrls.isEmpty()) {
-            throw emptyImageUrls();
+    public void deleteReviewImagesFolder(Long movieId, Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        if (!movieRepository.existsById(movieId)) {
+            throw movieNotFound(movieId);
         }
 
-        for (String imageUrl : imageUrls) {
-            s3Service.deleteImage(imageUrl);
-        }
+        String folderPath = String.format("users/%s/movie/%d",
+                member.getId(),
+                movieId);
+
+        s3Service.deleteFolder(folderPath);
     }
 }

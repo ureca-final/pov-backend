@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.util.Assert;
 
 @Entity
 @Getter
@@ -27,5 +26,10 @@ public class MovieGenre {
             throw new IllegalArgumentException("GenreCode must be exactly 2 characters");
         this.movie = movie;
         this.genreCode = genreCode;
+    }
+
+    public void updateMovie(Movie movie) {
+        movie.addGenre(this);
+        this.movie = movie;
     }
 }
