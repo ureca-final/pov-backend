@@ -28,8 +28,6 @@ public class Movie {
 
     private String backdrop;
 
-    private String country;
-
     private LocalDate released;
 
     private Integer tmdbId;
@@ -37,20 +35,28 @@ public class Movie {
     @Enumerated(EnumType.STRING)
     private KoreanFilmRating filmRating;
 
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    private final List<MovieCountry> countries = new ArrayList<>();
+
     @OneToMany(mappedBy = "movie")
     private final List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie")
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
     private final List<MovieGenre> genres = new ArrayList<>();
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    private final List<MovieCrew> crews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    private final List<MovieCast> casts = new ArrayList<>();
 
     @Builder
     private Movie(String title, String plot, String poster,
-                  String country, LocalDate released, Integer tmdbId, String backdrop, KoreanFilmRating filmRating) {
+                  LocalDate released, Integer tmdbId, String backdrop, KoreanFilmRating filmRating) {
         Assert.notNull(title, "title must not be null");
         this.title = title;
         this.plot = plot;
         this.poster = poster;
-        this.country = country;
         this.released = released;
         this.tmdbId = tmdbId;
         this.backdrop = backdrop;
@@ -59,5 +65,25 @@ public class Movie {
 
     public void addReview(Review review) {
         this.reviews.add(review);
+    }
+
+    public void addCrew(MovieCrew crew) {
+        this.crews.add(crew);
+        crew.updateMovie(this);
+    }
+
+    public void addCast(MovieCast cast) {
+        casts.add(cast);
+        cast.updateMovie(this);
+    }
+
+    public void addGenre(MovieGenre movieGenre) {
+        this.genres.add(movieGenre);
+        movieGenre.updateMovie(this);
+    }
+
+    public void addCountry(MovieCountry movieCountry) {
+        this.countries.add(movieCountry);
+        movieCountry.updateMovie(this);
     }
 }

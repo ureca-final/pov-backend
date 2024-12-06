@@ -38,7 +38,6 @@ class MovieTest {
                         .title(title)
                         .plot(plot)
                         .poster(poster)
-                        .country(country)
                         .released(released)
                         .tmdbId(tmdbId)
                         .backdrop(backdrop)
@@ -51,7 +50,6 @@ class MovieTest {
                     softly.assertThat(movie.getTitle()).isEqualTo(title);
                     softly.assertThat(movie.getPlot()).isEqualTo(plot);
                     softly.assertThat(movie.getPoster()).isEqualTo(poster);
-                    softly.assertThat(movie.getCountry()).isEqualTo(country);
                     softly.assertThat(movie.getReleased()).isEqualTo(released);
                     softly.assertThat(movie.getTmdbId()).isEqualTo(tmdbId);
                     softly.assertThat(movie.getBackdrop()).isEqualTo(backdrop);
@@ -71,7 +69,6 @@ class MovieTest {
                         .title(null) // 제목이 null인 경우
                         .plot("A mind-bending thriller.")
                         .poster("poster.jpg")
-                        .country("USA")
                         .released(LocalDate.of(2010, 7, 16))
                         .tmdbId(27205)
                         .build()).isInstanceOf(IllegalArgumentException.class)
@@ -93,7 +90,6 @@ class MovieTest {
                         .title("Inception")
                         .plot("A mind-bending thriller about dreams within dreams.")
                         .poster("inception-poster.jpg")
-                        .country("USA")
                         .released(LocalDate.now())
                         .tmdbId(27205)
                         .backdrop("inception-backdrop.jpg")
