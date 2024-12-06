@@ -115,9 +115,8 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public String createUniqueFileName(String originalFilename) {
 		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-		String baseName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
 		String uniquePrefix = UUID.randomUUID().toString();
-		return baseName + "_" + uniquePrefix + extension;
+		return uniquePrefix + extension;
 	}
 
 	@Override
