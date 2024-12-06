@@ -15,13 +15,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class CommonCodeServiceImpl implements CommonCodeService {
 
     private final CommonCodeCacheServiceImpl commonCodeCacheServiceImpl;
 
     @Override
-    @Transactional(readOnly = true)
     public String convertCommonCodeNameToName(String numberCode, CodeGroupEnum codeGroupEnum) {
         Map<String, String> genreCodeMap = findAllByCodeGroupEnum(codeGroupEnum).stream()
                 .collect(Collectors.toMap(CommonCode::getName, CommonCode::getDescription));
@@ -40,7 +39,6 @@ public class CommonCodeServiceImpl implements CommonCodeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public String convertCommonCodeToName(String numberCode, CodeGroupEnum codeGroupEnum) {
         Map<String, String> genreCodeMap = findAllByCodeGroupEnum(codeGroupEnum).stream()
                 .collect(Collectors.toMap(
@@ -64,7 +62,21 @@ public class CommonCodeServiceImpl implements CommonCodeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    public String convertCommonCodeDescriptionToCode(String description, CodeGroupEnum codeGroupEnum) {
+        Map<String, String> genreCodeMap = findAllByCodeGroupEnum(codeGroupEnum).stream()
+                .collect(Collectors.toMap(
+                        CommonCode::getDescription,
+                        c -> c.getCode().getCode()
+                ));
+
+        if (genreCodeMap.get(description) == null) {
+            throw CommonCodeException.genreNameNotFound(description);
+        }
+
+        return genreCodeMap.get(description);
+    }
+
+    @Override
     public List<CommonCode> findAllByCodeGroupEnum(CodeGroupEnum codeGroupEnum) {
         List<CommonCode> commonCodeList = commonCodeCacheServiceImpl.findAll();
 
