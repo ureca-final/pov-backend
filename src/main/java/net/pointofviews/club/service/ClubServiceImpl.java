@@ -195,8 +195,8 @@ public class ClubServiceImpl implements ClubService {
 
         return new PutClubLeaderResponse(
                 club.getId(),
-                newLeader.getNickname(),
-                newLeader.getEmail()
+                newLeader.getEmail(),
+                newLeader.getNickname()
         );
     }
 
