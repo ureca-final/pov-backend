@@ -28,4 +28,8 @@ public class CommonCodeException extends BusinessException {
     public static CommonCodeException commonCodeEmptyError() {
         return new CommonCodeException(HttpStatus.INTERNAL_SERVER_ERROR, "공통코드가 존재하지 않습니다.");
     }
+
+    public static CommonCodeException genreNameNotFound(String description) {
+        return new CommonCodeException(HttpStatus.INTERNAL_SERVER_ERROR, String.format("장르명이 존재하지 않습니다. {%s}", description));
+    }
 }
