@@ -2,6 +2,8 @@ package net.pointofviews.club.domain;
 
 import java.util.UUID;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import net.pointofviews.common.domain.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -51,5 +53,12 @@ public class Club extends BaseEntity {
 
     public void updateClubImage(String clubImage) {
         this.clubImage = clubImage;
+    }
+
+    public void updateClub(String name, String description, @Min(2) @Max(1000) Integer integer, boolean Public) {
+        this.name = name;
+        this.description = description;
+        this.maxParticipants = integer;
+        this.isPublic = Public;
     }
 }

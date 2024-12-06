@@ -14,4 +14,12 @@ public class ClubException extends BusinessException {
     public static ClubException clubNotFound(UUID clubId) {
         return new ClubException(HttpStatus.NOT_FOUND, String.format("클럽(Id: %s)이 존재하지 않습니다.", clubId));
     }
+
+    public static ClubException memberNotInClub() {
+        return new ClubException(HttpStatus.FORBIDDEN, "클럽 멤버가 아닙니다.");
+    }
+
+    public static ClubException notClubLeader() {
+        return new ClubException(HttpStatus.FORBIDDEN, "클럽장만 수정할 수 있습니다.");
+    }
 }

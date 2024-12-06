@@ -12,6 +12,7 @@ import net.pointofviews.club.dto.response.CreateClubImageListResponse;
 import net.pointofviews.club.dto.response.CreateClubResponse;
 import net.pointofviews.club.dto.response.PutClubLeaderResponse;
 import net.pointofviews.club.dto.response.PutClubResponse;
+import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubFavorGenreRepository;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
@@ -24,10 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static net.pointofviews.club.exception.ClubException.clubNotFound;
 import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSize;
 
 @Service
@@ -107,8 +108,63 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
+    @Transactional
     public PutClubResponse updateClub(UUID clubId, PutClubRequest request, Member member) {
-        return null;
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> clubNotFound(clubId));
+
+        validateClubLeader(club, member);
+
+        // 클럽 수정
+        club.updateClub(
+                request.name(),
+                request.description(),
+                request.maxParticipants(),
+                request.isPublic()
+        );
+        if (request.clubImage() != null && !request.clubImage().isEmpty()) {
+            club.updateClubImage(request.clubImage());
+        }
+
+        // 선호 장르 변경
+        Map<String, String> genreCodeMap = request.clubFavorGenre().stream()
+                .collect(Collectors.toMap(
+                        genre -> genre,
+                        genre -> commonCodeService.convertNameToCommonCode(genre, CodeGroupEnum.MOVIE_GENRE)
+                ));
+
+        List<ClubFavorGenre> existingGenres = clubFavorGenreRepository.findAllByClub(club);
+        Set<String> existingCodes = existingGenres.stream()
+                .map(ClubFavorGenre::getGenreCode)
+                .collect(Collectors.toSet());
+
+        Set<String> newCodes = new HashSet<>(genreCodeMap.values());
+
+        List<ClubFavorGenre> genresToDelete = existingGenres.stream()
+                .filter(genre -> !newCodes.contains(genre.getGenreCode()))
+                .toList();
+        clubFavorGenreRepository.deleteAll(genresToDelete);
+
+        Set<String> codesToAdd = newCodes.stream()
+                .filter(code -> !existingCodes.contains(code))
+                .collect(Collectors.toSet());
+
+        codesToAdd.forEach(code -> {
+            ClubFavorGenre newGenre = ClubFavorGenre.builder()
+                    .club(club)
+                    .genreCode(code)
+                    .build();
+            clubFavorGenreRepository.save(newGenre);
+        });
+
+        return new PutClubResponse(
+                club.getId(),
+                club.getName(),
+                club.getDescription(),
+                club.getMaxParticipants(),
+                club.isPublic(),
+                request.clubFavorGenre()
+        );
     }
 
     @Override
@@ -149,7 +205,44 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public CreateClubImageListResponse updateClubImages(List<MultipartFile> files, Member member) {
-        return null;
+    public CreateClubImageListResponse updateClubImages(UUID clubId, List<MultipartFile> files, Member member) {
+        long totalSize = files.stream()
+                .mapToLong(MultipartFile::getSize)
+                .sum();
+
+        if (totalSize > 10 * 1024 * 1024) {
+            throw invalidTotalImageSize();
+        }
+
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> clubNotFound(clubId));
+        validateClubLeader(club, member);
+
+        String clubImage = club.getClubImage();
+        if (clubImage != null && !clubImage.isEmpty()) {
+            String oldImagePath = clubImage.replace("https://" + bucketName + ".s3.ap-northeast-2.amazonaws.com/", "");
+            s3Service.deleteImage(oldImagePath);
+        }
+
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            s3Service.validateImageFile(file);
+            String uniqueFileName = s3Service.createUniqueFileName(file.getOriginalFilename());
+            String filePath = "clubs/" + club.getId() + "/profile/" + uniqueFileName;
+            String imageUrl = s3Service.saveImage(file, filePath);
+            imageUrls.add(imageUrl);
+            club.updateClubImage(imageUrl);
+        }
+
+        return new CreateClubImageListResponse(imageUrls);
+    }
+
+    private void validateClubLeader(Club club, Member member) {
+        MemberClub memberClub = memberClubRepository.findByClubAndMember(club, member)
+                .orElseThrow(ClubException::memberNotInClub);
+
+        if (!memberClub.isLeader()) {
+            throw ClubException.notClubLeader();
+        }
     }
 }

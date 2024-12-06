@@ -62,10 +62,11 @@ public class ClubController implements ClubSpecification{
     @Override
     @PostMapping(value = "/{clubId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<CreateClubImageListResponse>> putClubImages(
+            @PathVariable UUID clubId,
             @RequestPart(value = "files") List<MultipartFile> files,
             @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     ) {
-        CreateClubImageListResponse response = clubService.updateClubImages(files,memberDetailsDto.member());
+        CreateClubImageListResponse response = clubService.updateClubImages(clubId, files, memberDetailsDto.member());
         return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
     }
 
