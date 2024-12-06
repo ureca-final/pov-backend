@@ -15,13 +15,13 @@ import java.util.List;
 
 public interface ReviewMemberService {
 
-	void saveReview(Long movieId, CreateReviewRequest request);
+	void saveReview(Long movieId, CreateReviewRequest request, Member loginMember);
 
 	ProofreadReviewResponse proofreadReview(Long movieId, ProofreadReviewRequest request);
 
-	void updateReview(Long movieId, Long reviewId, PutReviewRequest request);
+	void updateReview(Long movieId, Long reviewId, PutReviewRequest request, Member loginMember);
 
-	void deleteReview(Long movieId, Long reviewId);
+	void deleteReview(Long movieId, Long reviewId, Member loginMember);
 
 	ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable);
 
@@ -31,9 +31,9 @@ public interface ReviewMemberService {
 
 	ReadReviewListResponse findReviewByMember(Member loginMember, Pageable pageable);
 
-	void updateReviewLike(Long reviewId, Long likedId);
+	void updateReviewLike(Long movieId, Long reviewId, Member loginMember);
 
-	CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files);
+	CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files, Long movieId, Member loginMember);
 
-    void deleteReviewImages(List<String> strings);
+	void deleteReviewImagesFolder(Long movieId, Member loginMember);
 }

@@ -10,13 +10,13 @@ public interface S3Service {
 
 	void deleteImage(String imageAddress);
 
+	void deleteFolder(String folderPath);
+
 	String getImage(String filePath);
 
 	void validateImageFile(MultipartFile file);
 
 	String createUniqueFileName(String originalFilename);
-
-	List<String> extractImageUrlsFromHtml(String html);
 
 	boolean isImageFile(String filename);
 

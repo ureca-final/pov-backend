@@ -1,22 +1,5 @@
 package net.pointofviews.review.controller.specification;
 
-import net.pointofviews.member.domain.Member;
-import net.pointofviews.review.dto.request.DeleteReviewImageListRequest;
-import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-
-import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.review.dto.request.CreateReviewRequest;
-import net.pointofviews.review.dto.request.ProofreadReviewRequest;
-import net.pointofviews.review.dto.request.PutReviewRequest;
-import net.pointofviews.review.dto.response.ProofreadReviewResponse;
-import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
-import net.pointofviews.review.dto.response.ReadReviewListResponse;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,8 +7,24 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import net.pointofviews.auth.dto.MemberDetailsDto;
+import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.member.domain.Member;
+import net.pointofviews.review.dto.request.CreateReviewRequest;
+import net.pointofviews.review.dto.request.ProofreadReviewRequest;
+import net.pointofviews.review.dto.request.PutReviewRequest;
+import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
+import net.pointofviews.review.dto.response.ProofreadReviewResponse;
+import net.pointofviews.review.dto.response.ReadReviewDetailResponse;
+import net.pointofviews.review.dto.response.ReadReviewListResponse;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -51,6 +50,18 @@ public interface ReviewMemberSpecification {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인이 필요한 서비스입니다.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                {
+                    "message": "로그인이 필요한 서비스입니다."
+                }
+                """)
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "리뷰 등록 실패",
                     content = @Content(
@@ -64,7 +75,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> createReview(Long movieId, CreateReviewRequest request);
+    ResponseEntity<BaseResponse<Void>> createReview(Long movieId, CreateReviewRequest request, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 교정",
@@ -109,6 +120,30 @@ public interface ReviewMemberSpecification {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인이 필요한 서비스입니다.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                {
+                    "message": "로그인이 필요한 서비스입니다."
+                }
+                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "리뷰 수정 권한이 없습니다.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                {
+                    "message": "리뷰 수정 권한이 없습니다."
+                }
+                """)
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "리뷰 수정 실패",
                     content = @Content(
@@ -122,7 +157,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> putReview(Long movieId, Long reviewId, PutReviewRequest request);
+    ResponseEntity<BaseResponse<Void>> putReview(Long movieId, Long reviewId, PutReviewRequest request, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 삭제",
@@ -142,6 +177,19 @@ public interface ReviewMemberSpecification {
                     )
             ),
             @ApiResponse(
+                    responseCode = "403",
+                    description = "리뷰 삭제 권한 없음",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                {
+                                    "message": "리뷰 삭제 권한이 없습니다."
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "리뷰 삭제 실패",
                     content = @Content(
@@ -155,7 +203,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> deleteReview(Long movieId, Long reviewId);
+    ResponseEntity<BaseResponse<Void>> deleteReview(Long movieId, Long reviewId, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "영화별 리뷰 조회",
@@ -288,7 +336,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> putReviewLike(Long movieId, Long reviewId);
+    ResponseEntity<BaseResponse<Void>> putReviewLike(Long movieId, Long reviewId, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 이미지 업로드",
@@ -325,12 +373,14 @@ public interface ReviewMemberSpecification {
             )
     })
     ResponseEntity<BaseResponse<CreateReviewImageListResponse>> createReviewImages(
-            @Parameter(description = "이미지 파일 목록") List<MultipartFile> files
+            @PathVariable Long movieId,
+            @RequestPart(value = "files") List<MultipartFile> files,
+            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     );
 
     @Operation(
-            summary = "리뷰 임시 이미지 삭제",
-            description = "임시 저장된 리뷰의 미사용 이미지를 삭제하는 API."
+            summary = "리뷰 이미지 삭제",
+            description = "리뷰(등록한 리뷰, 임시저장된 리뷰 모두 포함)에 사용된 이미지를 삭제하는 API."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -358,5 +408,5 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> deleteReviewImages(@RequestBody DeleteReviewImageListRequest request);
+    ResponseEntity<BaseResponse<Void>> deleteReviewImagesFolder(Long movieId, MemberDetailsDto memberDetailsDto);
 }

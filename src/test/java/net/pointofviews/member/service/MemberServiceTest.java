@@ -184,7 +184,7 @@ class MemberServiceTest {
 
                 given(memberRepository.existsByEmail(anyString())).willReturn(false);
                 given(commonCodeService.convertNameToCommonCode(anyString(), any()))
-                        .willThrow(CommonCodeException.genreNameNotFound("로맨틱"));
+                        .willThrow(CommonCodeException.NameNotFound("로맨틱"));
 
                 // when
                 CommonCodeException exception = assertThrows(CommonCodeException.class, () ->
@@ -194,7 +194,7 @@ class MemberServiceTest {
                 // then
                 assertSoftly(softly -> {
                     softly.assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-                    softly.assertThat(exception.getMessage()).isEqualTo(CommonCodeException.genreNameNotFound("로맨틱").getMessage());
+                    softly.assertThat(exception.getMessage()).isEqualTo(CommonCodeException.NameNotFound("로맨틱").getMessage());
                 });
             }
         }

@@ -36,7 +36,7 @@ public class CommonCodeServiceImpl implements CommonCodeService {
                 .collect(Collectors.toMap(CommonCode::getDescription, code -> code.getCode().getCode()));
 
         return Optional.ofNullable(codeMap.get(name))
-                .orElseThrow(() -> CommonCodeException.genreNameNotFound(name));
+                .orElseThrow(() -> CommonCodeException.NameNotFound(name));
     }
 
     @Override
@@ -50,6 +50,17 @@ public class CommonCodeServiceImpl implements CommonCodeService {
 
         return Optional.ofNullable(genreCodeMap.get(numberCode))
                 .orElseThrow(() -> CommonCodeException.commonCodeNotFound(numberCode));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String convertCommonCodeNameToCommonCode(String name, CodeGroupEnum codeGroupEnum) {
+        Map<String, String> codeMap = findAllByCodeGroupEnum(codeGroupEnum).stream()
+                .collect(Collectors.toMap(CommonCode::getName, code -> code.getCode().getCode()
+                ));
+
+        return Optional.ofNullable(codeMap.get(name))
+                .orElseThrow(() -> CommonCodeException.NameNotFound(name));
     }
 
     @Override

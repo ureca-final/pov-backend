@@ -2,6 +2,7 @@ package net.pointofviews.review.repository;
 
 import java.util.List;
 
+import net.pointofviews.review.domain.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,5 +20,7 @@ public interface ReviewKeywordLinkRepository extends JpaRepository<ReviewKeyword
 		 WHERE rkl.review.id = :reviewId
 	""")
 	List<String> findKeywordsByReviewId(@Param("reviewId") Long reviewId);
+
+	List<ReviewKeywordLink> findAllByReview(Review review);
 
 }
