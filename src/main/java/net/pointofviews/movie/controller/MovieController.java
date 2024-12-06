@@ -2,15 +2,14 @@ package net.pointofviews.movie.controller;
 
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.movie.dto.SearchMovieCriteria;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
-import net.pointofviews.movie.dto.response.SearchMovieListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import net.pointofviews.movie.service.MovieContentService;
+import net.pointofviews.movie.service.MovieSearchService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -18,11 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MovieController implements MovieSpecification {
 
     private final MovieContentService movieContentService;
+    private final MovieSearchService movieSearchService;
 
     @Override
-    @GetMapping
-    public ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(SearchMovieCriteria criteria) {
-        return null;
+    @GetMapping("/search")
+    public ResponseEntity<BaseResponse<Slice<SearchMovieResponse>>> searchMovieList(@RequestParam String query,
+                                                                                    Pageable pageable) {
+        Slice<SearchMovieResponse> response = movieSearchService.searchMovies(query, pageable);
+        return BaseResponse.ok("영화가 성공적으로 검색되었습니다.", response);
     }
 
     @Override
@@ -30,4 +32,6 @@ public class MovieController implements MovieSpecification {
     public ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(@PathVariable Long movieId) {
         return null;
     }
+
+
 }

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MovieMemberController implements MovieMemberSpecification {
 
-    private final MovieContentService movieContentService;
     private final MovieMemberService movieMemberService;
 
     @Override
