@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,17 +19,13 @@ public class Country {
     private String name;
 
     @OneToMany(mappedBy = "country")
-    private List<MovieCountry> movieCountry;
+    private final List<MovieCountry> movieCountry = new ArrayList<>();
 
     public Country(String name) {
         this.name = name;
     }
 
     public void updateMovieCountry(MovieCountry movieCountry) {
-        this.movieCountry.add(movieCountry);
-    }
-
-    public void addMovieCountry(MovieCountry movieCountry) {
         this.movieCountry.add(movieCountry);
     }
 }

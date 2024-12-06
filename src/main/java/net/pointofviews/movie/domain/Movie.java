@@ -32,7 +32,7 @@ public class Movie {
 
     private Integer tmdbId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = FilmRatingConverter.class)
     private KoreanFilmRating filmRating;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
