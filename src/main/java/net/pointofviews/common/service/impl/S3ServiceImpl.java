@@ -1,10 +1,7 @@
 package net.pointofviews.common.service.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.common.service.S3Service;
@@ -13,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static net.pointofviews.common.exception.S3Exception.*;
 
@@ -66,9 +65,15 @@ public class S3ServiceImpl implements S3Service {
 		try {
 			ObjectListing objectListing = amazonS3.listObjects(bucketName, folderPath);
 			while (true) {
-				for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-					amazonS3.deleteObject(bucketName, objectSummary.getKey());
-					log.info("Deleted object: {}", objectSummary.getKey());
+				DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName);
+				List<DeleteObjectsRequest.KeyVersion> keys = objectListing.getObjectSummaries().stream()
+						.map(s3 -> new DeleteObjectsRequest.KeyVersion(s3.getKey()))
+						.collect(Collectors.toList());
+
+				if (!keys.isEmpty()) {
+					deleteRequest.setKeys(keys);
+					amazonS3.deleteObjects(deleteRequest);
+					log.info("Batch deleted {} objects", keys.size());
 				}
 
 				if (objectListing.isTruncated()) {
