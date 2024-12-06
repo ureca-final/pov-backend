@@ -86,7 +86,7 @@ public interface MovieAdminSpecification {
     })
     ResponseEntity<?> deleteMovie(Long movieId);
 
-    @Operation(summary = "영화 이미지 URL 등록", description = "지정된 영화 ID에 이미지를 등록합니다.")
+    @Operation(summary = "영화 이미지 등록", description = "지정된 영화 ID에 이미지를 등록합니다.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -95,7 +95,7 @@ public interface MovieAdminSpecification {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
                                     {
-                                      "message": "이미지 URL 등록이 성공적으로 완료되었습니다."
+                                      "message": "이미지 등록이 성공적으로 완료되었습니다."
                                     }
                                     """)
                     )
@@ -120,7 +120,7 @@ public interface MovieAdminSpecification {
     })
     ResponseEntity<?> createVideos(Long movieId, List<String> urls);
 
-    @Operation(summary = "영화 이미지 URL 삭제", description = "지정된 영화 ID의 특정 이미지 URL을 삭제합니다.")
+    @Operation(summary = "영화 이미지 삭제", description = "지정된 영화 ID의 특정 이미지를 삭제합니다.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -136,12 +136,12 @@ public interface MovieAdminSpecification {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "삭제 실패 - 없는 영화 컨텐츠",
+                    description = "삭제 실패 - 없는 영화 이미지",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
                                     {
-                                      "message": "존재하지 않는 이미지 URL입니다."
+                                      "message": "존재하지 않는 이미지 입니다."
                                     }
                                     """)
                     )
