@@ -73,12 +73,14 @@ public class Review extends SoftDeleteEntity {
         }
     }
 
-    public void update(String title, String contents) {
+    public void update(String title, String contents, String preference, boolean isSpoiler) {
         Assert.notNull(title, "Title must not be null");
         Assert.notNull(contents, "Contents must not be null");
 
         this.title = title;
         this.contents = contents;
+        this.preference = preference;
+        this.isSpoiler = isSpoiler;
     }
 
     public void toggleDisabled() {

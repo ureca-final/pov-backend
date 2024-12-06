@@ -26,8 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSize;
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
@@ -110,7 +110,42 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
             throw unauthorizedReview();
         }
 
-        review.update(request.title(), request.contents());
+        // 키워드 변경 로직
+        Map<String, String> keywordCodeMap = request.keywords().stream()
+                .collect(Collectors.toMap(
+                        keyword -> keyword,
+                        keyword -> commonCodeService.convertCommonCodeNameToCommonCode(keyword, CodeGroupEnum.REVIEW_KEYWORD)
+                ));
+
+        List<ReviewKeywordLink> existingLinks = reviewKeywordLinkRepository.findAllByReview(review);
+        Set<String> existingCodes = existingLinks.stream()
+                .map(ReviewKeywordLink::getReviewKeywordCode)
+                .collect(Collectors.toSet());
+
+        Set<String> newCodes = new HashSet<>(keywordCodeMap.values());
+
+        // 삭제할 키워드 찾기
+        List<ReviewKeywordLink> linksToDelete = existingLinks.stream()
+                .filter(link -> !newCodes.contains(link.getReviewKeywordCode()))
+                .collect(Collectors.toList());
+
+        // 추가할 키워드 찾기
+        Set<String> codesToAdd = newCodes.stream()
+                .filter(code -> !existingCodes.contains(code))
+                .collect(Collectors.toSet());
+
+        reviewKeywordLinkRepository.deleteAll(linksToDelete);
+
+        codesToAdd.forEach(code -> {
+            ReviewKeywordLink newLink = ReviewKeywordLink.builder()
+                    .review(review)
+                    .reviewKeywordCode(code)
+                    .build();
+            reviewKeywordLinkRepository.save(newLink);
+        });
+
+
+        review.update(request.title(), request.contents(), request.preference(), request.spoiler());
     }
 
     @Override
@@ -206,8 +241,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files, Long movieId, Member loginMember)
-    {
+    public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files, Long movieId, Member loginMember) {
         Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> memberNotFound(loginMember.getId()));
 

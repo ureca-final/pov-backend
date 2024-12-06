@@ -12,6 +12,7 @@ import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.domain.ReviewKeywordLink;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
@@ -181,33 +182,40 @@ class ReviewMemberServiceTest {
 
     @Nested
     class UpdateReview {
+        private final PutReviewRequest request = new PutReviewRequest(
+                "수정된 제목",
+                "수정된 내용",
+                "긍정적",
+                List.of("감동적인"),
+                false
+        );
+
         @Nested
         class Success {
             @Test
             void 리뷰_수정_성공() {
                 // given
                 Member loginMember = mock(Member.class);
-                Member reviewMember = mock(Member.class);
-                UUID memberId = UUID.randomUUID();
-                Movie movie = mock(Movie.class);
                 Review review = mock(Review.class);
+                UUID memberId = UUID.randomUUID();
 
                 given(memberRepository.findById(any())).willReturn(Optional.of(loginMember));
-                given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+                given(movieRepository.findById(any())).willReturn(Optional.of(mock(Movie.class)));
                 given(reviewRepository.findById(any())).willReturn(Optional.of(review));
                 given(loginMember.getId()).willReturn(memberId);
-                given(reviewMember.getId()).willReturn(memberId);
-                given(review.getMember()).willReturn(reviewMember);
+                given(review.getMember()).willReturn(loginMember);
 
-                PutReviewRequest request = new PutReviewRequest(
-                        "수정된 제목",
-                        "수정된 내용"
-                );
+                given(reviewKeywordLinkRepository.findAllByReview(any()))
+                        .willReturn(List.of(mock(ReviewKeywordLink.class)));
+                given(commonCodeService.convertCommonCodeNameToCommonCode(any(), any()))
+                        .willReturn("03");
 
                 // when & then
                 assertSoftly(softly -> {
                     softly.assertThatCode(() -> reviewService.updateReview(1L, 1L, request, loginMember))
                             .doesNotThrowAnyException();
+                    verify(reviewKeywordLinkRepository).deleteAll(any());
+                    verify(reviewKeywordLinkRepository).save(any());
                 });
             }
         }
@@ -217,14 +225,11 @@ class ReviewMemberServiceTest {
             @Test
             void 존재하지_않는_회원_MemberNotFoundException_예외발생() {
                 // given
-                Member loginMember = mock(Member.class);
                 given(memberRepository.findById(any())).willReturn(Optional.empty());
-
-                PutReviewRequest request = new PutReviewRequest("제목", "내용");
 
                 // when & then
                 assertSoftly(softly -> {
-                    softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request, loginMember))
+                    softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request, mock(Member.class)))
                             .isInstanceOf(MemberException.class);
                 });
             }
@@ -232,21 +237,17 @@ class ReviewMemberServiceTest {
             @Test
             void 권한이_없는_사용자_ReviewException_unauthorizedReview_예외발생() {
                 // given
-                Member loginMember = mock(Member.class);
-                Member reviewMember = mock(Member.class);
-                UUID loginMemberId = UUID.randomUUID();
-                UUID reviewMemberId = UUID.randomUUID();
-                Movie movie = mock(Movie.class);
+                Member loginMember = mock(Member.class), reviewMember = mock(Member.class);
                 Review review = mock(Review.class);
+                UUID loginId = UUID.randomUUID();
+                UUID reviewerId = UUID.randomUUID();
 
                 given(memberRepository.findById(any())).willReturn(Optional.of(loginMember));
-                given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+                given(movieRepository.findById(any())).willReturn(Optional.of(mock(Movie.class)));
                 given(reviewRepository.findById(any())).willReturn(Optional.of(review));
-                given(loginMember.getId()).willReturn(loginMemberId);
-                given(reviewMember.getId()).willReturn(reviewMemberId);
+                given(loginMember.getId()).willReturn(loginId);
+                given(reviewMember.getId()).willReturn(reviewerId);
                 given(review.getMember()).willReturn(reviewMember);
-
-                PutReviewRequest request = new PutReviewRequest("제목", "내용");
 
                 // when & then
                 assertSoftly(softly -> {
@@ -258,15 +259,12 @@ class ReviewMemberServiceTest {
             @Test
             void 존재하지_않는_영화_MovieNotFoundException_예외발생() {
                 // given
-                Member loginMember = mock(Member.class);
-                given(memberRepository.findById(any())).willReturn(Optional.of(loginMember));
+                given(memberRepository.findById(any())).willReturn(Optional.of(mock(Member.class)));
                 given(movieRepository.findById(any())).willReturn(Optional.empty());
-
-                PutReviewRequest request = new PutReviewRequest("제목", "내용");
 
                 // when & then
                 assertSoftly(softly -> {
-                    softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request, loginMember))
+                    softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request, mock(Member.class)))
                             .isInstanceOf(MovieException.class);
                 });
             }
@@ -274,17 +272,13 @@ class ReviewMemberServiceTest {
             @Test
             void 존재하지_않는_리뷰_ReviewNotFoundException_예외발생() {
                 // given
-                Member loginMember = mock(Member.class);
-                Movie movie = mock(Movie.class);
-                given(memberRepository.findById(any())).willReturn(Optional.of(loginMember));
-                given(movieRepository.findById(any())).willReturn(Optional.of(movie));
+                given(memberRepository.findById(any())).willReturn(Optional.of(mock(Member.class)));
+                given(movieRepository.findById(any())).willReturn(Optional.of(mock(Movie.class)));
                 given(reviewRepository.findById(any())).willReturn(Optional.empty());
-
-                PutReviewRequest request = new PutReviewRequest("제목", "내용");
 
                 // when & then
                 assertSoftly(softly -> {
-                    softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request, loginMember))
+                    softly.assertThatThrownBy(() -> reviewService.updateReview(1L, 1L, request, mock(Member.class)))
                             .isInstanceOf(ReviewException.class);
                 });
             }

@@ -25,7 +25,7 @@ public record CreateReviewRequest(
 	@NotBlank
 	String preference,
 
-	@Schema(description = "키워드", example = "[\"흥미진진\", \"몰입감\"]")
+	@Schema(description = "키워드", example = "[\"감동적인\", \"몰입감 있는\"]")
 	@NotNull
 	List<String> keywords,
 
