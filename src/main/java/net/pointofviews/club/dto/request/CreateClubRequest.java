@@ -24,6 +24,6 @@ public record CreateClubRequest(
         @Schema(description = "공개 여부", example = "true")
         boolean isPublic,
 
-        @Schema(description = "클럽 선호 장르 목록", example = "[\"ACTION\", \"ROMANCE\"]")
+        @Schema(description = "클럽 선호 장르 목록", example = "[\"액션\", \"로맨스\"]")
         List<String> clubFavorGenre
 ) {}

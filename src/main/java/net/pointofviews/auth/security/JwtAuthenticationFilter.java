@@ -1,4 +1,4 @@
-package net.pointofviews.auth.security.filter;
+package net.pointofviews.auth.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
