@@ -16,4 +16,8 @@ public class MovieException extends BusinessException {
     public static MovieException tmdbBadRequest(String message) {
         return new MovieException(HttpStatus.BAD_REQUEST, message);
     }
+
+    public static MovieException duplicateMovie(Integer tmdbId) {
+        return new MovieException(HttpStatus.CONFLICT, String.format("영화(tmdb id: %d)는 존재하는 영화입니다.", tmdbId));
+    }
 }
