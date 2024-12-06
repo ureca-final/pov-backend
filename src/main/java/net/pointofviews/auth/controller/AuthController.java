@@ -61,6 +61,7 @@ public class AuthController implements AuthSpecification {
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true);  // HTTPS only
         refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setAttribute("SameSite", "None");
         refreshTokenCookie.setMaxAge(1209600);  // 2주
         response.addCookie(refreshTokenCookie);
 
