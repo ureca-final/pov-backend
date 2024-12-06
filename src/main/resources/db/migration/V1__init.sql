@@ -11,7 +11,6 @@ CREATE TABLE movie
 (
     id          bigint auto_increment primary key,
     released    date         null,
-    country     varchar(255) null,
     tmdb_id     int          null,
     plot        varchar(255) null,
     poster      varchar(255) null,
