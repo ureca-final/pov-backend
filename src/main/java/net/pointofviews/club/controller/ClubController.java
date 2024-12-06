@@ -46,7 +46,7 @@ public class ClubController implements ClubSpecification{
     @Override
     public ResponseEntity<BaseResponse<CreateClubResponse>> createClub(@Valid @RequestBody CreateClubRequest request, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
         CreateClubResponse response = clubService.saveClub(request, memberDetailsDto.member());
-        return BaseResponse.created("/api/clubs/" + response.clubId(), "클럽이 성공적으로 생성되었습니다.");
+        return BaseResponse.ok("클럽이 성공적으로 생성되었습니다.", response);
     }
 
     @Override

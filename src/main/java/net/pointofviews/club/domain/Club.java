@@ -48,4 +48,8 @@ public class Club extends BaseEntity {
         }
         return maxParticipants;
     }
+
+    public void updateClubImage(String clubImage) {
+        this.clubImage = clubImage;
+    }
 }
