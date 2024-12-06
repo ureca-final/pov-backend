@@ -201,7 +201,25 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
+    @Transactional
     public Void deleteClub(UUID clubId, Member member) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> clubNotFound(clubId));
+
+        validateClubLeader(club, member);
+
+        // 클럽 이미지 삭제
+        String clubImage = club.getClubImage();
+        if (clubImage != null && !clubImage.isEmpty()) {
+            String imagePath = clubImage.replace("https://" + bucketName + ".s3.ap-northeast-2.amazonaws.com/", "");
+            s3Service.deleteImage(imagePath);
+        }
+
+        // 클럽과 관련된 데이터 삭제
+        clubFavorGenreRepository.deleteAllByClub(club);
+        memberClubRepository.deleteAllByClub(club);
+        clubRepository.delete(club);
+
         return null;
     }
 
@@ -215,6 +233,13 @@ public class ClubServiceImpl implements ClubService {
                 .orElseThrow(ClubException::memberNotInClub);
 
         if (memberClub.isLeader()) {
+            // 클럽 인원 수 확인
+            long memberCount = memberClubRepository.countByClub(club);
+
+            if (memberCount == 1) {
+                // 클럽장이 마지막 남은 인원이면 클럽 삭제
+                return deleteClub(clubId, member);
+            }
             throw ClubException.clubLeaderCannotLeave();
         }
 

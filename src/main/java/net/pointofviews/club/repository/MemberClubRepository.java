@@ -50,4 +50,8 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
     Slice<ReadReviewResponse> findReviewsWithLikesByClubId(@Param("clubId") UUID clubId, Pageable pageable);
 
     Optional<MemberClub> findByClubAndMember(Club club, Member member);
+
+    void deleteAllByClub(Club club);
+
+    long countByClub(Club club);
 }
