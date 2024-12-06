@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class MovieCountry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Country country;

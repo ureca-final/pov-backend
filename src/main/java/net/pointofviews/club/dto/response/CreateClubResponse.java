@@ -1,6 +1,8 @@
 package net.pointofviews.club.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.List;
 import java.util.UUID;
 
 @Schema(description = "클럽 생성 응답 DTO")
@@ -23,6 +25,6 @@ public record CreateClubResponse(
         @Schema(description = "공개 여부", example = "true")
         boolean isPublic,
 
-        @Schema(description = "클럽장 ID")
-        UUID leaderId
+        @Schema(description = "클럽 선호 장르 목록", example = "[\"액션\", \"로맨스\"]")
+        List<String> clubFavorGenre
 ) {}
