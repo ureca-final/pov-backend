@@ -20,6 +20,8 @@ import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
+import net.pointofviews.member.exception.MemberException;
+import net.pointofviews.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,7 @@ public class ClubServiceImpl implements ClubService {
     private final ClubRepository clubRepository;
     private final MemberClubRepository memberClubRepository;
     private final ClubFavorGenreRepository clubFavorGenreRepository;
+    private final MemberRepository memberRepository;
     private final CommonCodeService commonCodeService;
     private final S3Service s3Service;
 
@@ -168,8 +171,33 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public PutClubLeaderResponse updateClubLeader(UUID clubId, PutClubLeaderRequest request, Member member) {
-        return null;
+    @Transactional
+    public PutClubLeaderResponse updateClubLeader(UUID clubId, PutClubLeaderRequest request, Member currentLeader) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> clubNotFound(clubId));
+
+        validateClubLeader(club, currentLeader);
+
+        Member newLeader = memberRepository.findByEmail(request.newLeaderEmail())
+                .orElseThrow(() -> MemberException.memberNotFound());
+
+        // 새 클럽장이 클럽원인지 확인
+        MemberClub newLeaderMemberClub = memberClubRepository.findByClubAndMember(club, newLeader)
+                .orElseThrow(ClubException::memberNotInClub);
+
+        // 현재 클럽장의 권한 변경
+        MemberClub currentLeaderMemberClub = memberClubRepository.findByClubAndMember(club, currentLeader)
+                .orElseThrow(ClubException::memberNotInClub);
+        currentLeaderMemberClub.updateLeaderStatus(false);
+
+        // 새로운 클럽장 권한 부여
+        newLeaderMemberClub.updateLeaderStatus(true);
+
+        return new PutClubLeaderResponse(
+                club.getId(),
+                newLeader.getNickname(),
+                newLeader.getEmail()
+        );
     }
 
     @Override
