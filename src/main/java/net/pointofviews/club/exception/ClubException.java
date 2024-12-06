@@ -22,4 +22,8 @@ public class ClubException extends BusinessException {
     public static ClubException notClubLeader() {
         return new ClubException(HttpStatus.FORBIDDEN, "클럽장만 수정할 수 있습니다.");
     }
+
+    public static ClubException clubLeaderCannotLeave() {
+        return new ClubException(HttpStatus.BAD_REQUEST, "클럽장은 클럽을 탈퇴할 수 없습니다.");
+    }
 }

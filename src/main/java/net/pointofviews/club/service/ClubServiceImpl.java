@@ -206,7 +206,19 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
+    @Transactional
     public Void leaveClub(UUID clubId, Member member) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> clubNotFound(clubId));
+
+        MemberClub memberClub = memberClubRepository.findByClubAndMember(club, member)
+                .orElseThrow(ClubException::memberNotInClub);
+
+        if (memberClub.isLeader()) {
+            throw ClubException.clubLeaderCannotLeave();
+        }
+
+        memberClubRepository.delete(memberClub);
         return null;
     }
 
