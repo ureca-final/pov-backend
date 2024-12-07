@@ -1,5 +1,6 @@
 package net.pointofviews.movie.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
@@ -27,7 +28,7 @@ public class MovieAdminController implements MovieAdminSpecification {
 
     @Override
     @PostMapping
-    public ResponseEntity<?> createMovie(@RequestBody CreateMovieRequest request) {
+    public ResponseEntity<?> createMovie(@Valid @RequestBody CreateMovieRequest request) {
         movieService.saveMovie(request);
 
         return BaseResponse.ok("OK");

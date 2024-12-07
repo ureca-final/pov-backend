@@ -2,7 +2,11 @@ package net.pointofviews.movie.dto.request;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import net.pointofviews.movie.domain.*;
+import jakarta.validation.constraints.NotNull;
+import net.pointofviews.movie.domain.KoreanFilmRating;
+import net.pointofviews.movie.domain.Movie;
+import net.pointofviews.movie.domain.MovieCast;
+import net.pointofviews.movie.domain.MovieCrew;
 import net.pointofviews.people.domain.People;
 
 import java.time.LocalDate;
@@ -11,6 +15,7 @@ import java.util.List;
 @Schema(description = "영화 등록 요청 DTO")
 public record CreateMovieRequest(
         @Schema(description = "TMDB 영화 ID", example = "27205")
+        @NotNull
         Integer tmdbId,
 
         @Schema(description = "영화 제목", example = "Inception")
@@ -66,6 +71,7 @@ public record CreateMovieRequest(
                 Integer gender,
 
                 @Schema(description = "출연진 ID", example = "6193")
+                @NotNull
                 int id,
 
                 @Schema(description = "출연진 이름", example = "Leonardo DiCaprio")
@@ -102,6 +108,7 @@ public record CreateMovieRequest(
                 Integer gender,
 
                 @Schema(description = "제작진 ID", example = "525")
+                @NotNull
                 int id,
 
                 @Schema(description = "제작진 이름", example = "Christopher Nolan")
