@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import net.pointofviews.auth.dto.response.CheckLoginResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -202,51 +203,53 @@ class MemberServiceTest {
 
     @Nested
     class Login {
-
         @Nested
         class Success {
-
             @Test
             void 로그인_성공() {
                 // given
                 Member member = createTestMember();
                 given(memberRepository.findByEmail(TEST_EMAIL)).willReturn(Optional.of(member));
+                given(memberFavorGenreRepository.findGenreCodeByMemberId(any()))
+                        .willReturn(List.of("01", "02"));
+                given(commonCodeService.convertCommonCodeToName(any(), any()))
+                        .willReturn("로맨스", "코미디");
+
                 LoginMemberRequest request = createLoginRequest(SocialType.NAVER);
 
                 // when
-                LoginMemberResponse response = memberService.login(request);
+                CheckLoginResponse response = memberService.login(request);
 
                 // then
                 assertSoftly(softly -> {
-                    softly.assertThat(response.email()).isEqualTo(TEST_EMAIL);
-                    softly.assertThat(response.role()).isEqualTo("USER");
+                    softly.assertThat(response.exists()).isTrue();
+                    softly.assertThat(response.memberInfo()).isNotNull();
+                    softly.assertThat(response.memberInfo().email()).isEqualTo(TEST_EMAIL);
+                    softly.assertThat(response.memberInfo().role()).isEqualTo(RoleType.USER.name());
                     verify(memberRepository, times(1)).findByEmail(TEST_EMAIL);
+                });
+            }
+
+            @Test
+            void 존재하지_않는_이메일_로그인_시도() {
+                // given
+                LoginMemberRequest request = createLoginRequest(SocialType.NAVER);
+                given(memberRepository.findByEmail(TEST_EMAIL))
+                        .willReturn(Optional.empty());
+
+                // when
+                CheckLoginResponse response = memberService.login(request);
+
+                // then
+                assertSoftly(softly -> {
+                    softly.assertThat(response.exists()).isFalse();
+                    softly.assertThat(response.memberInfo()).isNull();
                 });
             }
         }
 
         @Nested
         class Failure {
-
-            @Test
-            void 존재하지_않는_이메일_MemberException_memberNotFound_예외발생() {
-                // given
-                LoginMemberRequest request = createLoginRequest(SocialType.GOOGLE);
-                given(memberRepository.findByEmail(TEST_EMAIL))
-                        .willReturn(Optional.empty());
-
-                // when
-                MemberException exception = assertThrows(MemberException.class, () ->
-                        memberService.login(request)
-                );
-
-                // then
-                assertSoftly(softly -> {
-                    softly.assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-                    softly.assertThat(exception.getMessage()).isEqualTo(MemberException.memberNotFound().getMessage());
-                });
-            }
-
             @Test
             void 소셜타입_불일치_MemberException_invalidSocialType_예외발생() {
                 // given
@@ -257,15 +260,11 @@ class MemberServiceTest {
 
                 LoginMemberRequest request = createLoginRequest(SocialType.NAVER);  // 다른 소셜 타입으로 요청
 
-                // when
-                MemberException exception = assertThrows(MemberException.class, () ->
-                        memberService.login(request)
-                );
-
-                // then
+                // when & then
                 assertSoftly(softly -> {
-                    softly.assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
-                    softly.assertThat(exception.getMessage()).isEqualTo(MemberException.invalidSocialType().getMessage());
+                    softly.assertThatThrownBy(() -> memberService.login(request))
+                            .isInstanceOf(MemberException.class)
+                            .hasMessage("잘못된 소셜 로그인 타입입니다.");
                 });
             }
         }
