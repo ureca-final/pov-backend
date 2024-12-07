@@ -1,9 +1,10 @@
-package net.pointofviews.movie.domain;
+package net.pointofviews.country.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.movie.domain.MovieCountry;
 
 import java.util.ArrayList;
 import java.util.List;
