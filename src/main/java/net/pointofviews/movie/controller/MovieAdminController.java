@@ -37,7 +37,8 @@ public class MovieAdminController implements MovieAdminSpecification {
     @Override
     @DeleteMapping("/{movieId}")
     public ResponseEntity<?> deleteMovie(@PathVariable Long movieId) {
-        return null;
+        movieService.deleteMovie(movieId);
+        return BaseResponse.noContent();
     }
 
     @Override

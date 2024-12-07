@@ -65,6 +65,15 @@ public class MovieServiceImpl implements MovieService {
         movieRepository.save(movie);
     }
 
+    @Override
+    public void deleteMovie(Long movieId) {
+        if(!movieRepository.existsById(movieId)) {
+            throw movieNotFound(movieId);
+        }
+
+        movieRepository.deleteById(movieId);
+    }
+
     private List<MovieGenre> convertStringsToMovieGenre(List<String> stringGenres) {
         return stringGenres.stream()
                 .map(genre -> {
