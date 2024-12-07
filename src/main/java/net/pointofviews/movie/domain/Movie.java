@@ -35,19 +35,19 @@ public class Movie {
     @Convert(converter = FilmRatingConverter.class)
     private KoreanFilmRating filmRating;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieCountry> countries = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
     private final List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieGenre> genres = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieCrew> crews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieCast> casts = new ArrayList<>();
 
     @Builder
