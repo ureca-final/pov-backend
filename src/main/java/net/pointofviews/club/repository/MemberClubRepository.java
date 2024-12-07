@@ -1,6 +1,8 @@
 package net.pointofviews.club.repository;
 
+import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
@@ -46,4 +49,9 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
             """)
     Slice<ReadReviewResponse> findReviewsWithLikesByClubId(@Param("clubId") UUID clubId, Pageable pageable);
 
+    Optional<MemberClub> findByClubAndMember(Club club, Member member);
+
+    void deleteAllByClub(Club club);
+
+    long countByClub(Club club);
 }

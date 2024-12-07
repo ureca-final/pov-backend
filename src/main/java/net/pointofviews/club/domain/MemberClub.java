@@ -37,4 +37,8 @@ public class MemberClub extends BaseEntity {
         this.isLeader = isLeader;
         this.member = member;
     }
+
+    public void updateLeaderStatus(boolean isLeader) {
+        this.isLeader = isLeader;
+    }
 }

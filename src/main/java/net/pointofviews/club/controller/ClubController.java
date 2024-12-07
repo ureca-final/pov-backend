@@ -46,7 +46,7 @@ public class ClubController implements ClubSpecification{
     @Override
     public ResponseEntity<BaseResponse<CreateClubResponse>> createClub(@Valid @RequestBody CreateClubRequest request, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
         CreateClubResponse response = clubService.saveClub(request, memberDetailsDto.member());
-        return BaseResponse.created("/api/clubs/" + response.clubId(), "클럽이 성공적으로 생성되었습니다.");
+        return BaseResponse.ok("클럽이 성공적으로 생성되었습니다.", response);
     }
 
     @Override
@@ -62,10 +62,11 @@ public class ClubController implements ClubSpecification{
     @Override
     @PostMapping(value = "/{clubId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<CreateClubImageListResponse>> putClubImages(
+            @PathVariable UUID clubId,
             @RequestPart(value = "files") List<MultipartFile> files,
             @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     ) {
-        CreateClubImageListResponse response = clubService.updateClubImages(files,memberDetailsDto.member());
+        CreateClubImageListResponse response = clubService.updateClubImages(clubId, files, memberDetailsDto.member());
         return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
     }
 
