@@ -17,6 +17,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+import net.pointofviews.auth.exception.SecurityException;
+
+
 @Component
 public class JwtProvider {
 
@@ -52,6 +55,27 @@ public class JwtProvider {
             throw e;
         } catch (RuntimeException e) {
             throw new BadCredentialsException(e.getMessage());
+        }
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            String bearerRemovedToken = removeBearerPrefix(token);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(bearerRemovedToken);
+            return false;
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
+    }
+
+    // AccessToken 재발급
+    public String reissueAccessToken(String refreshToken) {
+        try {
+            Jws<Claims> claims = parseToken(refreshToken);
+            UUID memberId = UUID.fromString(claims.getPayload().getSubject());
+            return createToken(memberId, 3600000);
+        } catch (Exception e) {
+            throw SecurityException.invalidToken();
         }
     }
 }
