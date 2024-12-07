@@ -90,6 +90,23 @@ public class S3ServiceImpl implements S3Service {
 	}
 
 	@Override
+	public void moveImage(String sourceKey, String destinationKey) {
+		try {
+			// 복사
+			CopyObjectRequest copyRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
+			amazonS3.copyObject(copyRequest);
+
+			// 원본 삭제
+			amazonS3.deleteObject(bucketName, sourceKey);
+
+			log.info("S3 이미지 이동 성공: {} -> {}", sourceKey, destinationKey);
+		} catch (Exception e) {
+			log.error("S3 이미지 이동 중 오류 발생: {}", e.getMessage(), e);
+			throw failedToMove(e.getMessage());
+		}
+	}
+
+	@Override
 	public String getImage(String filePath) {
 		return amazonS3.getUrl(bucketName, filePath).toString();
 	}

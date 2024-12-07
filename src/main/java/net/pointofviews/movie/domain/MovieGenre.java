@@ -29,7 +29,6 @@ public class MovieGenre {
     }
 
     public void updateMovie(Movie movie) {
-        movie.addGenre(this);
         this.movie = movie;
     }
 }

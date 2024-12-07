@@ -1,5 +1,6 @@
 package net.pointofviews.movie.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
@@ -9,6 +10,7 @@ import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
 import net.pointofviews.movie.service.MovieApiSearchService;
 import net.pointofviews.movie.service.MovieContentService;
+import net.pointofviews.movie.service.MovieService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,11 +24,14 @@ public class MovieAdminController implements MovieAdminSpecification {
 
     private final MovieContentService movieContentService;
     private final MovieApiSearchService movieApiSearchService;
+    private final MovieService movieService;
 
     @Override
     @PostMapping
-    public ResponseEntity<?> createMovie(@RequestBody CreateMovieRequest request) {
-        return null;
+    public ResponseEntity<?> createMovie(@Valid @RequestBody CreateMovieRequest request) {
+        movieService.saveMovie(request);
+
+        return BaseResponse.ok("OK");
     }
 
     @Override

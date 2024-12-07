@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.people.domain.People;
 
 @Entity
 @Getter
@@ -13,7 +14,7 @@ public class MovieCrew {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     private People people;
 
     @ManyToOne(fetch = FetchType.LAZY)
