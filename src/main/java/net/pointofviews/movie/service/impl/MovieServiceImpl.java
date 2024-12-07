@@ -20,6 +20,7 @@ import java.util.function.Function;
 
 import static net.pointofviews.movie.dto.request.CreateMovieRequest.SearchCreditApiRequest.CastRequest;
 import static net.pointofviews.movie.dto.request.CreateMovieRequest.SearchCreditApiRequest.CrewRequest;
+import static net.pointofviews.movie.exception.MovieException.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class MovieServiceImpl implements MovieService {
     @Transactional
     public void saveMovie(CreateMovieRequest request) {
         if (movieRepository.existsByTmdbId(request.tmdbId())) {
-            throw MovieException.duplicateMovie(request.tmdbId());
+            throw duplicateMovie(request.tmdbId());
         }
 
         Movie movie = request.toMovieEntity();
