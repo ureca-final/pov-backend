@@ -180,6 +180,7 @@ class ClubServiceImplTest {
             void 클럽_정보_수정_성공() {
                 // given
                 UUID clubId = UUID.randomUUID();
+                UUID memberId = UUID.randomUUID();
                 Club club = mock(Club.class);
                 Member member = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
@@ -193,24 +194,30 @@ class ClubServiceImplTest {
                         "new-image-url"
                 );
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(List.of(memberClub));
+                given(memberClub.getMember()).willReturn(member);
+                given(member.getId()).willReturn(memberId);
                 given(memberClub.isLeader()).willReturn(true);
-                given(clubFavorGenreRepository.findAllByClub(club)).willReturn(List.of());
+                given(club.getId()).willReturn(clubId);
                 given(commonCodeService.convertNameToCommonCode(anyString(), any())).willReturn("01");
 
                 // when
                 PutClubResponse response = clubService.updateClub(clubId, request, member);
 
                 // then
-                verify(club).updateClub(
-                        request.name(),
-                        request.description(),
-                        request.maxParticipants(),
-                        request.isPublic()
-                );
-                verify(club).updateClubImage(request.clubImage());
-                verify(clubFavorGenreRepository).save(any(ClubFavorGenre.class));
+                assertSoftly(softly -> {
+                    softly.assertThat(response.id()).isEqualTo(clubId);
+
+                    verify(club).updateClub(
+                            request.name(),
+                            request.description(),
+                            request.maxParticipants(),
+                            request.isPublic()
+                    );
+                    verify(club).updateClubImage(request.clubImage());
+                    verify(clubFavorGenreRepository, times(1)).save(any(ClubFavorGenre.class));
+                });
             }
         }
 
@@ -220,59 +227,70 @@ class ClubServiceImplTest {
             void 존재하지_않는_클럽() {
                 // given
                 UUID clubId = UUID.randomUUID();
-                PutClubRequest request = mock(PutClubRequest.class);
-
-                given(clubRepository.findById(clubId)).willReturn(Optional.empty());
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.empty());
 
                 // when & then
-                assertThrows(ClubException.class,
-                        () -> clubService.updateClub(clubId, request, mock(Member.class)));
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(
+                                    () -> clubService.updateClubLeader(clubId, new PutClubLeaderRequest("email"), mock(Member.class)))
+                            .isInstanceOf(ClubException.class);
+                });
             }
 
             @Test
             void 클럽장이_아닌_경우() {
                 // given
                 UUID clubId = UUID.randomUUID();
+                UUID memberId = UUID.randomUUID();
                 Club club = mock(Club.class);
-                Member member = mock(Member.class);
+                Member currentLeader = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
-                PutClubRequest request = mock(PutClubRequest.class);
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(List.of(memberClub));
+                given(currentLeader.getId()).willReturn(memberId);
+                given(memberClub.getMember()).willReturn(currentLeader);
                 given(memberClub.isLeader()).willReturn(false);
 
                 // when & then
-                assertThrows(ClubException.class,
-                        () -> clubService.updateClub(clubId, request, member));
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(
+                                    () -> clubService.updateClubLeader(clubId, new PutClubLeaderRequest("email"), currentLeader))
+                            .isInstanceOf(ClubException.class);
+                });
             }
 
             @Test
-            void 잘못된_장르코드_변환() {
+            void 잘못된_장르코드_변환시_실패() {
                 // given
                 UUID clubId = UUID.randomUUID();
                 Club club = mock(Club.class);
                 Member member = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
+                List<MemberClub> memberClubs = List.of(memberClub);
 
                 PutClubRequest request = new PutClubRequest(
                         "수정된 클럽명",
                         "수정된 설명",
                         20,
                         false,
-                        List.of("잘못된장르"),
+                        List.of("시사교양"),
                         "image-url"
                 );
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(memberClubs);
+                given(memberClub.getMember()).willReturn(member);
+                given(member.getId()).willReturn(UUID.randomUUID());
                 given(memberClub.isLeader()).willReturn(true);
                 given(commonCodeService.convertNameToCommonCode(anyString(), any()))
                         .willThrow(CommonCodeException.class);
 
                 // when & then
-                assertThrows(CommonCodeException.class,
-                        () -> clubService.updateClub(clubId, request, member));
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(() -> clubService.updateClub(clubId, request, member))
+                            .isInstanceOf(CommonCodeException.class);
+                });
             }
         }
     }
@@ -295,27 +313,36 @@ class ClubServiceImplTest {
                 String newLeaderNickname = "새클럽장";
                 PutClubLeaderRequest request = new PutClubLeaderRequest(newLeaderEmail);
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberRepository.findByEmail(newLeaderEmail)).willReturn(Optional.of(newLeader));
-                given(memberClubRepository.findByClubAndMember(club, currentLeader)).willReturn(Optional.of(currentLeaderClub));
-                given(memberClubRepository.findByClubAndMember(club, newLeader)).willReturn(Optional.of(newLeaderClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
                 given(club.getId()).willReturn(clubId);
-                given(currentLeaderClub.isLeader()).willReturn(true);
-                given(newLeader.getNickname()).willReturn(newLeaderNickname);
+                given(club.getMemberClubs()).willReturn(List.of(currentLeaderClub, newLeaderClub));
+
+                given(memberRepository.findByEmail(newLeaderEmail)).willReturn(Optional.of(newLeader));
                 given(newLeader.getEmail()).willReturn(newLeaderEmail);
+                given(newLeader.getNickname()).willReturn(newLeaderNickname);
+                given(newLeader.getId()).willReturn(UUID.randomUUID());
+
+                given(currentLeaderClub.getMember()).willReturn(currentLeader);
+                given(currentLeader.getId()).willReturn(UUID.randomUUID());
+                given(currentLeaderClub.isLeader()).willReturn(true);
+
+                given(newLeaderClub.getMember()).willReturn(newLeader);
 
                 // when
                 PutClubLeaderResponse response = clubService.updateClubLeader(clubId, request, currentLeader);
 
                 // then
                 assertSoftly(softly -> {
-                    verify(currentLeaderClub).updateLeaderStatus(false);
-                    verify(newLeaderClub).updateLeaderStatus(true);
                     softly.assertThat(response.clubId()).isEqualTo(clubId);
                     softly.assertThat(response.newLeaderEmail()).isEqualTo(newLeaderEmail);
                     softly.assertThat(response.newLeaderNickname()).isEqualTo(newLeaderNickname);
+
+                    verify(currentLeaderClub).updateLeaderStatus(false);
+                    verify(newLeaderClub).updateLeaderStatus(true);
+                    verify(memberRepository).findByEmail(newLeaderEmail);
                 });
             }
+
         }
 
         @Nested
@@ -324,7 +351,7 @@ class ClubServiceImplTest {
             void 존재하지_않는_클럽() {
                 // given
                 UUID clubId = UUID.randomUUID();
-                given(clubRepository.findById(clubId)).willReturn(Optional.empty());
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.empty());
 
                 // when & then
                 assertSoftly(softly -> {
@@ -338,12 +365,15 @@ class ClubServiceImplTest {
             void 클럽장이_아닌_경우() {
                 // given
                 UUID clubId = UUID.randomUUID();
+                UUID memberId = UUID.randomUUID();
                 Club club = mock(Club.class);
                 Member currentLeader = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, currentLeader)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(List.of(memberClub));
+                given(currentLeader.getId()).willReturn(memberId);
+                given(memberClub.getMember()).willReturn(currentLeader);
                 given(memberClub.isLeader()).willReturn(false);
 
                 // when & then
@@ -358,12 +388,15 @@ class ClubServiceImplTest {
             void 존재하지_않는_새_클럽장() {
                 // given
                 UUID clubId = UUID.randomUUID();
+                UUID memberId = UUID.randomUUID();
                 Club club = mock(Club.class);
                 Member currentLeader = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, currentLeader)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(List.of(memberClub));
+                given(currentLeader.getId()).willReturn(memberId);
+                given(memberClub.getMember()).willReturn(currentLeader);
                 given(memberClub.isLeader()).willReturn(true);
                 given(memberRepository.findByEmail(anyString())).willReturn(Optional.empty());
 
@@ -372,29 +405,6 @@ class ClubServiceImplTest {
                     softly.assertThatThrownBy(
                                     () -> clubService.updateClubLeader(clubId, new PutClubLeaderRequest("email"), currentLeader))
                             .isInstanceOf(MemberException.class);
-                });
-            }
-
-            @Test
-            void 새_클럽장이_클럽_멤버가_아님() {
-                // given
-                UUID clubId = UUID.randomUUID();
-                Club club = mock(Club.class);
-                Member currentLeader = mock(Member.class);
-                Member newLeader = mock(Member.class);
-                MemberClub currentLeaderClub = mock(MemberClub.class);
-
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(newLeader));
-                given(memberClubRepository.findByClubAndMember(club, currentLeader)).willReturn(Optional.of(currentLeaderClub));
-                given(memberClubRepository.findByClubAndMember(club, newLeader)).willReturn(Optional.empty());
-                given(currentLeaderClub.isLeader()).willReturn(true);
-
-                // when & then
-                assertSoftly(softly -> {
-                    softly.assertThatThrownBy(
-                                    () -> clubService.updateClubLeader(clubId, new PutClubLeaderRequest("email"), currentLeader))
-                            .isInstanceOf(ClubException.class);
                 });
             }
         }
@@ -408,13 +418,16 @@ class ClubServiceImplTest {
             void 클럽_삭제_성공() {
                 // given
                 UUID clubId = UUID.randomUUID();
+                UUID memberId = UUID.randomUUID();
                 Club club = mock(Club.class);
                 Member member = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
                 String clubImage = "club-image-url";
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(List.of(memberClub));
+                given(member.getId()).willReturn(memberId);
+                given(memberClub.getMember()).willReturn(member);
                 given(memberClub.isLeader()).willReturn(true);
                 given(club.getClubImage()).willReturn(clubImage);
 
@@ -437,9 +450,12 @@ class ClubServiceImplTest {
                 Club club = mock(Club.class);
                 Member member = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
+                UUID memberId = UUID.randomUUID();
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(List.of(memberClub));
+                given(member.getId()).willReturn(memberId);
+                given(memberClub.getMember()).willReturn(member);
                 given(memberClub.isLeader()).willReturn(true);
                 given(club.getClubImage()).willReturn(null);
 
@@ -462,7 +478,7 @@ class ClubServiceImplTest {
             void 존재하지_않는_클럽() {
                 // given
                 UUID clubId = UUID.randomUUID();
-                given(clubRepository.findById(clubId)).willReturn(Optional.empty());
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.empty());
 
                 // when & then
                 assertSoftly(softly -> {
@@ -478,9 +494,12 @@ class ClubServiceImplTest {
                 Club club = mock(Club.class);
                 Member member = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
+                UUID memberId = UUID.randomUUID();
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
-                given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
+                given(club.getMemberClubs()).willReturn(List.of(memberClub));
+                given(member.getId()).willReturn(memberId);
+                given(memberClub.getMember()).willReturn(member);
                 given(memberClub.isLeader()).willReturn(false);
 
                 // when & then
@@ -504,7 +523,7 @@ class ClubServiceImplTest {
                 Member member = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
                 given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
                 given(memberClub.isLeader()).willReturn(false);
 
@@ -536,7 +555,7 @@ class ClubServiceImplTest {
             void 존재하지_않는_클럽() {
                 // given
                 UUID clubId = UUID.randomUUID();
-                given(clubRepository.findById(clubId)).willReturn(Optional.empty());
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.empty());
 
                 // when & then
                 assertSoftly(softly -> {
@@ -552,7 +571,7 @@ class ClubServiceImplTest {
                 Club club = mock(Club.class);
                 Member member = mock(Member.class);
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
                 given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.empty());
 
                 // when & then
@@ -570,7 +589,7 @@ class ClubServiceImplTest {
                 Member member = mock(Member.class);
                 MemberClub memberClub = mock(MemberClub.class);
 
-                given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+                given(clubRepository.findByIdWithMemberClubs(clubId)).willReturn(Optional.of(club));
                 given(memberClubRepository.findByClubAndMember(club, member)).willReturn(Optional.of(memberClub));
                 given(memberClub.isLeader()).willReturn(true);
                 given(memberClubRepository.countByClub(club)).willReturn(2L);
