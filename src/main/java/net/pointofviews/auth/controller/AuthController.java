@@ -51,9 +51,10 @@ public class AuthController implements AuthSpecification {
         // 회원이 존재하는 경우에만 토큰 생성 및 설정
         if (loginResponse.exists() && loginResponse.memberInfo() != null) {
             // 토큰 생성 (AT: 1시간, RT: 2주)
-            String accessToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 3600000);
-            String refreshToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 1209600000);
+            String accessToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 60000);
+            String refreshToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 300000);
 
+            // 1분 60000, 10초 10000
             // Access Token은 Authorization 헤더에 설정
             response.setHeader("Authorization", accessToken);
 
