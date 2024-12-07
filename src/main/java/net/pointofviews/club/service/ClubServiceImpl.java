@@ -113,7 +113,7 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public PutClubResponse updateClub(UUID clubId, PutClubRequest request, Member member) {
-        Club club = clubRepository.findById(clubId)
+        Club club = clubRepository.findByIdWithMemberClubs(clubId)
                 .orElseThrow(() -> clubNotFound(clubId));
 
         validateClubLeader(club, member);
@@ -173,25 +173,21 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public PutClubLeaderResponse updateClubLeader(UUID clubId, PutClubLeaderRequest request, Member currentLeader) {
-        Club club = clubRepository.findById(clubId)
+        Club club = clubRepository.findByIdWithMemberClubs(clubId)
                 .orElseThrow(() -> clubNotFound(clubId));
-
         validateClubLeader(club, currentLeader);
 
         Member newLeader = memberRepository.findByEmail(request.newLeaderEmail())
                 .orElseThrow(() -> MemberException.memberNotFound());
 
-        // 새 클럽장이 클럽원인지 확인
-        MemberClub newLeaderMemberClub = memberClubRepository.findByClubAndMember(club, newLeader)
-                .orElseThrow(ClubException::memberNotInClub);
-
-        // 현재 클럽장의 권한 변경
-        MemberClub currentLeaderMemberClub = memberClubRepository.findByClubAndMember(club, currentLeader)
-                .orElseThrow(ClubException::memberNotInClub);
-        currentLeaderMemberClub.updateLeaderStatus(false);
-
-        // 새로운 클럽장 권한 부여
-        newLeaderMemberClub.updateLeaderStatus(true);
+        // 새 클럽장이 클럽원인지 확인 & 현재 클럽장 권한 변경
+        club.getMemberClubs().forEach(mc -> {
+            if (mc.getMember().getId().equals(newLeader.getId())) {
+                mc.updateLeaderStatus(true);
+            } else if (mc.getMember().getId().equals(currentLeader.getId())) {
+                mc.updateLeaderStatus(false);
+            }
+        });
 
         return new PutClubLeaderResponse(
                 club.getId(),
@@ -202,8 +198,8 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     @Transactional
-    public Void deleteClub(UUID clubId, Member member) {
-        Club club = clubRepository.findById(clubId)
+    public void deleteClub(UUID clubId, Member member) {
+        Club club = clubRepository.findByIdWithMemberClubs(clubId)
                 .orElseThrow(() -> clubNotFound(clubId));
 
         validateClubLeader(club, member);
@@ -219,14 +215,12 @@ public class ClubServiceImpl implements ClubService {
         clubFavorGenreRepository.deleteAllByClub(club);
         memberClubRepository.deleteAllByClub(club);
         clubRepository.delete(club);
-
-        return null;
     }
 
     @Override
     @Transactional
-    public Void leaveClub(UUID clubId, Member member) {
-        Club club = clubRepository.findById(clubId)
+    public void leaveClub(UUID clubId, Member member) {
+        Club club = clubRepository.findByIdWithMemberClubs(clubId)
                 .orElseThrow(() -> clubNotFound(clubId));
 
         MemberClub memberClub = memberClubRepository.findByClubAndMember(club, member)
@@ -238,13 +232,13 @@ public class ClubServiceImpl implements ClubService {
 
             if (memberCount == 1) {
                 // 클럽장이 마지막 남은 인원이면 클럽 삭제
-                return deleteClub(clubId, member);
+                deleteClub(clubId, member);
+                return;
             }
             throw ClubException.clubLeaderCannotLeave();
         }
 
         memberClubRepository.delete(memberClub);
-        return null;
     }
 
     @Override
@@ -279,7 +273,7 @@ public class ClubServiceImpl implements ClubService {
             throw invalidTotalImageSize();
         }
 
-        Club club = clubRepository.findById(clubId)
+        Club club = clubRepository.findByIdWithMemberClubs(clubId)
                 .orElseThrow(() -> clubNotFound(clubId));
         validateClubLeader(club, member);
 
@@ -303,7 +297,9 @@ public class ClubServiceImpl implements ClubService {
     }
 
     private void validateClubLeader(Club club, Member member) {
-        MemberClub memberClub = memberClubRepository.findByClubAndMember(club, member)
+        MemberClub memberClub = club.getMemberClubs().stream()
+                .filter(mc -> mc.getMember().getId().equals(member.getId()))
+                .findFirst()
                 .orElseThrow(ClubException::memberNotInClub);
 
         if (!memberClub.isLeader()) {

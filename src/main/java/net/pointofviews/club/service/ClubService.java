@@ -21,9 +21,9 @@ public interface ClubService {
 
     PutClubLeaderResponse updateClubLeader(UUID clubId, @Valid PutClubLeaderRequest request, Member member);
 
-    Void deleteClub(UUID clubId, Member member);
+    void deleteClub(UUID clubId, Member member);
 
-    Void leaveClub(UUID clubId, Member member);
+    void leaveClub(UUID clubId, Member member);
 
     CreateClubImageListResponse saveClubImages(List<MultipartFile> files, Member member);
 

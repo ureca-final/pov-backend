@@ -1,16 +1,14 @@
 package net.pointofviews.club.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import net.pointofviews.common.domain.BaseEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +32,9 @@ public class Club extends BaseEntity {
     private Integer maxParticipants;
 
     private boolean isPublic;
+
+    @OneToMany(mappedBy = "club")
+    private List<MemberClub> memberClubs = new ArrayList<>();
 
     @Builder
     private Club(String description, boolean isPublic, Integer maxParticipants, String name, String clubImage) {
