@@ -27,7 +27,8 @@ public class ClubController implements ClubSpecification{
     @GetMapping
     @Override
     public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllClubs() {
-        return null;
+        ReadAllClubsListResponse response = clubService.readAllPublicClubs();
+        return BaseResponse.ok("공개된 모든 클럽이 성공적으로 조회되었습니다.", response);
     }
 
     @GetMapping("/{clubId}")
@@ -38,13 +39,13 @@ public class ClubController implements ClubSpecification{
 
     @GetMapping("/myclub")
     @Override
-    public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readMyClubs() {
+    public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readMyClubs(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
         return null;
     }
 
     @GetMapping("/{clubId}/bookmark")
     @Override
-    public ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies() {
+    public ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
         return null;
     }
 

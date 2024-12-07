@@ -54,4 +54,6 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
     void deleteAllByClub(Club club);
 
     long countByClub(Club club);
+
+
 }

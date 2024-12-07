@@ -66,7 +66,7 @@ public interface ClubSpecification {
                     description = "조회 성공"
             )
     })
-    ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readMyClubs();
+    ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readMyClubs(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto);
 
     @Operation(summary = "클럽 영화 북마크 조회", description = "클럽에서 저장한 영화 리스트를 조회합니다.")
     @ApiResponses({
@@ -75,7 +75,7 @@ public interface ClubSpecification {
                     description = "조회 성공"
             )
     })
-    ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies();
+    ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto);
 
     @Operation(summary = "클럽 생성", description = "새로운 클럽을 생성합니다.")
     @ApiResponses(value = {
