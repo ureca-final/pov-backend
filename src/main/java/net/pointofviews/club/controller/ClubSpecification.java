@@ -158,7 +158,7 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<CreateClubImageListResponse>> putClubImages(@RequestPart(value = "files") List<MultipartFile> files, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto);
+    ResponseEntity<BaseResponse<CreateClubImageListResponse>> putClubImages(@RequestPart(value = "files") UUID clubId, List<MultipartFile> files, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto);
 
     @Operation(summary = "클럽 수정", description = "기존 클럽 정보를 수정합니다.")
     @ApiResponses(value = {

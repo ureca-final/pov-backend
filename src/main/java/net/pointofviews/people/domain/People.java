@@ -1,10 +1,12 @@
-package net.pointofviews.movie.domain;
+package net.pointofviews.people.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.movie.domain.MovieCast;
+import net.pointofviews.movie.domain.MovieCrew;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
@@ -28,26 +30,6 @@ public class People {
     @OneToMany(mappedBy = "people")
     private final List<MovieCrew> crews = new ArrayList<>();
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        People people = (People) o;
-        return Objects.equals(getId(), people.getId()) && Objects.equals(getName(), people.getName()) && Objects.equals(getImageUrl(), people.getImageUrl()) && Objects.equals(getTmdbId(), people.getTmdbId()) && getCrews().equals(people.getCrews()) && getCasts().equals(people.getCasts());
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hashCode(getId());
-        result = 31 * result + Objects.hashCode(getName());
-        result = 31 * result + Objects.hashCode(getImageUrl());
-        result = 31 * result + Objects.hashCode(getTmdbId());
-        result = 31 * result + getCrews().hashCode();
-        result = 31 * result + getCasts().hashCode();
-        return result;
-    }
-
     @OneToMany(mappedBy = "people")
     private final List<MovieCast> casts = new ArrayList<>();
 
@@ -67,5 +49,25 @@ public class People {
     public void addCast(MovieCast cast) {
         casts.add(cast);
         cast.updatePeople(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        People people = (People) o;
+        return Objects.equals(getId(), people.getId()) && Objects.equals(getName(), people.getName()) && Objects.equals(getImageUrl(), people.getImageUrl()) && Objects.equals(getTmdbId(), people.getTmdbId()) && getCrews().equals(people.getCrews()) && getCasts().equals(people.getCasts());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(getId());
+        result = 31 * result + Objects.hashCode(getName());
+        result = 31 * result + Objects.hashCode(getImageUrl());
+        result = 31 * result + Objects.hashCode(getTmdbId());
+        result = 31 * result + getCrews().hashCode();
+        result = 31 * result + getCasts().hashCode();
+        return result;
     }
 }

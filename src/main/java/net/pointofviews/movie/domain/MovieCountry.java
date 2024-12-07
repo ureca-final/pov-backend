@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.country.domain.Country;
 
 @Entity
 @Getter
@@ -13,7 +14,7 @@ public class MovieCountry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Country country;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -21,7 +22,6 @@ public class MovieCountry {
 
     public MovieCountry(Country country) {
         this.country = country;
-        country.updateMovieCountry(this);
     }
 
     public void updateMovie(Movie movie) {

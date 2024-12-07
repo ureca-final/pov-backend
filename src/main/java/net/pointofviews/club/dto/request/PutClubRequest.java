@@ -3,6 +3,7 @@ package net.pointofviews.club.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -22,5 +23,9 @@ public record PutClubRequest(
         boolean isPublic,
 
         @Schema(description = "클럽 선호 장르 목록", example = "[\"액션\", \"로맨스\"]")
-        List<String> clubFavorGenre
+        List<String> clubFavorGenre,
+
+        @Schema(description = "클럽 이미지 URL", example = "https://example.com/image.jpg")
+        @NotNull
+        String clubImage
 ) {}

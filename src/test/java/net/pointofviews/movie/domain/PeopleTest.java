@@ -1,5 +1,6 @@
 package net.pointofviews.movie.domain;
 
+import net.pointofviews.people.domain.People;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -17,7 +17,7 @@ public record CreateClubResponse(
         String description,
 
         @Schema(description = "최대 인원 수", example = "10")
-        int maxMembers,
+        int maxParticipants,
 
         @Schema(description = "현재 인원 수", example = "1")
         int currentMembers,
