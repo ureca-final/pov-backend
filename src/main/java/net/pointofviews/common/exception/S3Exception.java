@@ -39,8 +39,8 @@ public class S3Exception extends BusinessException {
 		return new S3Exception(HttpStatus.BAD_REQUEST, "삭제할 이미지 URL이 없습니다.");
 	}
 
-	public static S3Exception failedToParseHtml(String message) {
+	public static S3Exception failedToMove(String message) {
 		return new S3Exception(HttpStatus.INTERNAL_SERVER_ERROR,
-			String.format("HTML 파싱 중 오류가 발생했습니다: %s", message));
+				String.format("S3 이미지 이동 중 오류 발생: %s", message));
 	}
 }

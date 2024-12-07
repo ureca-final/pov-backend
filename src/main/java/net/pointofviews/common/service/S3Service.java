@@ -12,6 +12,8 @@ public interface S3Service {
 
 	void deleteFolder(String folderPath);
 
+	void moveImage(String sourceKey, String destinationKey);
+
 	String getImage(String filePath);
 
 	void validateImageFile(MultipartFile file);
