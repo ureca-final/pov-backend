@@ -6,9 +6,11 @@ import net.pointofviews.movie.service.MoviePeopleService;
 import net.pointofviews.people.domain.People;
 import net.pointofviews.people.repository.PeopleRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class MoviePeopleServiceImpl implements MoviePeopleService {
     private final PeopleRepository peopleRepository;
