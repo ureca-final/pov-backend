@@ -11,6 +11,7 @@ import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.dto.request.*;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +66,16 @@ public interface ClubSpecification {
                     description = "조회 성공"
             )
     })
-    ResponseEntity<BaseResponse<ReadMyClubsListResponse>> readMyClubs();
+    ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readMyClubs();
+
+    @Operation(summary = "클럽 영화 북마크 조회", description = "클럽에서 저장한 영화 리스트를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공"
+            )
+    })
+    ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies();
 
     @Operation(summary = "클럽 생성", description = "새로운 클럽을 생성합니다.")
     @ApiResponses(value = {

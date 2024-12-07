@@ -38,7 +38,13 @@ public class ClubController implements ClubSpecification{
 
     @GetMapping("/myclub")
     @Override
-    public ResponseEntity<BaseResponse<ReadMyClubsListResponse>> readMyClubs() {
+    public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readMyClubs() {
+        return null;
+    }
+
+    @GetMapping("/{clubId}/bookmark")
+    @Override
+    public ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies() {
         return null;
     }
 
