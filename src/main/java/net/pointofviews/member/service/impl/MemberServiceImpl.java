@@ -2,6 +2,7 @@ package net.pointofviews.member.service.impl;
 
 import static net.pointofviews.member.exception.MemberException.*;
 
+import net.pointofviews.auth.dto.response.CheckLoginResponse;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.MemberFavorGenre;
@@ -11,6 +12,7 @@ import net.pointofviews.member.repository.MemberFavorGenreRepository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -100,14 +102,20 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public LoginMemberResponse login(LoginMemberRequest request) {
+    public CheckLoginResponse login(LoginMemberRequest request) {
         // 이메일로 회원 조회
-        Member member = memberRepository.findByEmail(request.email())
-                .orElseThrow(MemberException::memberNotFound);
+        Optional<Member> memberOptional = memberRepository.findByEmail(request.email());
 
+        // 회원이 없는 경우
+        if (memberOptional.isEmpty()) {
+            return new CheckLoginResponse(false, null);
+        }
+
+        Member member = memberOptional.get();
         if (!member.getSocialType().name().equals(request.socialType())) {
             throw invalidSocialType();
         }
+
 
         List<String> favorGenreNames = memberFavorGenreRepository.findGenreCodeByMemberId(member.getId())
                 .stream()
@@ -117,8 +125,8 @@ public class MemberServiceImpl implements MemberService {
                 ))
                 .toList();
 
-        // 응답 생성
-        return new LoginMemberResponse(
+        // 회원이 있는 경우 정보 반환
+        LoginMemberResponse memberInfo = new LoginMemberResponse(
                 member.getId(),
                 member.getEmail(),
                 member.getNickname(),
@@ -127,6 +135,8 @@ public class MemberServiceImpl implements MemberService {
                 member.getProfileImage(),
                 member.getRoleType().name()
         );
+
+        return new CheckLoginResponse(true, memberInfo);
     }
 
     @Override

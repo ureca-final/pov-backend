@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
+import net.pointofviews.auth.dto.response.CheckLoginResponse;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
 import net.pointofviews.auth.utils.JwtProvider;
@@ -26,7 +27,7 @@ public class AuthController implements AuthSpecification {
 
     @Override
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<LoginMemberResponse>> signup(
+    public ResponseEntity<BaseResponse<CheckLoginResponse>> signup(
             @Valid @RequestBody CreateMemberRequest request,
             HttpServletResponse response) {
 
@@ -44,28 +45,31 @@ public class AuthController implements AuthSpecification {
 
     @Override
     @PostMapping("/login")
-    public ResponseEntity<BaseResponse<LoginMemberResponse>> login(@Valid @RequestBody LoginMemberRequest request, HttpServletResponse response) {
-        LoginMemberResponse loginResponse = memberService.login(request);
+    public ResponseEntity<BaseResponse<CheckLoginResponse>> login(@Valid @RequestBody LoginMemberRequest request, HttpServletResponse response) {
+        CheckLoginResponse loginResponse = memberService.login(request);
 
-        // 토큰 생성 (AT: 1시간, RT: 2주)
-        String accessToken = jwtProvider.createToken(loginResponse.id(), 3600000);
-        String refreshToken = jwtProvider.createToken(loginResponse.id(), 1209600000);
+        // 회원이 존재하는 경우에만 토큰 생성 및 설정
+        if (loginResponse.exists() && loginResponse.memberInfo() != null) {
+            // 토큰 생성 (AT: 1시간, RT: 2주)
+            String accessToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 3600000);
+            String refreshToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 1209600000);
 
-        // Access Token은 Authorization 헤더에 설정
-        response.setHeader("Authorization", accessToken);
+            // Access Token은 Authorization 헤더에 설정
+            response.setHeader("Authorization", accessToken);
 
-        // Refresh Token은 보안 쿠키로 설정
-        String cookieRefreshToken = refreshToken.replace(" ", "%20");
+            // Refresh Token은 보안 쿠키로 설정
+            String cookieRefreshToken = refreshToken.replace(" ", "%20");
 
-        Cookie refreshTokenCookie = new Cookie("refresh-token", cookieRefreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);  // HTTPS only
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setAttribute("SameSite", "None");
-        refreshTokenCookie.setMaxAge(1209600);  // 2주
-        response.addCookie(refreshTokenCookie);
+            Cookie refreshTokenCookie = new Cookie("refresh-token", cookieRefreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setAttribute("SameSite", "None");
+            refreshTokenCookie.setMaxAge(1209600);
+            response.addCookie(refreshTokenCookie);
+        }
 
-
-        return BaseResponse.ok("로그인이 완료되었습니다.", loginResponse);
+        return BaseResponse.ok(loginResponse.exists() ? "로그인이 완료되었습니다." : "가입되지 않은 이메일입니다.",
+                loginResponse);
     }
 }
