@@ -1,4 +1,4 @@
-package net.pointofviews.club.controller;
+package net.pointofviews.club.controller.specification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,15 +70,6 @@ public interface ClubSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllMyClubs(@AuthenticationPrincipal(expression = "member") Member loginMember);
-
-    @Operation(summary = "클럽 영화 북마크 조회", description = "클럽에서 저장한 영화 리스트를 조회합니다.")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공"
-            )
-    })
-    ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto);
 
     @Operation(summary = "클럽 생성", description = "새로운 클럽을 생성합니다.")
     @ApiResponses(value = {

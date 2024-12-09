@@ -3,6 +3,7 @@ package net.pointofviews.club.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.MemberDetailsDto;
+import net.pointofviews.club.controller.specification.ClubSpecification;
 import net.pointofviews.club.dto.request.CreateClubRequest;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.club.dto.request.*;
@@ -23,7 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/clubs")
 @RequiredArgsConstructor
-public class ClubController implements ClubSpecification{
+public class ClubController implements ClubSpecification {
 
     private final ClubService clubService;
 
@@ -46,12 +47,6 @@ public class ClubController implements ClubSpecification{
     public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllMyClubs(@AuthenticationPrincipal(expression = "member") Member loginMember) {
         ReadAllClubsListResponse response = clubService.readAllMyClubs(loginMember);
         return BaseResponse.ok("사용자가 속한 모든 클럽이 성공적으로 조회되었습니다.", response);
-    }
-
-    @GetMapping("/{clubId}/bookmark")
-    @Override
-    public ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
-        return null;
     }
 
     @PostMapping

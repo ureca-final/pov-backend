@@ -2,11 +2,13 @@ package net.pointofviews.club.repository;
 
 import net.pointofviews.club.domain.ClubMovie;
 import net.pointofviews.club.dto.response.ReadClubMovieResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface ClubMoviesRepository extends JpaRepository<ClubMovie, Long> {
@@ -25,5 +27,5 @@ public interface ClubMoviesRepository extends JpaRepository<ClubMovie, Long> {
        WHERE cm.club.id = :clubId
        GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
        """)
-    List<ReadClubMovieResponse> findMovieDetailsByClubId(@Param("clubId") UUID clubId);
+    Slice<ReadClubMovieResponse> findMovieDetailsByClubId(@Param("clubId") UUID clubId,  Pageable pageable);
 }

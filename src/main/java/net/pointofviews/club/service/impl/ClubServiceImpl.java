@@ -393,7 +393,7 @@ public class ClubServiceImpl implements ClubService {
 
             ReadClubMemberListResponse members = memberClubService.readMembersByClubId(clubId);
             ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, pageable);
-            ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId);
+            ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, pageable);
 
             return new ReadClubDetailsResponse(
                     basicInfo.name(),
