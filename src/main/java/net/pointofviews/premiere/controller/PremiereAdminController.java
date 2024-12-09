@@ -47,10 +47,11 @@ public class PremiereAdminController implements PremiereAdminSpecification {
     @DeleteMapping("/{premiereId}")
     public ResponseEntity<BaseResponse<Void>> deletePremiere(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
-            @PathVariable Long premiereId,
-            @RequestBody @Valid PremiereRequest request
+            @PathVariable Long premiereId
     ) {
-        return null;
+        premiereAdminService.deletePremiere(loginMember, premiereId);
+
+        return BaseResponse.ok("시사회가 성공적으로 삭제되었습니다.");
     }
 
     @Override

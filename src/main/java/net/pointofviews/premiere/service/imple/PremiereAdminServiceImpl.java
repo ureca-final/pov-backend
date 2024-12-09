@@ -1,6 +1,7 @@
 package net.pointofviews.premiere.service.imple;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.premiere.domain.Premiere;
@@ -21,6 +22,7 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
 
     private final PremiereRepository premiereRepository;
     private final MemberRepository memberRepository;
+    private final S3Service s3Service;
 
     @Override
     public void savePremiere(Member loginMember, PremiereRequest premiere) {
@@ -41,7 +43,21 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
     }
 
     @Override
+    @Transactional
     public void deletePremiere(Member loginMember, Long premiereId) {
+
+        if (memberRepository.findById(loginMember.getId()).isEmpty()) {
+            throw adminNotFound(loginMember.getId());
+        }
+
+        Premiere premiere = premiereRepository.findById(premiereId)
+                .orElseThrow(() -> premiereNotFound(premiereId));
+
+        if (premiere.getEventImage() != null) {
+            s3Service.deleteImage(premiere.getEventImage());
+        }
+
+        premiereRepository.delete(premiere);
     }
 
     @Override
