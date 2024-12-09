@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,18 @@ public interface ClubSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllClubs();
+
+    @Operation(summary = "그룹 검색", description = "클럽을 검색합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            )
+    })
+    ResponseEntity<BaseResponse<SearchClubsListResponse>> searchClubs(
+            @RequestParam String query,
+            Pageable pageable
+    );
 
     @Operation(summary = "클럽 상세 조회", description = "특정 클럽의 상세 정보를 조회합니다.")
     @ApiResponses({

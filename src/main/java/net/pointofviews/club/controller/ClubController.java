@@ -35,6 +35,14 @@ public class ClubController implements ClubSpecification {
         return BaseResponse.ok("공개된 모든 클럽이 성공적으로 조회되었습니다.", response);
     }
 
+    @GetMapping("/search")
+    @Override
+    public ResponseEntity<BaseResponse<SearchClubsListResponse>> searchClubs(@RequestParam String query,
+                                                                              Pageable pageable) {
+        SearchClubsListResponse response = clubService.searchClubs(query, pageable);
+        return BaseResponse.ok("공개된 모든 클럽이 성공적으로 조회되었습니다.", response);
+    }
+
     @GetMapping("/{clubId}")
     @Override
     public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember, Pageable pageable) {
