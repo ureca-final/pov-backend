@@ -6,7 +6,7 @@ import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.country.domain.Country;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
-import net.pointofviews.movie.exception.MovieException;
+import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.MovieService;
 import net.pointofviews.people.domain.People;
@@ -20,9 +20,11 @@ import java.util.function.Function;
 
 import static net.pointofviews.movie.dto.request.CreateMovieRequest.SearchCreditApiRequest.CastRequest;
 import static net.pointofviews.movie.dto.request.CreateMovieRequest.SearchCreditApiRequest.CrewRequest;
-import static net.pointofviews.movie.exception.MovieException.*;
+import static net.pointofviews.movie.exception.MovieException.duplicateMovie;
+import static net.pointofviews.movie.exception.MovieException.movieNotFound;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class MovieServiceImpl implements MovieService {
 
@@ -32,7 +34,6 @@ public class MovieServiceImpl implements MovieService {
     private final MoviePeopleServiceImpl moviePeopleServiceImpl;
 
     @Override
-    @Transactional
     public void saveMovie(CreateMovieRequest request) {
         if (movieRepository.existsByTmdbId(request.tmdbId())) {
             throw duplicateMovie(request.tmdbId());
@@ -67,11 +68,40 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public void deleteMovie(Long movieId) {
-        if(!movieRepository.existsById(movieId)) {
+        if (!movieRepository.existsById(movieId)) {
             throw movieNotFound(movieId);
         }
 
         movieRepository.deleteById(movieId);
+    }
+
+    @Override
+    public void updateMovie(Long movieId, PutMovieRequest request) {
+        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> movieNotFound(movieId));
+
+        List<MovieGenre> genres = convertStringsToMovieGenre(request.genres());
+        genres.forEach(movie::addGenre);
+
+        List<MovieCountry> countries = processMovieCountries(request.country());
+        countries.forEach(movie::addCountry);
+
+        List<MovieCast> casts = processMoviePeoples(
+                request.peoples().cast(),
+                PutMovieRequest.UpdateMoviePeopleRequest.CastRequest::toPeopleEntity,
+                PutMovieRequest.UpdateMoviePeopleRequest.CastRequest::toMovieCastEntity,
+                People::addCast
+        );
+        casts.forEach(cast -> cast.updateMovie(movie));
+
+        List<MovieCrew> crews = processMoviePeoples(
+                request.peoples().crew(),
+                PutMovieRequest.UpdateMoviePeopleRequest.CrewRequest::toPeopleEntity,
+                PutMovieRequest.UpdateMoviePeopleRequest.CrewRequest::toMovieCrewEntity,
+                People::addCrew
+        );
+        crews.forEach(crew -> crew.updateMovie(movie));
+
+        movie.updateMovie(request, casts, crews, countries, genres);
     }
 
     private List<MovieGenre> convertStringsToMovieGenre(List<String> stringGenres) {
