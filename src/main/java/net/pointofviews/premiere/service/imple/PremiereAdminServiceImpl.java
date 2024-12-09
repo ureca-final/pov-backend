@@ -23,13 +23,12 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
     private final MemberRepository memberRepository;
 
     @Override
-    public Void savePremiere(Member loginMember, PremiereRequest premiere) {
-        return null;
+    public void savePremiere(Member loginMember, PremiereRequest premiere) {
     }
 
     @Override
     @Transactional
-    public Void updatePremiere(Member loginMember, Long premiereId, PremiereRequest request) {
+    public void updatePremiere(Member loginMember, Long premiereId, PremiereRequest request) {
 
         if (memberRepository.findById(loginMember.getId()).isEmpty()) {
             throw adminNotFound(loginMember.getId());
@@ -39,18 +38,14 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
                 .orElseThrow(() -> premiereNotFound(premiereId));
 
         premiere.updatePremiere(request);
-
-        return null;
     }
 
     @Override
-    public Void deletePremiere(Member loginMember, Long premiereId) {
-        return null;
+    public void deletePremiere(Member loginMember, Long premiereId) {
     }
 
     @Override
-    public Void findAllPremiere(Member loginMember) {
-        return null;
+    public void findAllPremiere(Member loginMember) {
     }
 
     @Override

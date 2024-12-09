@@ -6,13 +6,13 @@ import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 
 public interface PremiereAdminService {
 
-    Void savePremiere(Member loginMember, PremiereRequest request);
+    void savePremiere(Member loginMember, PremiereRequest request);
 
-    Void updatePremiere(Member loginMember, Long premiereId, PremiereRequest request);
+    void updatePremiere(Member loginMember, Long premiereId, PremiereRequest request);
 
-    Void deletePremiere(Member loginMember, Long premiereId);
+    void deletePremiere(Member loginMember, Long premiereId);
 
-    Void findAllPremiere(Member loginMember);
+    void findAllPremiere(Member loginMember);
 
     ReadDetailPremiereResponse findPremiereById(Member loginMember, Long premiereId);
 }
