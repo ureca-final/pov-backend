@@ -400,6 +400,8 @@ public class ClubServiceImpl implements ClubService {
             ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, pageable);
             ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, pageable);
 
+            int reviewCount = reviews != null ? reviews.reviews().getSize() : 0;
+
             return new ReadClubDetailsResponse(
                     basicInfo.name(),
                     basicInfo.description(),
@@ -409,7 +411,7 @@ public class ClubServiceImpl implements ClubService {
                     basicInfo.participant(),
                     basicInfo.isPublic(),
                     reviews,
-                    reviews.reviews().getSize(), // 리뷰 수
+                    reviewCount,
                     bookmarks,
                     basicInfo.movieCount()
             );
