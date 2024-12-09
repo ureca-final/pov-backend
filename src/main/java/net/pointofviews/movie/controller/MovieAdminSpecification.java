@@ -10,15 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
-import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
-import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
-import net.pointofviews.movie.dto.response.SearchFilteredMovieDetailResponse;
-import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
-import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
+import net.pointofviews.movie.dto.response.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -333,7 +328,6 @@ public interface MovieAdminSpecification {
 
     })
     ResponseEntity<BaseResponse<ReadDailyMovieLikeListResponse>> readDailyMovieLikeList(
-            @AuthenticationPrincipal(expression = "member") Member loginMember
+            Member loginMember
     );
-
 }
