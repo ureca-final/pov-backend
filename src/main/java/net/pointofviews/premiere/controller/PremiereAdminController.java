@@ -9,10 +9,12 @@ import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
 import net.pointofviews.premiere.service.PremiereAdminService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,13 +34,14 @@ public class PremiereAdminController implements PremiereAdminSpecification {
     }
 
     @Override
-    @PutMapping("/{premiereId}")
+    @PutMapping(value = "/{premiereId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<Void>> putPremiere(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
             @PathVariable Long premiereId,
-            @RequestBody @Valid PremiereRequest request
+            @RequestPart(value = "request") PremiereRequest request,
+            @RequestPart(value = "eventImage", required = false) MultipartFile file
     ) {
-        premiereAdminService.updatePremiere(loginMember, premiereId, request);
+        premiereAdminService.updatePremiere(loginMember, premiereId, request, file);
 
         return BaseResponse.ok("시사회 정보가 성공적으로 수정되었습니다.");
     }
