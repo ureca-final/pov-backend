@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchFilteredMovieDetailResponse;
@@ -16,6 +18,7 @@ import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
 import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -313,4 +316,24 @@ public interface MovieAdminSpecification {
     })
     ResponseEntity<BaseResponse<SearchReleaseApiResponse>> searchTMDbReleases(
             @Parameter(description = "TMDb 영화 id", example = "27205") String tmdbId);
+
+    @Operation(
+            summary = "영화 좋아요 관리 조회",
+            description = "일일 `좋아요` 가 가장 많은 상위 10개 영화 조회하는 API."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "영화 좋아요 관리 조회 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "어제 날짜의 영화 좋아요 정보 없음"
+            ),
+
+    })
+    ResponseEntity<BaseResponse<ReadDailyMovieLikeListResponse>> readDailyMovieLikeList(
+            @AuthenticationPrincipal(expression = "member") Member loginMember
+    );
+
 }
