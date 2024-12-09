@@ -66,6 +66,22 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
 
     @Override
     public ReadDetailPremiereResponse findPremiereById(Member loginMember, Long premiereId) {
-        return null;
+
+        if (memberRepository.findById(loginMember.getId()).isEmpty()) {
+            throw adminNotFound(loginMember.getId());
+        }
+
+        Premiere premiere = premiereRepository.findById(premiereId)
+                .orElseThrow(() -> premiereNotFound(premiereId));
+
+        ReadDetailPremiereResponse response = new ReadDetailPremiereResponse(
+                premiere.getTitle(),
+                premiere.getStartAt(),
+                premiere.getEndAt(),
+                premiere.isPaymentRequired(),
+                premiere.getEventImage()
+        );
+
+        return response;
     }
 }
