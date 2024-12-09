@@ -8,6 +8,7 @@ import net.pointofviews.club.dto.response.*;
 import net.pointofviews.club.dto.request.*;
 import net.pointofviews.club.service.ClubService;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.member.domain.Member;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,14 +34,16 @@ public class ClubController implements ClubSpecification{
 
     @GetMapping("/{clubId}")
     @Override
-    public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(String clubId) {
-        return null;
+    public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
+        ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember);
+        return BaseResponse.ok("클럽 상세 정보를 성공적으로 조회했습니다.", response);
     }
 
     @GetMapping("/myclub")
     @Override
-    public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readMyClubs(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
-        return null;
+    public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllMyClubs(@AuthenticationPrincipal(expression = "member") Member loginMember) {
+        ReadAllClubsListResponse response = clubService.readAllMyClubs(loginMember);
+        return BaseResponse.ok("사용자가 속한 모든 클럽이 성공적으로 조회되었습니다.", response);
     }
 
     @GetMapping("/{clubId}/bookmark")

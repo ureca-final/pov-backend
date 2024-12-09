@@ -55,5 +55,21 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
 
     long countByClub(Club club);
 
+    @Query("""
+           SELECT c.id AS clubId,
+                  c.name AS clubName,
+                  c.description AS clubDescription,
+                  c.maxParticipants AS maxParticipant,
+                  COUNT(DISTINCT mc.id) AS participantCount,
+                  COUNT(DISTINCT cm.id) AS movieCount,
+                  GROUP_CONCAT(DISTINCT cfg.genreCode) AS genreCodes
+           FROM MemberClub mc
+           JOIN mc.club c
+           LEFT JOIN c.clubMovies cm
+           LEFT JOIN c.clubFavorGenres cfg
+           WHERE mc.member.id = :memberId
+           GROUP BY c.id
+           """)
+    List<Object[]> findMyClubsByMemberId(@Param("memberId") UUID memberId);
 
 }

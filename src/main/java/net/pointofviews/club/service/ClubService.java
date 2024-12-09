@@ -6,6 +6,7 @@ import net.pointofviews.club.dto.request.PutClubLeaderRequest;
 import net.pointofviews.club.dto.request.PutClubRequest;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.member.domain.Member;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -28,9 +29,9 @@ public interface ClubService {
 
     ReadAllClubsListResponse readAllPublicClubs();
 
-    ReadAllClubsListResponse readMyClubs();
+    ReadAllClubsListResponse readAllMyClubs(Member loginMember);
 
-    ReadClubDetailsResponse readClubDetails(String clubId);
+    ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember);
 
     ReadClubMoviesListResponse readMyClubMovies();
 }

@@ -39,4 +39,16 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
            GROUP BY c.id
            """)
     List<Object[]> findAllPublicClubs();
+
+    @Query("""
+           SELECT c
+           FROM Club c
+           LEFT JOIN FETCH c.memberClubs mc
+           LEFT JOIN FETCH c.clubMovies cm
+           LEFT JOIN FETCH c.clubFavorGenres cfg
+           WHERE c.id = :clubId
+           """)
+    Optional<Club> findByIdWithDetails(@Param("clubId") UUID clubId);
+
+
 }

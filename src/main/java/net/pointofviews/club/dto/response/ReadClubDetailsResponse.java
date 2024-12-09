@@ -14,11 +14,14 @@ public record ReadClubDetailsResponse(
         @Schema(description = "클럽 설명", example = "영화를 좋아하는 00년생들")
         String clubDescription,
 
+        @Schema(description = "클럽 대표 이미지", example = "https://example.com/image.jpg")
+        String clubImage,
+
         @Schema(description = "클럽 선호 장르 해시태그", example = "[\"액션\", \"SF\"]")
         List<String> clubFavorGenres,
 
-        @Schema(description = "참가자 목록", example = "[\"노지민\", \"박시은\", \"이승희\"]")
-        List<String> members,
+        @Schema(description = "참가자")
+        ReadClubMemberListResponse members,
 
         @Schema(description = "참가자 수", example = "3")
         int participant,

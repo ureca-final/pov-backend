@@ -19,6 +19,7 @@ import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberRepository;
+import net.pointofviews.review.dto.response.ReadMyClubReviewListResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -331,21 +332,116 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ReadAllClubsListResponse readMyClubs() {
-        return null;
+    public ReadAllClubsListResponse readAllMyClubs(Member loginMember) {
+        UUID memberId = loginMember.getId();
+        List<Object[]> clubData = memberClubRepository.findMyClubsByMemberId(memberId);
+
+        List<ReadAllClubsResponse> clubResponses = clubData.stream()
+                .map(data -> {
+                    UUID clubId = (UUID) data[0];
+                    String clubName = (String) data[1];
+                    String clubDescription = (String) data[2];
+                    int maxParticipants = (int) data[3];
+                    int participantCount = ((Long) data[4]).intValue();
+                    int movieCount = ((Long) data[5]).intValue();
+                    String genreCodes = (String) data[6];
+
+                    // 장르 코드 -> 장르 이름 변환
+                    List<String> genreNames = Arrays.stream(genreCodes.split(","))
+                            .map(code -> commonCodeService.convertCommonCodeToName(code, CodeGroupEnum.MOVIE_GENRE))
+                            .collect(Collectors.toList());
+
+                    return new ReadAllClubsResponse(
+                            clubId,
+                            clubName,
+                            clubDescription,
+                            participantCount,
+                            maxParticipants,
+                            movieCount,
+                            genreNames
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new ReadAllClubsListResponse(clubResponses);
     }
 
     @Override
-    public ReadClubDetailsResponse readClubDetails(String clubId) {
-        return null;
+    public ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember) {
+        // 클럽 기본 정보 조회
+        Club club = clubRepository.findByIdWithDetails(clubId)
+                .orElseThrow(() -> clubNotFound(clubId));
+
+        // 사용자가 클럽 멤버인지 확인
+        boolean isMember = club.getMemberClubs().stream()
+                .anyMatch(mc -> mc.getMember().getId().equals(loginMember.getId()));
+
+        // 공통 필드: 클럽 기본 정보와 선호 장르
+        List<String> favorGenres = club.getClubFavorGenres().stream()
+                .map(genre -> commonCodeService.convertCommonCodeToName(genre.getGenreCode(), CodeGroupEnum.MOVIE_GENRE))
+                .collect(Collectors.toList());
+
+        // 공통 필드: 리더 정보
+        ReadClubMemberResponse leader = club.getMemberClubs().stream()
+                .filter(mc -> mc.isLeader())
+                .findFirst()
+                .map(mc -> new ReadClubMemberResponse(mc.getMember().getNickname(),
+                        mc.getMember().getProfileImage(),
+                        true))
+                .orElseThrow(ClubException::ClubLeaderNotFoundException);
+
+        // 멤버인 경우: 리뷰와 영화 목록 포함, 모든 멤버 조회
+        if (isMember) {
+            List<ReadClubMemberResponse> members = club.getMemberClubs().stream()
+                    .map(mc -> new ReadClubMemberResponse(
+                            mc.getMember().getNickname(),
+                            mc.getMember().getProfileImage(),
+                            mc.isLeader()))
+                    .collect(Collectors.toList());
+
+            ReadMyClubReviewListResponse clubReviewList = getClubReviews(clubId); // 리뷰 조회 로직 구현 예정
+            ReadClubMoviesListResponse clubMovieList = getClubMovies(clubId);   // 영화 목록 조회 로직 구현 예정
+
+            return new ReadClubDetailsResponse(
+                    club.getName(),
+                    club.getDescription(),
+                    club.getClubImage(),
+                    favorGenres,
+                    new ReadClubMemberListResponse(members),
+                    members.size(),
+                    club.isPublic(),
+                    clubReviewList,
+                    clubMovieList
+            );
+        }
+
+        // 멤버가 아닌 경우: 리뷰와 영화 목록 null, 리더만 포함
+        return new ReadClubDetailsResponse(
+                club.getName(),
+                club.getDescription(),
+                club.getClubImage(),
+                favorGenres,
+                new ReadClubMemberListResponse(List.of(leader)),
+                club.getMemberClubs().size(),
+                club.isPublic(),
+                null, // 리뷰는 null
+                null  // 영화 목록은 null
+        );
     }
+
 
     @Override
     public ReadClubMoviesListResponse readMyClubMovies() {
         return null;
     }
 
+    private ReadMyClubReviewListResponse getClubReviews(UUID clubId) {
+        return null;
+    }
 
+    private ReadClubMoviesListResponse getClubMovies(UUID clubId) {
+        return null;
+    }
 
     private void validateClubLeader(Club club, Member member) {
         MemberClub memberClub = club.getMemberClubs().stream()
