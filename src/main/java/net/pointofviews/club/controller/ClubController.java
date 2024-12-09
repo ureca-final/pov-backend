@@ -7,6 +7,7 @@ import net.pointofviews.club.controller.specification.ClubSpecification;
 import net.pointofviews.club.dto.request.CreateClubRequest;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.club.dto.request.*;
+import net.pointofviews.club.service.ClubSearchService;
 import net.pointofviews.club.service.ClubService;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class ClubController implements ClubSpecification {
 
     private final ClubService clubService;
+    private final ClubSearchService clubSearchService;
 
     @GetMapping
     @Override
@@ -39,8 +41,8 @@ public class ClubController implements ClubSpecification {
     @Override
     public ResponseEntity<BaseResponse<SearchClubsListResponse>> searchClubs(@RequestParam String query,
                                                                               Pageable pageable) {
-        SearchClubsListResponse response = clubService.searchClubs(query, pageable);
-        return BaseResponse.ok("공개된 모든 클럽이 성공적으로 조회되었습니다.", response);
+        SearchClubsListResponse response = clubSearchService.searchClubs(query, pageable);
+        return BaseResponse.ok("공개된 모든 클럽이 성공적으로 검색되었습니다.", response);
     }
 
     @GetMapping("/{clubId}")

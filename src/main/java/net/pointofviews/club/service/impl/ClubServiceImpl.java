@@ -343,11 +343,6 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public SearchClubsListResponse searchClubs(String query, Pageable pageable) {
-        return null;
-    }
-
-    @Override
     public ReadAllClubsListResponse readAllMyClubs(Member loginMember) {
         UUID memberId = loginMember.getId();
         List<Object[]> clubData = memberClubRepository.findMyClubsByMemberId(memberId);

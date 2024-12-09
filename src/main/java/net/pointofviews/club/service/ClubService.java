@@ -30,8 +30,6 @@ public interface ClubService {
 
     ReadAllClubsListResponse readAllPublicClubs();
 
-    SearchClubsListResponse searchClubs(String query, Pageable pageable);
-
     ReadAllClubsListResponse readAllMyClubs(Member loginMember);
 
     ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember, Pageable pageable);

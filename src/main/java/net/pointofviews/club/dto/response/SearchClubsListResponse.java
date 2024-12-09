@@ -6,5 +6,5 @@ import org.springframework.data.domain.Slice;
 @Schema(description = "클럽 검색 리스트 응답 DTO")
 public record SearchClubsListResponse(
         @Schema(description = "클럽 리스트")
-        Slice<ReadAllClubsResponse> clubs
+        Slice<SearchClubsResponse> clubs
 ) {}
