@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
 import net.pointofviews.movie.dto.response.SearchFilteredMovieDetailResponse;
 import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
@@ -31,6 +32,13 @@ public class MovieAdminController implements MovieAdminSpecification {
     public ResponseEntity<?> createMovie(@Valid @RequestBody CreateMovieRequest request) {
         movieService.saveMovie(request);
 
+        return BaseResponse.ok("OK");
+    }
+
+    @Override
+    @PutMapping("/{movieId}")
+    public ResponseEntity<?> updateMovie(@PathVariable Long movieId, @RequestBody PutMovieRequest request) {
+        movieService.updateMovie(movieId, request);
         return BaseResponse.ok("OK");
     }
 
