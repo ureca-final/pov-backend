@@ -26,4 +26,8 @@ public class ClubException extends BusinessException {
     public static ClubException clubLeaderCannotLeave() {
         return new ClubException(HttpStatus.BAD_REQUEST, "클럽장은 클럽을 탈퇴할 수 없습니다.");
     }
+
+    public static ClubException ClubLeaderNotFoundException() {
+        return new ClubException(HttpStatus.INTERNAL_SERVER_ERROR, "클럽 리더가 설정되지 않았습니다.");
+    }
 }

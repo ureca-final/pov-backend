@@ -36,6 +36,12 @@ public class Club extends BaseEntity {
     @OneToMany(mappedBy = "club")
     private List<MemberClub> memberClubs = new ArrayList<>();
 
+    @OneToMany(mappedBy = "club")
+    private List<ClubMovie> clubMovies = new ArrayList<>();
+
+    @OneToMany(mappedBy = "club")
+    private List<ClubFavorGenre> clubFavorGenres = new ArrayList<>();
+
     @Builder
     private Club(String description, boolean isPublic, Integer maxParticipants, String name, String clubImage) {
         this.maxParticipants = validateMaxParticipants(maxParticipants);

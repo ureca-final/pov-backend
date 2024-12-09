@@ -4,11 +4,9 @@ import jakarta.validation.Valid;
 import net.pointofviews.club.dto.request.CreateClubRequest;
 import net.pointofviews.club.dto.request.PutClubLeaderRequest;
 import net.pointofviews.club.dto.request.PutClubRequest;
-import net.pointofviews.club.dto.response.CreateClubImageListResponse;
-import net.pointofviews.club.dto.response.CreateClubResponse;
-import net.pointofviews.club.dto.response.PutClubLeaderResponse;
-import net.pointofviews.club.dto.response.PutClubResponse;
+import net.pointofviews.club.dto.response.*;
 import net.pointofviews.member.domain.Member;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -28,4 +26,12 @@ public interface ClubService {
     CreateClubImageListResponse saveClubImages(List<MultipartFile> files, Member member);
 
     CreateClubImageListResponse updateClubImages(UUID clubId, List<MultipartFile> files, Member member);
+
+    ReadAllClubsListResponse readAllPublicClubs();
+
+    ReadAllClubsListResponse readAllMyClubs(Member loginMember);
+
+    ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember);
+
+    ReadClubMoviesListResponse readMyClubMovies();
 }
