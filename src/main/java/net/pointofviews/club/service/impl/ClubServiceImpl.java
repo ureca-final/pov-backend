@@ -1,4 +1,4 @@
-package net.pointofviews.club.service;
+package net.pointofviews.club.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,10 @@ import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubFavorGenreRepository;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
+import net.pointofviews.club.service.ClubFavorGenreService;
+import net.pointofviews.club.service.ClubMovieService;
+import net.pointofviews.club.service.ClubService;
+import net.pointofviews.club.service.MemberClubService;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.S3Service;
@@ -20,11 +24,13 @@ import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.review.dto.response.ReadMyClubReviewListResponse;
+import net.pointofviews.review.service.ReviewClubService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Pageable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +51,11 @@ public class ClubServiceImpl implements ClubService {
     private final ClubFavorGenreRepository clubFavorGenreRepository;
     private final MemberRepository memberRepository;
     private final CommonCodeService commonCodeService;
+    private final MemberClubService memberClubService;
+    private final ClubMovieService clubMovieService;
+    private final ClubFavorGenreService clubFavorGenreService;
+    private final ReviewClubService reviewClubService;
+
     private final S3Service s3Service;
 
     @Override
@@ -367,23 +378,56 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember) {
-        return null;
+    public ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember, Pageable pageable) {
+        // 1. 클럽 기본 정보 조회
+        FindBasicClubInfo basicInfo = clubRepository.findBasicClubInfoById(clubId)
+                .orElseThrow(() -> ClubException.clubNotFound(clubId));
+        // 클럽 장르 정보 조회
+        List<String> genres = clubFavorGenreService.readGenreNamesByClubId(clubId);
+
+        // 2. 클럽 가입 여부 확인
+        boolean isMember = memberClubService.isMemberOfClub(clubId, loginMember.getId());
+
+        if (isMember) {
+            // 가입한 클럽: 모든 데이터를 반환
+
+            ReadClubMemberListResponse members = memberClubService.readMembersByClubId(clubId);
+            ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, pageable);
+            ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId);
+
+            return new ReadClubDetailsResponse(
+                    basicInfo.name(),
+                    basicInfo.description(),
+                    basicInfo.image(),
+                    genres,
+                    members,
+                    basicInfo.participant(),
+                    basicInfo.isPublic(),
+                    reviews,
+                    reviews.reviews().getSize(), // 리뷰 수
+                    bookmarks,
+                    basicInfo.movieCount()
+            );
+        } else {
+            // 가입하지 않은 클럽: 제한된 데이터만 반환
+            ReadClubMemberResponse leader = memberClubService.readClubLeaderByClubId(clubId);
+
+            return new ReadClubDetailsResponse(
+                    basicInfo.name(),
+                    basicInfo.description(),
+                    basicInfo.image(),
+                    List.of(), // 장르 제외
+                    new ReadClubMemberListResponse(List.of(leader)), // 리더 정보만 반환
+                    basicInfo.participant(),
+                    basicInfo.isPublic(),
+                    null, // 리뷰 제외
+                    0, // 리뷰 수 제외
+                    null, // 북마크 제외
+                    basicInfo.movieCount() // 북마크 수
+            );
+        }
     }
 
-
-    @Override
-    public ReadClubMoviesListResponse readMyClubMovies() {
-        return null;
-    }
-
-    private ReadMyClubReviewListResponse getClubReviews(UUID clubId) {
-        return null;
-    }
-
-    private ReadClubMoviesListResponse getClubMovies(UUID clubId) {
-        return null;
-    }
 
     private void validateClubLeader(Club club, Member member) {
         MemberClub memberClub = club.getMemberClubs().stream()

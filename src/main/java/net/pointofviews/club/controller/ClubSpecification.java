@@ -11,9 +11,7 @@ import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.dto.request.*;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.member.domain.Member;
-import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +19,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +58,8 @@ public interface ClubSpecification {
     })
     ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(
             @PathVariable UUID clubId,
-            @AuthenticationPrincipal(expression = "member") Member loginMember
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            Pageable pageable
     );
 
     @Operation(summary = "내 그룹 조회", description = "사용자가 속한 모든 클럽 정보를 조회합니다.")

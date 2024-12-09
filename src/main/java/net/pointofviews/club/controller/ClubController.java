@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -34,8 +36,8 @@ public class ClubController implements ClubSpecification{
 
     @GetMapping("/{clubId}")
     @Override
-    public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
-        ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember);
+    public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember, Pageable pageable) {
+        ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember,pageable);
         return BaseResponse.ok("클럽 상세 정보를 성공적으로 조회했습니다.", response);
     }
 

@@ -13,6 +13,7 @@ import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubFavorGenreRepository;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
+import net.pointofviews.club.service.impl.ClubServiceImpl;
 import net.pointofviews.common.exception.CommonCodeException;
 import net.pointofviews.common.exception.S3Exception;
 import net.pointofviews.common.service.CommonCodeService;
