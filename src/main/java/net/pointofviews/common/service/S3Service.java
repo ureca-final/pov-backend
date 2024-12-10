@@ -1,7 +1,5 @@
 package net.pointofviews.common.service;
 
-import java.util.List;
-
 import org.springframework.web.multipart.MultipartFile;
 
 public interface S3Service {

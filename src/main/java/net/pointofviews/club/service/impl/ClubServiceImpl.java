@@ -251,34 +251,22 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public CreateClubImageListResponse saveClubImages(List<MultipartFile> files, Member member) {
-        long totalSize = files.stream()
-                .mapToLong(MultipartFile::getSize)
-                .sum();
-
-        if (totalSize > 10 * 1024 * 1024) {
+    public CreateClubImageResponse saveClubImages(MultipartFile file, Member member) {
+        if (file.getSize() > 2 * 1024 * 1024) {
             throw invalidTotalImageSize();
         }
 
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : files) {
-            s3Service.validateImageFile(file);
-            String uniqueFileName = s3Service.createUniqueFileName(file.getOriginalFilename());
-            String filePath = "clubs/" + uniqueFileName;
-            String imageUrl = s3Service.saveImage(file, filePath);
-            imageUrls.add(imageUrl);
-        }
+        s3Service.validateImageFile(file);
+        String uniqueFileName = s3Service.createUniqueFileName(file.getOriginalFilename());
+        String filePath = "clubs/" + uniqueFileName;
+        String imageUrl = s3Service.saveImage(file, filePath);
 
-        return new CreateClubImageListResponse(imageUrls);
+        return new CreateClubImageResponse(imageUrl);
     }
 
     @Override
-    public CreateClubImageListResponse updateClubImages(UUID clubId, List<MultipartFile> files, Member member) {
-        long totalSize = files.stream()
-                .mapToLong(MultipartFile::getSize)
-                .sum();
-
-        if (totalSize > 10 * 1024 * 1024) {
+    public CreateClubImageResponse updateClubImages(UUID clubId, MultipartFile file, Member member) {
+        if (file.getSize() > 2 * 1024 * 1024) {
             throw invalidTotalImageSize();
         }
 
@@ -292,21 +280,14 @@ public class ClubServiceImpl implements ClubService {
             s3Service.deleteImage(oldImagePath);
         }
 
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : files) {
-            s3Service.validateImageFile(file);
-            String uniqueFileName = s3Service.createUniqueFileName(file.getOriginalFilename());
-            String filePath = "clubs/" + club.getId() + "/profile/" + uniqueFileName;
-            String imageUrl = s3Service.saveImage(file, filePath);
-            imageUrls.add(imageUrl);
-            club.updateClubImage(imageUrl);
-        }
+        s3Service.validateImageFile(file);
+        String uniqueFileName = s3Service.createUniqueFileName(file.getOriginalFilename());
+        String filePath = "clubs/" + club.getId() + "/profile/" + uniqueFileName;
+        String imageUrl = s3Service.saveImage(file, filePath);
+        club.updateClubImage(imageUrl);
 
-        return new CreateClubImageListResponse(imageUrls);
+        return new CreateClubImageResponse(imageUrl);
     }
-
-
-
 
     @Override
     public ReadAllClubsListResponse readAllPublicClubs() {
