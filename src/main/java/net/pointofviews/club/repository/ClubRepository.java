@@ -50,6 +50,7 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
            c.clubImage,
            c.isPublic,
            COUNT(DISTINCT mc.id),
+           c.maxParticipants,
            COUNT(DISTINCT cm.id)
        )
        FROM Club c

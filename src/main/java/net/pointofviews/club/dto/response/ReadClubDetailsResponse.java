@@ -26,6 +26,9 @@ public record ReadClubDetailsResponse(
         @Schema(description = "참가자 수", example = "3")
         Long participant,
 
+        @Schema(description = "전체 참가자 수", example = "100")
+        Integer maxParticipant,
+
         @Schema(description = "클럽 공개 여부", example = "true")
         boolean isPublic,
 

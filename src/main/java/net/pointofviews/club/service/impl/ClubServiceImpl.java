@@ -385,6 +385,7 @@ public class ClubServiceImpl implements ClubService {
                     genres,
                     members,
                     basicInfo.participant(),
+                    basicInfo.maxParticipants(),
                     basicInfo.isPublic(),
                     reviews,
                     reviewCount,
@@ -402,6 +403,7 @@ public class ClubServiceImpl implements ClubService {
                     List.of(), // 장르 제외
                     new ReadClubMemberListResponse(List.of(leader)), // 리더 정보만 반환
                     basicInfo.participant(),
+                    basicInfo.maxParticipants(),
                     basicInfo.isPublic(),
                     null, // 리뷰 제외
                     0, // 리뷰 수 제외
