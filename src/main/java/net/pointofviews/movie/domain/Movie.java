@@ -103,4 +103,9 @@ public class Movie {
         this.casts.addAll(casts);
         this.crews.addAll(crews);
     }
+
+    public void updateMovie(LocalDate release, KoreanFilmRating certification) {
+        this.released = release;
+        filmRating = certification;
+    }
 }
