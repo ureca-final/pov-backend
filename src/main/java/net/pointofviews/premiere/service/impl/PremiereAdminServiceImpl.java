@@ -115,14 +115,6 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
         premiereRepository.delete(premiere);
     }
 
-    /**
-     * 시사회 전체 조회
-     * <p>
-     * 1. 관리자 존재 확인
-     * 2. 시사회 전체 조회
-     * 3. 리스트가 빈 경우 -> 204
-     * 4. 그렇지 않은 경우 -> 반환
-     */
     @Override
     public ReadPremiereListResponse findAllPremiere(Member loginMember, Pageable pageable) {
 
