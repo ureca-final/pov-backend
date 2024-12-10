@@ -114,7 +114,7 @@ public interface PremiereAdminSpecification {
             ))
 
     })
-    ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetails(
+    ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetail(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
             @Parameter(description = "조회할 시사회 ID", example = "123") Long premiereId
     );

@@ -15,5 +15,5 @@ public interface PremiereAdminService {
 
     void findAllPremiere(Member loginMember);
 
-    ReadDetailPremiereResponse findPremiereById(Member loginMember, Long premiereId);
+    ReadDetailPremiereResponse findPremiereDetail(Member loginMember, Long premiereId);
 }

@@ -65,11 +65,13 @@ public class PremiereAdminController implements PremiereAdminSpecification {
 
     @Override
     @GetMapping("/{premiereId}")
-    public ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetails(
+    public ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetail(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
             @PathVariable Long premiereId
     ) {
-        return null;
+        ReadDetailPremiereResponse response = premiereAdminService.findPremiereDetail(loginMember, premiereId);
+
+        return BaseResponse.ok("시사회 상세 정보가 성공적으로 조회되었습니다.", response);
     }
 
 }
