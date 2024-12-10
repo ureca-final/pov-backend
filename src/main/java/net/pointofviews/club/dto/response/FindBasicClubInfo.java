@@ -19,6 +19,9 @@ public record FindBasicClubInfo(
         @Schema(description = "참가자 수", example = "3")
         Long participant,
 
+        @Schema(description = "최대 참가자 수", example = "100")
+        Integer maxParticipants,
+
         @Schema(description = "이 클럽의 북마크 수", example = "5")
         Long movieCount
 ) {}

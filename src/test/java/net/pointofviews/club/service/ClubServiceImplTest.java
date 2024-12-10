@@ -713,6 +713,7 @@ class ClubServiceImplTest {
                         "이미지 URL",
                         true,
                         3L, // 참여 인원
+                        100, // 최대 참여 인원
                         5L  // 북마크 수
                 );
 
@@ -750,7 +751,7 @@ class ClubServiceImplTest {
                 Pageable pageable = mock(Pageable.class);
 
                 FindBasicClubInfo basicInfo = new FindBasicClubInfo(
-                        "클럽명", "클럽 설명", "이미지 URL", true, 10L, 5L
+                        "클럽명", "클럽 설명", "이미지 URL", true, 10L, 100, 5L
                 );
 
                 ReadClubMemberResponse leader = mock(ReadClubMemberResponse.class);
