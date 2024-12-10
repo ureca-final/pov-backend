@@ -1,4 +1,4 @@
-package net.pointofviews.premiere.service.imple;
+package net.pointofviews.premiere.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.service.S3Service;
@@ -7,8 +7,12 @@ import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.premiere.domain.Premiere;
 import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
+import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
+import net.pointofviews.premiere.dto.response.ReadPremiereResponse;
 import net.pointofviews.premiere.repository.PremiereRepository;
 import net.pointofviews.premiere.service.PremiereAdminService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,7 +46,6 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
             throw adminNotFound(loginMember.getId());
         }
 
-        // 시사회 데이터 조회
         Premiere premiere = premiereRepository.findById(premiereId)
                 .orElseThrow(() -> premiereNotFound(premiereId));
 
@@ -112,8 +115,33 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
         premiereRepository.delete(premiere);
     }
 
+    /**
+     * 시사회 전체 조회
+     * <p>
+     * 1. 관리자 존재 확인
+     * 2. 시사회 전체 조회
+     * 3. 리스트가 빈 경우 -> 204
+     * 4. 그렇지 않은 경우 -> 반환
+     */
     @Override
-    public void findAllPremiere(Member loginMember) {
+    public ReadPremiereListResponse findAllPremiere(Member loginMember, Pageable pageable) {
+
+        if (memberRepository.findById(loginMember.getId()).isEmpty()) {
+            throw adminNotFound(loginMember.getId());
+        }
+
+        Page<Premiere> premierePage = premiereRepository.findAll(pageable);
+
+        Page<ReadPremiereResponse> premieres = premierePage.map(premiere ->
+                new ReadPremiereResponse(
+                        premiere.getId(),
+                        premiere.getTitle(),
+                        premiere.getThumbnail(),
+                        premiere.getStartAt()
+                )
+        );
+
+        return new ReadPremiereListResponse(premieres);
     }
 
     @Override

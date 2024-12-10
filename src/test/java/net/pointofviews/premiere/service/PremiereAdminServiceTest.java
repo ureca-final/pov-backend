@@ -10,7 +10,7 @@ import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 import net.pointofviews.premiere.exception.PremiereException;
 import net.pointofviews.premiere.repository.PremiereRepository;
-import net.pointofviews.premiere.service.imple.PremiereAdminServiceImpl;
+import net.pointofviews.premiere.service.impl.PremiereAdminServiceImpl;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
