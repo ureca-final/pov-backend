@@ -71,7 +71,21 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
     }
 
     @Override
+    @Transactional
     public void deletePremiere(Member loginMember, Long premiereId) {
+
+        if (memberRepository.findById(loginMember.getId()).isEmpty()) {
+            throw adminNotFound(loginMember.getId());
+        }
+
+        Premiere premiere = premiereRepository.findById(premiereId)
+                .orElseThrow(() -> premiereNotFound(premiereId));
+
+        if (premiere.getEventImage() != null) {
+            s3Service.deleteImage(premiere.getEventImage());
+        }
+
+        premiereRepository.delete(premiere);
     }
 
     @Override

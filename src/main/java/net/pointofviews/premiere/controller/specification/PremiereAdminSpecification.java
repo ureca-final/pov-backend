@@ -74,12 +74,19 @@ public interface PremiereAdminSpecification {
                               "message": "시사회가 성공적으로 삭제되었습니다."
                             }
                             """)
+            )),
+            @ApiResponse(responseCode = "404", description = "시사회 상세 조회 실패 - 존재하지 않는 시사회", content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(value = """
+                            {
+                              "message": "시사회(Id: 123)가 존재하지 않습니다."
+                            }
+                            """)
             ))
     })
     ResponseEntity<BaseResponse<Void>> deletePremiere(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
-            @Parameter(description = "삭제할 시사회 ID", example = "123") Long premiereId,
-            @RequestBody @Valid PremiereRequest request
+            @Parameter(description = "삭제할 시사회 ID", example = "123") Long premiereId
     );
 
     @Operation(
@@ -97,15 +104,14 @@ public interface PremiereAdminSpecification {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "시사회 상세 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "시사회 상세 조회 실패 - 존재하지 않는 시사회",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(value = """
-                                    {
-                                      "message": "존재하지 않는 시사회입니다."
-                                    }
-                                    """)
-                    ))
+            @ApiResponse(responseCode = "404", description = "시사회 상세 조회 실패 - 존재하지 않는 시사회", content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(value = """
+                            {
+                              "message": "시사회(Id: 123)가 존재하지 않습니다."
+                            }
+                            """)
+            ))
 
     })
     ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetails(
