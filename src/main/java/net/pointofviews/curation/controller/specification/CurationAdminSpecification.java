@@ -1,4 +1,4 @@
-package net.pointofviews.curation.controller;
+package net.pointofviews.curation.controller.specification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,7 +11,6 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
-import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

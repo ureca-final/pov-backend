@@ -1,4 +1,4 @@
-package net.pointofviews.curation.controller;
+package net.pointofviews.curation.controller.specification;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 

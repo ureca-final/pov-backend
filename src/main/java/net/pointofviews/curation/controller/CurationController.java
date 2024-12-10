@@ -1,13 +1,10 @@
 package net.pointofviews.curation.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.curation.domain.CurationCategory;
-import net.pointofviews.curation.dto.request.CreateCurationRequest;
+import net.pointofviews.curation.controller.specification.CurationSpecification;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
-import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.curation.service.CurationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/movies/curations")
 @RequiredArgsConstructor
-public class CurationController implements CurationSpecification{
+public class CurationController implements CurationSpecification {
 
     private final CurationService curationService;
 
