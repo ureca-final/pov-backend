@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
+import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -37,8 +38,8 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Slice<SearchMovieResponse>>> searchMovieList(@RequestParam String query,
-                                                                             Pageable pageable);
+    ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(@RequestParam String query,
+                                                                          Pageable pageable);
 
     @Operation(summary = "영화 상세 조회", description = "영화 단건 상세 조회 API.")
     @ApiResponses({

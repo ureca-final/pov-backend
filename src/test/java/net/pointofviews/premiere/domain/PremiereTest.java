@@ -1,5 +1,6 @@
 package net.pointofviews.premiere.domain;
 
+import net.pointofviews.fixture.PremiereFixture;
 import net.pointofviews.premiere.dto.request.PremiereRequest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Nested;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class PremiereTest {
@@ -60,7 +63,7 @@ class PremiereTest {
                 // given -- 테스트의 상태 설정
                 LocalDateTime startAt = LocalDateTime.of(2024, 11, 22, 14, 30);
                 LocalDateTime endAt = LocalDateTime.of(2024, 11, 28, 14, 30);
-                
+
                 Premiere premiere = Premiere.builder()
                         .title("title")
                         .eventImage("https://example.com/images/premiere.jpg")
@@ -71,7 +74,6 @@ class PremiereTest {
 
                 PremiereRequest request = new PremiereRequest(
                         "Update Premiere Title",
-                        "https://example.com/images/update-premiere.jpg",
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         true
@@ -84,12 +86,25 @@ class PremiereTest {
                 SoftAssertions.assertSoftly(softly -> {
                     softly.assertThat(premiere).isNotNull();
                     softly.assertThat(premiere.getTitle()).isEqualTo(request.title());
-                    softly.assertThat(premiere.getEventImage()).isEqualTo(request.image());
                     softly.assertThat(premiere.isPaymentRequired()).isEqualTo(request.isPaymentRequired());
                     softly.assertThat(premiere.getStartAt()).isEqualTo(request.startAt());
                     softly.assertThat(premiere.getEndAt()).isEqualTo(request.endAt());
                 });
             }
+
+            @Test
+            void 시사회_이미지_수정() {
+                // given -- 테스트의 상태 설정
+                Premiere premiere = PremiereFixture.createPremiere();
+                String eventImage = "https://example.com/images/new-premiere.jpg";
+
+                // when -- 테스트하고자 하는 행동
+                premiere.updateEventImage(eventImage);
+
+                // then -- 예상되는 변화 및 결과
+                assertThat(premiere.getEventImage()).isEqualTo(eventImage);
+            }
+
         }
     }
 }

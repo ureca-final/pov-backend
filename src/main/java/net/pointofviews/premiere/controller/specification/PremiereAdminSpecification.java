@@ -16,6 +16,8 @@ import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Premiere-Admin", description = "시사회 관련 관리자 API")
 public interface PremiereAdminSpecification {
@@ -56,7 +58,8 @@ public interface PremiereAdminSpecification {
     ResponseEntity<BaseResponse<Void>> putPremiere(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
             @Parameter(description = "수정할 시사회 ID", example = "123") Long premiereId,
-            @RequestBody @Valid PremiereRequest request
+            @RequestPart(value = "request") @Valid PremiereRequest request,
+            @RequestPart(value = "eventImage", required = false) MultipartFile file
     );
 
     @Operation(

@@ -1,4 +1,4 @@
-package net.pointofviews.club.controller;
+package net.pointofviews.club.controller.specification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,16 +11,17 @@ import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.dto.request.*;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.member.domain.Member;
-import net.pointofviews.review.dto.response.CreateReviewImageListResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,18 @@ public interface ClubSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllClubs();
+
+    @Operation(summary = "그룹 검색", description = "클럽을 검색합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            )
+    })
+    ResponseEntity<BaseResponse<SearchClubsListResponse>> searchClubs(
+            @RequestParam String query,
+            Pageable pageable
+    );
 
     @Operation(summary = "클럽 상세 조회", description = "특정 클럽의 상세 정보를 조회합니다.")
     @ApiResponses({
@@ -58,7 +71,8 @@ public interface ClubSpecification {
     })
     ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(
             @PathVariable UUID clubId,
-            @AuthenticationPrincipal(expression = "member") Member loginMember
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            Pageable pageable
     );
 
     @Operation(summary = "내 그룹 조회", description = "사용자가 속한 모든 클럽 정보를 조회합니다.")
@@ -69,15 +83,6 @@ public interface ClubSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllMyClubs(@AuthenticationPrincipal(expression = "member") Member loginMember);
-
-    @Operation(summary = "클럽 영화 북마크 조회", description = "클럽에서 저장한 영화 리스트를 조회합니다.")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공"
-            )
-    })
-    ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies(@AuthenticationPrincipal MemberDetailsDto memberDetailsDto);
 
     @Operation(summary = "클럽 생성", description = "새로운 클럽을 생성합니다.")
     @ApiResponses(value = {
