@@ -9,8 +9,6 @@ import net.pointofviews.member.domain.Member;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
-
-import java.util.List;
 import java.util.UUID;
 
 public interface ClubService {
@@ -24,9 +22,9 @@ public interface ClubService {
 
     void leaveClub(UUID clubId, Member member);
 
-    CreateClubImageListResponse saveClubImages(List<MultipartFile> files, Member member);
+    CreateClubImageResponse saveClubImages(MultipartFile file, Member member);
 
-    CreateClubImageListResponse updateClubImages(UUID clubId, List<MultipartFile> files, Member member);
+    CreateClubImageResponse updateClubImages(UUID clubId, MultipartFile file, Member member);
 
     ReadAllClubsListResponse readAllPublicClubs();
 

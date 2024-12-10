@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
-
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -68,22 +66,22 @@ public class ClubController implements ClubSpecification {
 
     @Override
     @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<CreateClubImageListResponse>> createClubImages(
-            @RequestPart(value = "files") List<MultipartFile> files,
+    public ResponseEntity<BaseResponse<CreateClubImageResponse>> createClubImages(
+            @RequestPart(value = "file") MultipartFile file,
             @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     ) {
-        CreateClubImageListResponse response = clubService.saveClubImages(files,memberDetailsDto.member());
+        CreateClubImageResponse response = clubService.saveClubImages(file,memberDetailsDto.member());
         return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
     }
 
     @Override
     @PostMapping(value = "/{clubId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<CreateClubImageListResponse>> putClubImages(
+    public ResponseEntity<BaseResponse<CreateClubImageResponse>> putClubImages(
             @PathVariable UUID clubId,
-            @RequestPart(value = "files") List<MultipartFile> files,
+            @RequestPart(value = "file") MultipartFile file,
             @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     ) {
-        CreateClubImageListResponse response = clubService.updateClubImages(clubId, files, memberDetailsDto.member());
+        CreateClubImageResponse response = clubService.updateClubImages(clubId, file, memberDetailsDto.member());
         return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
     }
 
