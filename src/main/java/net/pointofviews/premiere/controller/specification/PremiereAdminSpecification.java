@@ -59,7 +59,8 @@ public interface PremiereAdminSpecification {
             @AuthenticationPrincipal(expression = "member") Member loginMember,
             @Parameter(description = "수정할 시사회 ID", example = "123") Long premiereId,
             @RequestPart(value = "request") @Valid PremiereRequest request,
-            @RequestPart(value = "eventImage", required = false) MultipartFile file
+            @RequestPart(value = "eventImage", required = false) MultipartFile eventImage,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
     );
 
     @Operation(

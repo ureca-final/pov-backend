@@ -54,7 +54,7 @@ class PremiereAdminServiceTest {
         class Success {
 
             @Test
-            void 요청_이미지가_포함된_시사회_정보_수정() {
+            void 요청_이미지_썸네일과_이벤트_모두_포함된_시사회_정보_수정() {
                 // given -- 테스트의 상태 설정
                 Member admin = mock(Member.class);
                 Premiere premiere = PremiereFixture.createPremiere();
@@ -62,47 +62,91 @@ class PremiereAdminServiceTest {
                 given(memberRepository.findById(any())).willReturn(Optional.of(admin));
                 given(premiereRepository.findById(any())).willReturn(Optional.of(premiere));
 
-                MockMultipartFile file = new MockMultipartFile(
+                MockMultipartFile thumbnail = new MockMultipartFile(
+                        "thumbnail",
+                        "thumbnail.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "thumbnail".getBytes()
+                );
+
+                MockMultipartFile eventImage = new MockMultipartFile(
                         "eventImage",
                         "eventImage.jpg",
                         MediaType.IMAGE_JPEG_VALUE,
                         "eventImage".getBytes()
                 );
 
-                given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../eventImage.jpg");
-
                 PremiereRequest request = new PremiereRequest(
                         "Update Premiere Title",
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
+                        10000,
                         true
                 );
 
                 // when -- 테스트하고자 하는 행동
-                premiereAdminService.updatePremiere(admin, 1L, request, file);
+                premiereAdminService.updatePremiere(admin, 1L, request, thumbnail, eventImage);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
                     softly.assertThat(premiere.getTitle()).isEqualTo(request.title());
-                    softly.assertThat(premiere.getEventImage()).isEqualTo("https://s3-bucket.../eventImage.jpg");
                     softly.assertThat(premiere.getStartAt()).isEqualTo(request.startAt());
                     softly.assertThat(premiere.getEndAt()).isEqualTo(request.endAt());
+                    softly.assertThat(premiere.getPrice()).isEqualTo(request.price());
                     softly.assertThat(premiere.isPaymentRequired()).isEqualTo(request.isPaymentRequired());
                 });
             }
 
             @Test
-            void 요청_이미지가_포함되고_기존_이미지가_null_일_때_시사회_정보_수정() {
+            void 요청_이미지_썸네일만_포함_기존_썸네일이_null_일_때_시사회_정보_수정() {
                 // given -- 테스트의 상태 설정
                 Member admin = mock(Member.class);
                 Premiere premiere = PremiereFixture.createPremiere();
 
-                premiere.updateEventImage(null);
+                premiere.updateThumbnail(null);
 
                 given(memberRepository.findById(any())).willReturn(Optional.of(admin));
                 given(premiereRepository.findById(any())).willReturn(Optional.of(premiere));
 
-                MockMultipartFile file = new MockMultipartFile(
+                MockMultipartFile thumbnail = new MockMultipartFile(
+                        "thumbnail",
+                        "thumbnail.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "thumbnail".getBytes()
+                );
+
+                given(s3Service.saveImage(any(), any())).willReturn("https://s3-bucket.../thumbnail.jpg");
+
+                PremiereRequest request = new PremiereRequest(
+                        "Update Premiere Title",
+                        LocalDateTime.of(2024, 12, 22, 14, 30),
+                        LocalDateTime.of(2024, 12, 22, 14, 30),
+                        10000,
+                        true
+                );
+
+                // when -- 테스트하고자 하는 행동
+                premiereAdminService.updatePremiere(admin, 1L, request, null, thumbnail);
+
+                // then -- 예상되는 변화 및 결과
+                assertSoftly(softly -> {
+                    softly.assertThat(premiere.getThumbnail()).isEqualTo("https://s3-bucket.../thumbnail.jpg");
+                    verify(s3Service, times(1)).saveImage(any(), any());
+                });
+            }
+
+            @Test
+            void 요청_이미지_이벤트이미지만_포함_기존_이벤트이미지가_null_일_때_시사회_정보_수정() {
+                // given -- 테스트의 상태 설정
+                Member admin = mock(Member.class);
+                Premiere premiere = PremiereFixture.createPremiere();
+
+                premiere.updateThumbnail(null);
+
+                given(memberRepository.findById(any())).willReturn(Optional.of(admin));
+                given(premiereRepository.findById(any())).willReturn(Optional.of(premiere));
+
+                MockMultipartFile eventImage = new MockMultipartFile(
                         "eventImage",
                         "eventImage.jpg",
                         MediaType.IMAGE_JPEG_VALUE,
@@ -115,21 +159,22 @@ class PremiereAdminServiceTest {
                         "Update Premiere Title",
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
+                        10000,
                         true
                 );
 
                 // when -- 테스트하고자 하는 행동
-                premiereAdminService.updatePremiere(admin, 1L, request, file);
+                premiereAdminService.updatePremiere(admin, 1L, request, eventImage, null);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
                     softly.assertThat(premiere.getEventImage()).isEqualTo("https://s3-bucket.../eventImage.jpg");
-                    verify(s3Service, times(0)).deleteImage(any());
+                    verify(s3Service, times(1)).saveImage(any(), any());
                 });
             }
 
             @Test
-            void 요청_이미지가_null_이고_기존_이미지가_있을_때_이미지_삭제_후_시사회_정보_수정() {
+            void 요청_이미지가_모두_null_이고_기존_이미지가_있을_때_이미지_모두_삭제_후_시사회_정보_수정() {
                 // given -- 테스트의 상태 설정
                 Member admin = mock(Member.class);
                 Premiere premiere = PremiereFixture.createPremiere();
@@ -141,20 +186,22 @@ class PremiereAdminServiceTest {
                         "Update Premiere Title",
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
+                        10000,
                         true
                 );
 
                 // when -- 테스트하고자 하는 행동
-                premiereAdminService.updatePremiere(admin, 1L, request, null);
+                premiereAdminService.updatePremiere(admin, 1L, request, null, null);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
                     softly.assertThat(premiere.getTitle()).isEqualTo(request.title());
                     softly.assertThat(premiere.getEventImage()).isNull();
+                    softly.assertThat(premiere.getThumbnail()).isNull();
                     softly.assertThat(premiere.getStartAt()).isEqualTo(request.startAt());
                     softly.assertThat(premiere.getEndAt()).isEqualTo(request.endAt());
                     softly.assertThat(premiere.isPaymentRequired()).isEqualTo(request.isPaymentRequired());
-                    verify(s3Service).deleteImage(any());
+                    verify(s3Service, times(2)).deleteImage(any());
                 });
             }
 
@@ -171,11 +218,12 @@ class PremiereAdminServiceTest {
                         "Update Premiere Title",
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
+                        10000,
                         true
                 );
 
                 // when -- 테스트하고자 하는 행동
-                premiereAdminService.updatePremiere(admin, 1L, request, null);
+                premiereAdminService.updatePremiere(admin, 1L, request, null, null);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -199,7 +247,13 @@ class PremiereAdminServiceTest {
 
                 // when -- 테스트하고자 하는 행동
                 MemberException exception = assertThrows(MemberException.class, () ->
-                        premiereAdminService.updatePremiere(admin, 1L, mock(PremiereRequest.class), mock(MultipartFile.class))
+                        premiereAdminService.updatePremiere(
+                                admin,
+                                1L,
+                                mock(PremiereRequest.class),
+                                mock(MultipartFile.class),
+                                mock(MultipartFile.class)
+                        )
                 );
 
                 // then -- 예상되는 변화 및 결과
@@ -221,7 +275,13 @@ class PremiereAdminServiceTest {
 
                 // when -- 테스트하고자 하는 행동
                 PremiereException exception = assertThrows(PremiereException.class, () ->
-                        premiereAdminService.updatePremiere(admin, -1L, mock(PremiereRequest.class), mock(MultipartFile.class))
+                        premiereAdminService.updatePremiere(
+                                admin,
+                                -1L,
+                                mock(PremiereRequest.class),
+                                mock(MultipartFile.class),
+                                mock(MultipartFile.class)
+                        )
                 );
 
                 // then -- 예상되는 변화 및 결과

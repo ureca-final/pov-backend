@@ -39,9 +39,10 @@ public class PremiereAdminController implements PremiereAdminSpecification {
             @AuthenticationPrincipal(expression = "member") Member loginMember,
             @PathVariable Long premiereId,
             @RequestPart(value = "request") PremiereRequest request,
-            @RequestPart(value = "eventImage", required = false) MultipartFile file
+            @RequestPart(value = "eventImage", required = false) MultipartFile eventImage,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
     ) {
-        premiereAdminService.updatePremiere(loginMember, premiereId, request, file);
+        premiereAdminService.updatePremiere(loginMember, premiereId, request, eventImage, thumbnail);
 
         return BaseResponse.ok("시사회 정보가 성공적으로 수정되었습니다.");
     }

@@ -35,39 +35,63 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
             Member loginMember,
             Long premiereId,
             PremiereRequest request,
-            MultipartFile file
+            MultipartFile eventImage,
+            MultipartFile thumbnail
     ) {
         if (memberRepository.findById(loginMember.getId()).isEmpty()) {
             throw adminNotFound(loginMember.getId());
         }
 
+        // 시사회 데이터 조회
         Premiere premiere = premiereRepository.findById(premiereId)
                 .orElseThrow(() -> premiereNotFound(premiereId));
 
-        String oldEventImage = premiere.getEventImage();
+        // 이벤트 이미지 처리
+        String newEventImage = processImage(
+                eventImage,
+                premiere.getEventImage(),
+                "premieres/" + premiereId + "/event/"
+        );
 
-        if (file == null) {
-            if (oldEventImage != null) {
-                s3Service.deleteImage(oldEventImage);
-                premiere.updateEventImage(null);
-            }
-        } else {
+        if (newEventImage != null || eventImage == null) {
+            premiere.updateEventImage(newEventImage);
+        }
+
+        // 썸네일 이미지 처리
+        String newThumbnail = processImage(
+                thumbnail,
+                premiere.getThumbnail(),
+                "premieres/" + premiereId + "/thumbnail/"
+        );
+
+        if (newThumbnail != null || thumbnail == null) {
+            premiere.updateThumbnail(newThumbnail);
+        }
+
+        premiere.updatePremiere(request);
+    }
+
+    private String processImage(MultipartFile file, String oldImage, String folderPath) {
+        if (file != null && !file.isEmpty()) {
             s3Service.validateImageFile(file);
 
             String originalFileName = file.getOriginalFilename();
             String uniqueFileName = s3Service.createUniqueFileName(originalFileName);
-            String filePath = "premieres/" + premiereId + "/" + uniqueFileName;
+            String filePath = folderPath + uniqueFileName;
+            String newImageUrl = s3Service.saveImage(file, filePath);
 
-            String imageUrl = s3Service.saveImage(file, filePath);
-
-            if (oldEventImage != null) {
-                s3Service.deleteImage(oldEventImage);
+            if (oldImage != null) {
+                s3Service.deleteImage(oldImage);
             }
 
-            premiere.updateEventImage(imageUrl);
+            return newImageUrl;
+
+        } else if (oldImage != null) {
+            s3Service.deleteImage(oldImage);
+            return null;
         }
 
-        premiere.updatePremiere(request);
+        return null;
     }
 
     @Override

@@ -9,7 +9,7 @@ public interface PremiereAdminService {
 
     void savePremiere(Member loginMember, PremiereRequest request);
 
-    void updatePremiere(Member loginMember, Long premiereId, PremiereRequest request, MultipartFile file);
+    void updatePremiere(Member loginMember, Long premiereId, PremiereRequest request, MultipartFile eventImage, MultipartFile thumbnail);
 
     void deletePremiere(Member loginMember, Long premiereId);
 
