@@ -7,6 +7,7 @@ import net.pointofviews.curation.controller.specification.CurationAdminSpecifica
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
+import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.curation.service.CurationAdminService;
 import org.springframework.http.ResponseEntity;
@@ -55,4 +56,20 @@ public class CurationAdminController implements CurationAdminSpecification{
         curationAdminService.deleteCuration(curationId);
         return BaseResponse.ok("큐레이션이 성공적으로 삭제되었습니다.");
     }
+
+
+    @GetMapping
+    @Override
+    public ResponseEntity<BaseResponse<ReadCurationListResponse>> adminReadAllCurations() {
+        ReadCurationListResponse response = curationAdminService.readAllCurations();
+        return BaseResponse.ok("관리자용 큐레이션 전체 조회에 성공하였습니다.", response);
+    }
+
+    @GetMapping("/{curationId}")
+    @Override
+    public ResponseEntity<BaseResponse<ReadCurationMoviesResponse>> adminReadCuration(@PathVariable Long curationId) {
+        ReadCurationMoviesResponse response = curationAdminService.readCuration(curationId);
+        return BaseResponse.ok("관리자용 큐레이션 상세 조회에 성공하였습니다.", response);
+    }
+
 }
