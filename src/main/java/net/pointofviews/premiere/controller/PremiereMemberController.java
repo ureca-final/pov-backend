@@ -7,12 +7,10 @@ import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
 import net.pointofviews.premiere.service.PremiereMemberService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ROLE_USER')")
 @RequestMapping("/api/premieres")
 public class PremiereMemberController implements PremiereMemberSpecification {
 
@@ -21,7 +19,13 @@ public class PremiereMemberController implements PremiereMemberSpecification {
     @Override
     @GetMapping
     public ResponseEntity<BaseResponse<ReadPremiereListResponse>> readPremiereList() {
-        return null;
+        ReadPremiereListResponse response = premiereMemberService.findAllPremiere();
+
+        if (response.premieres().isEmpty()) {
+            return BaseResponse.noContent();
+        }
+
+        return BaseResponse.ok("모든 시사회가 성공적으로 조회되었습니다.", response);
     }
 
     @Override

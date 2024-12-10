@@ -20,7 +20,8 @@ public interface PremiereMemberSpecification {
             description = "등록된 모든 시사회 목록을 조회하는 API."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "시사회 전체 조회 성공")
+            @ApiResponse(responseCode = "200", description = "시사회 전체 조회 성공"),
+            @ApiResponse(responseCode = "204", description = "아직 시사회 정보 없음")
     })
     ResponseEntity<BaseResponse<ReadPremiereListResponse>> readPremiereList();
 
