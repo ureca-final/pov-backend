@@ -3,7 +3,7 @@ package net.pointofviews.movie.controller;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.movie.service.MovieContentService;
+import net.pointofviews.movie.controller.specification.MovieMemberSpecification;
 import net.pointofviews.movie.service.MovieMemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

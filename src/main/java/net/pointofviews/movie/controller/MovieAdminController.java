@@ -4,12 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
+import net.pointofviews.movie.controller.specification.MovieAdminSpecification;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.response.*;
-import net.pointofviews.movie.service.MovieAdminService;
-import net.pointofviews.movie.service.MovieApiSearchService;
-import net.pointofviews.movie.service.MovieContentService;
-import net.pointofviews.movie.service.MovieService;
+import net.pointofviews.movie.service.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +26,7 @@ public class MovieAdminController implements MovieAdminSpecification {
     private final MovieApiSearchService movieApiSearchService;
     private final MovieAdminService movieAdminService;
     private final MovieService movieService;
+    private final MovieSearchService movieSearchService;
 
     @Override
     @PostMapping
@@ -194,4 +194,13 @@ public class MovieAdminController implements MovieAdminSpecification {
 
         return BaseResponse.ok("하루 동안 좋아요를 가장 많이 받은 영화 목록을 성공적으로 조회했습니다.", response);
     }
+
+    @Override
+    @GetMapping("/admin-search")
+    public ResponseEntity<BaseResponse<AdminSearchMovieListResponse>> adminSearchMovies(
+            @RequestParam String query, Pageable pageable) {
+        AdminSearchMovieListResponse response = movieSearchService.adminSearchMovies(query, pageable);
+        return BaseResponse.ok("영화 검색 결과 조회 성공", response);
+    }
+
 }

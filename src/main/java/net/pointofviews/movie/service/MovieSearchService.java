@@ -5,4 +5,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface MovieSearchService {
     SearchMovieListResponse searchMovies(String query, Pageable pageable);
+
+    AdminSearchMovieListResponse adminSearchMovies(String query, Pageable pageable);
 }
