@@ -36,7 +36,7 @@ public class Movie {
     @Convert(converter = FilmRatingConverter.class)
     private KoreanFilmRating filmRating;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     private final List<MovieCountry> countries = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
