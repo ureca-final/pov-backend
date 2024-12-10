@@ -1,11 +1,9 @@
 package net.pointofviews.movie.repository;
 
-import net.pointofviews.movie.dto.response.AdminSearchMovieResponse;
+import net.pointofviews.movie.domain.Movie;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import net.pointofviews.movie.domain.Movie;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -39,6 +37,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             """,
             nativeQuery = true)
     Slice<Object[]> searchMoviesByTitleOrPeople(@Param("query") String query, Pageable pageable);
+
     boolean existsByTmdbId(Integer title);
 
 

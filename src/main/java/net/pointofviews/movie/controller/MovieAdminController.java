@@ -6,6 +6,7 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieAdminSpecification;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.service.*;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +38,17 @@ public class MovieAdminController implements MovieAdminSpecification {
     }
 
     @Override
+    @PutMapping("/{movieId}")
+    public ResponseEntity<?> updateMovie(@PathVariable Long movieId, @RequestBody PutMovieRequest request) {
+        movieService.updateMovie(movieId, request);
+        return BaseResponse.ok("OK");
+    }
+
+    @Override
     @DeleteMapping("/{movieId}")
     public ResponseEntity<?> deleteMovie(@PathVariable Long movieId) {
-        return null;
+        movieService.deleteMovie(movieId);
+        return BaseResponse.noContent();
     }
 
     @Override
