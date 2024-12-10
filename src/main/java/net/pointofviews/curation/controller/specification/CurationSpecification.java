@@ -1,4 +1,4 @@
-package net.pointofviews.curation.controller;
+package net.pointofviews.curation.controller.specification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -6,16 +6,12 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
-import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Curation", description = "관리자 영화 추천 큐레이션 API")
 public interface CurationSpecification {
