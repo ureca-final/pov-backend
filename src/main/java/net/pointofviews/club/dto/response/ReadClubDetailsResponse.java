@@ -24,7 +24,7 @@ public record ReadClubDetailsResponse(
         ReadClubMemberListResponse members,
 
         @Schema(description = "참가자 수", example = "3")
-        int participant,
+        Long participant,
 
         @Schema(description = "클럽 공개 여부", example = "true")
         boolean isPublic,
@@ -32,7 +32,13 @@ public record ReadClubDetailsResponse(
         @Schema(description = "클럽원들이 작성한 리뷰")
         ReadMyClubReviewListResponse clubReviewList,
 
+        @Schema(description = "클럽원들이 작성한 리뷰 수", example = "15")
+        int reviewCount,
+
         @Schema(description = "이 클럽의 북마크")
-        ReadClubMoviesListResponse clubMovieList
+        ReadClubMoviesListResponse clubMovieList,
+
+        @Schema(description = "이 클럽의 북마크 수", example = "5")
+        Long movieCount
 
 ) {}

@@ -1,5 +1,8 @@
 package net.pointofviews.club.repository;
 
+import net.pointofviews.club.dto.response.FindBasicClubInfo;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import net.pointofviews.club.domain.Club;
@@ -41,14 +44,47 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
     List<Object[]> findAllPublicClubs();
 
     @Query("""
-           SELECT c
-           FROM Club c
-           LEFT JOIN FETCH c.memberClubs mc
-           LEFT JOIN FETCH c.clubMovies cm
-           LEFT JOIN FETCH c.clubFavorGenres cfg
-           WHERE c.id = :clubId
-           """)
-    Optional<Club> findByIdWithDetails(@Param("clubId") UUID clubId);
+       SELECT new net.pointofviews.club.dto.response.FindBasicClubInfo(
+           c.name,
+           c.description,
+           c.clubImage,
+           c.isPublic,
+           COUNT(DISTINCT mc.id),
+           COUNT(DISTINCT cm.id)
+       )
+       FROM Club c
+       LEFT JOIN c.memberClubs mc
+       LEFT JOIN c.clubMovies cm
+       WHERE c.id = :clubId
+       """)
+    Optional<FindBasicClubInfo> findBasicClubInfoById(@Param("clubId") UUID clubId);
 
 
+    /**
+     * 검색
+     */
+    @Query(value = """
+    SELECT DISTINCT BIN_TO_UUID(c.id) AS clubId, c.name AS clubName, c.description AS clubDescription,
+           COUNT(DISTINCT mc.id) AS participantCount,
+           c.max_participants AS maxParticipant,
+           COUNT(DISTINCT cm.id) AS clubMovieCount,
+           COALESCE(GROUP_CONCAT(DISTINCT cfg.genre_code), '') AS clubFavorGenres
+    FROM club c
+    LEFT JOIN member_club mc ON mc.club_id = c.id
+    LEFT JOIN club_movie cm ON cm.club_id = c.id
+    LEFT JOIN club_favor_genre cfg ON cfg.club_id = c.id
+    LEFT JOIN member m ON m.id = mc.member_id
+    WHERE MATCH(c.name) AGAINST(:query IN NATURAL LANGUAGE MODE)
+       OR EXISTS (
+           SELECT 1
+           FROM member_club mc2
+           JOIN member m2 ON m2.id = mc2.member_id
+           WHERE mc2.club_id = c.id
+             AND MATCH(m2.nickname) AGAINST(:query IN NATURAL LANGUAGE MODE)
+             AND mc2.is_leader = TRUE
+       )
+    GROUP BY c.id
+    """,
+            nativeQuery = true)
+    Slice<Object[]> searchClubsByTitleOrNickname(@Param("query") String query, Pageable pageable);
 }

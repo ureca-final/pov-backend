@@ -41,9 +41,12 @@ public class Premiere {
 
     public void updatePremiere(PremiereRequest request) {
         this.title = request.title();
-        this.eventImage = request.image();
         this.isPaymentRequired = request.isPaymentRequired();
         this.startAt = request.startAt();
         this.endAt = request.endAt();
+    }
+
+    public void updateEventImage(String eventImage) {
+        this.eventImage = eventImage;
     }
 }

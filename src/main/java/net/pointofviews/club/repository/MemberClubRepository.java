@@ -2,6 +2,7 @@ package net.pointofviews.club.repository;
 
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
 import org.springframework.data.domain.Pageable;
@@ -72,4 +73,33 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
            """)
     List<Object[]> findMyClubsByMemberId(@Param("memberId") UUID memberId);
 
+    @Query("""
+       SELECT new net.pointofviews.club.dto.response.ReadClubMemberResponse(
+           m.nickname,
+           m.profileImage,
+           mc.isLeader
+       )
+       FROM MemberClub mc
+       JOIN mc.member m
+       WHERE mc.club.id = :clubId
+       """)
+    List<ReadClubMemberResponse> findMembersByClubId(@Param("clubId") UUID clubId);
+
+    @Query("""
+       SELECT mc
+       FROM MemberClub mc
+       WHERE mc.club.id = :clubId AND mc.member.id = :memberId
+       """)
+    Optional<MemberClub> findByClubIdAndMemberId(@Param("clubId") UUID clubId, @Param("memberId") UUID memberId);
+
+    @Query("""
+       SELECT new net.pointofviews.club.dto.response.ReadClubMemberResponse(
+           mc.member.nickname,
+           mc.member.profileImage,
+           mc.isLeader
+       )
+       FROM MemberClub mc
+       WHERE mc.club.id = :clubId AND mc.isLeader = true
+       """)
+    Optional<ReadClubMemberResponse> findLeaderByClubId(@Param("clubId") UUID clubId);
 }
