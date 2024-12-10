@@ -15,10 +15,11 @@ public class MovieBatchConfig {
     private final JobRepository jobRepository;
 
     @Bean
-    public Job tmdbMovieDiscoverJob(Step tmdbMovieDiscoverStep, Step tmdbMovieReleaseStep) {
+    public Job tmdbMovieDiscoverJob(Step tmdbMovieDiscoverStep, Step tmdbMovieReleaseStep, Step tmdbMovieCountryStep) {
         return new JobBuilder("fetchMovieJob", jobRepository)
                 .start(tmdbMovieDiscoverStep)
                 .next(tmdbMovieReleaseStep)
+                .next(tmdbMovieCountryStep)
                 .build();
     }
 }
