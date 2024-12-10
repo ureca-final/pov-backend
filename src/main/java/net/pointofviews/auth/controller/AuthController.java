@@ -26,7 +26,7 @@ public class AuthController implements AuthSpecification {
 
     // Access Token 유효 시간 (1분, 1시간, 2주)
     private static final long EXPIRATION_TIME_1M = 60000;
-    private static final long EXPIRATION_TIME_1H = 3600000;
+    private static final long EXPIRATION_TIME_1H = EXPIRATION_TIME_1M * 60;
     private static final long EXPIRATION_TIME_2W = 1209600000;
 
     @Override
