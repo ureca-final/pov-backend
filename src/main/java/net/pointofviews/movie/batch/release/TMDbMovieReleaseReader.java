@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TMDbMovieReleaseReader {
 
-    @Bean
-    public JpaPagingItemReader<Movie> movieJpaReader(EntityManagerFactory entityManagerFactory) {
+    @Bean(name = "movieReleaseJpaReader")
+    public JpaPagingItemReader<Movie> movieReleaseJpaReader(EntityManagerFactory entityManagerFactory) {
         JpaPagingItemReader<Movie> reader = new JpaPagingItemReader<>() {
             @Override
             public int getPage() {

@@ -15,7 +15,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class TMDbMovieReleaseStep {
 
     private final JobRepository jobRepository;
-    private final JpaPagingItemReader<Movie> reader;
+    private final JpaPagingItemReader<Movie> movieReleaseJpaReader;
     private final TMDbMovieReleaseProcessor processor;
     private final TMDbMovieReleaseWriter writer;
 
@@ -23,7 +23,7 @@ public class TMDbMovieReleaseStep {
     public Step tmdbMovieReleaseStep(PlatformTransactionManager transactionManager) {
         return new StepBuilder("tmdbMovieReleaseStep", jobRepository)
                 .<Movie, Movie>chunk(100, transactionManager)
-                .reader(reader)
+                .reader(movieReleaseJpaReader)
                 .processor(processor)
                 .writer(writer)
                 .build();
