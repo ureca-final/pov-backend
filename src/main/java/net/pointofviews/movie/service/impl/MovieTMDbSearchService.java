@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -133,6 +134,29 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                 response.id(),
                 List.of(new SearchReleaseApiResponse.Result(bestResult.iso_3166_1(), bestResult.release_dates()))
         );
+    }
+
+    @Override
+    public SearchMovieDiscoverApiResponse searchDiscoverMovie(LocalDate start, LocalDate end, int page) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/discover")
+                        .path("/movie")
+                        .queryParam("release_date.gte", start)
+                        .queryParam("release_date.lte", end)
+                        .queryParam("region", "KR")
+                        .queryParam("sort_by", "popularity.desc")
+                        .queryParam("with_release_type", 3)
+                        .queryParam("page", page)
+                        .queryParam("language", LocaleUtils.KOREAN_LANGUAGE_CODE)
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchMovieDiscoverApiResponse.class);
+
     }
 
     private SearchReleaseApiResponse searchApiReleaseDate(String movieId) {
