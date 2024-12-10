@@ -1,5 +1,5 @@
 package net.pointofviews.curation.domain;
 
 public enum CurationCategory {
-    ACTOR, GENRE, DIRECTOR, AWARD, RELEASE, OTHER, COUNTRY
+    ACTOR, GENRE, DIRECTOR, RELEASE, OTHER
 }
