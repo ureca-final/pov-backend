@@ -1,9 +1,8 @@
 package net.pointofviews.movie.service;
 
-import net.pointofviews.movie.dto.response.SearchCreditApiResponse;
-import net.pointofviews.movie.dto.response.SearchFilteredMovieDetailResponse;
-import net.pointofviews.movie.dto.response.SearchMovieApiListResponse;
-import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
+import net.pointofviews.movie.dto.response.*;
+
+import java.time.LocalDate;
 
 public interface MovieApiSearchService {
     SearchMovieApiListResponse searchMovie(String searchTerm, int page);
@@ -13,4 +12,6 @@ public interface MovieApiSearchService {
     SearchCreditApiResponse searchLimit10Credit(String movieId);
 
     SearchReleaseApiResponse searchReleaseDate(String movieId);
+
+    SearchMovieDiscoverApiResponse searchDiscoverMovie(LocalDate start, LocalDate end, int page);
 }
