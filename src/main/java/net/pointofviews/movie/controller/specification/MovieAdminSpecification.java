@@ -1,4 +1,4 @@
-package net.pointofviews.movie.controller;
+package net.pointofviews.movie.controller.specification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,8 +12,11 @@ import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.response.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -328,6 +331,34 @@ public interface MovieAdminSpecification {
 
     })
     ResponseEntity<BaseResponse<ReadDailyMovieLikeListResponse>> readDailyMovieLikeList(
-            Member loginMember
+            @AuthenticationPrincipal(expression = "member") Member loginMember
     );
+
+
+    @Operation(
+            summary = "관리자 영화 검색",
+            description = "관리자 영화 수정, 큐레이션에 추가할 영화를 검색하기 위한 API."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "검색 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<AdminSearchMovieListResponse>> adminSearchMovies(
+            @RequestParam String query, Pageable pageable
+    );
+
 }

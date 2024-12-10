@@ -1,6 +1,8 @@
 package net.pointofviews.movie.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.movie.dto.response.AdminSearchMovieListResponse;
+import net.pointofviews.movie.dto.response.AdminSearchMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import net.pointofviews.movie.repository.MovieRepository;
@@ -31,5 +33,17 @@ public class MovieSearchServiceImpl implements MovieSearchService {
         ));
 
         return new SearchMovieListResponse(responses);
+    }
+
+    @Override
+    public AdminSearchMovieListResponse adminSearchMovies(String query, Pageable pageable) {
+        Slice<AdminSearchMovieResponse> movieResponses = movieRepository.adminSearchMovies(query, pageable)
+                .map(row -> new AdminSearchMovieResponse(
+                        ((Number) row[0]).longValue(),  // id
+                        (String) row[1],                // title
+                        ((java.sql.Date) row[2]).toLocalDate() // released
+                ));
+
+        return new AdminSearchMovieListResponse(movieResponses);
     }
 }
