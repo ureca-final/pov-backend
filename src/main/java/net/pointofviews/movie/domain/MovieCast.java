@@ -26,7 +26,7 @@ public class MovieCast {
     private Integer displayOrder;
 
     @Builder
-    public MovieCast(String roleName, Integer displayOrder) {
+    private MovieCast(String roleName, Integer displayOrder) {
         this.roleName = roleName;
         this.displayOrder = displayOrder;
     }

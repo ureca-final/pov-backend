@@ -10,10 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
+import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.response.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -51,7 +51,40 @@ public interface MovieAdminSpecification {
                     )
             )
     })
-    ResponseEntity<?> createMovie(CreateMovieRequest request);
+    ResponseEntity<?> createMovie(@Parameter(description = "db 영화 등록 요청") CreateMovieRequest request);
+
+    @Operation(
+            summary = "영화 정보 수정",
+            description = "지정된 영화 ID로 영화 정보를 수정하는 API. 영화 제목, 장르, 국가, 개봉일, 줄거리, 출연진 및 제작진 정보를 업데이트할 수 있습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "수정 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "영화 정보 수정이 성공적으로 완료되었습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "수정 실패 - 존재하지 않는 영화",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "영화(Id: 1)는 존재하지 않습니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<?> updateMovie(@Parameter(description = "db 영화 Pk") Long movieId,
+                                  @Parameter(description = "영화 수정 요청") PutMovieRequest request);
 
     @Operation(
             summary = "영화 삭제",
@@ -295,7 +328,6 @@ public interface MovieAdminSpecification {
 
     })
     ResponseEntity<BaseResponse<ReadDailyMovieLikeListResponse>> readDailyMovieLikeList(
-            @AuthenticationPrincipal(expression = "member") Member loginMember
+            Member loginMember
     );
-
 }
