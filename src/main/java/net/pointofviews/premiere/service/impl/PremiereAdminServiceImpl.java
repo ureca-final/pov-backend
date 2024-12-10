@@ -150,8 +150,10 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
                 premiere.getTitle(),
                 premiere.getStartAt(),
                 premiere.getEndAt(),
+                premiere.getPrice(),
                 premiere.isPaymentRequired(),
-                premiere.getEventImage()
+                premiere.getEventImage(),
+                premiere.getThumbnail()
         );
 
         return response;
