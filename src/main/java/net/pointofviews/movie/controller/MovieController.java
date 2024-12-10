@@ -5,7 +5,6 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieResponse;
-import net.pointofviews.movie.service.MovieContentService;
 import net.pointofviews.movie.service.MovieSearchService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MovieController implements MovieSpecification {
 
-    private final MovieContentService movieContentService;
     private final MovieSearchService movieSearchService;
 
     @Override

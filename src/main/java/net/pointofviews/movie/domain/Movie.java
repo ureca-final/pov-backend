@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.review.domain.Review;
 import org.springframework.util.Assert;
 
@@ -35,19 +36,19 @@ public class Movie {
     @Convert(converter = FilmRatingConverter.class)
     private KoreanFilmRating filmRating;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieCountry> countries = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
     private final List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieGenre> genres = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieCrew> crews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<MovieCast> casts = new ArrayList<>();
 
     @Builder
@@ -85,5 +86,21 @@ public class Movie {
     public void addCountry(MovieCountry movieCountry) {
         this.countries.add(movieCountry);
         movieCountry.updateMovie(this);
+    }
+
+    public void updateMovie(PutMovieRequest request, List<MovieCast> casts, List<MovieCrew> crews, List<MovieCountry> countries, List<MovieGenre> genres) {
+        this.title = request.title();
+        this.plot = request.plot();
+        this.released = request.release();
+
+        this.genres.clear();
+        this.countries.clear();
+        this.casts.clear();
+        this.crews.clear();
+
+        this.countries.addAll(countries);
+        this.genres.addAll(genres);
+        this.casts.addAll(casts);
+        this.crews.addAll(crews);
     }
 }

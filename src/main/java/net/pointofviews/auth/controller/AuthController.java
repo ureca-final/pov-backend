@@ -8,7 +8,6 @@ import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CheckLoginResponse;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
-import net.pointofviews.auth.dto.response.LoginMemberResponse;
 import net.pointofviews.auth.utils.JwtProvider;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.service.MemberService;
@@ -24,6 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController implements AuthSpecification {
     private final MemberService memberService;
     private final JwtProvider jwtProvider;
+
+    // Access Token 유효 시간 (1분, 1시간, 2주)
+    private static final long EXPIRATION_TIME_1M = 60000;
+    private static final long EXPIRATION_TIME_1H = EXPIRATION_TIME_1M * 60;
+    private static final long EXPIRATION_TIME_2W = 1209600000;
 
     @Override
     @PostMapping("/signup")
@@ -51,10 +55,9 @@ public class AuthController implements AuthSpecification {
         // 회원이 존재하는 경우에만 토큰 생성 및 설정
         if (loginResponse.exists() && loginResponse.memberInfo() != null) {
             // 토큰 생성 (AT: 1시간, RT: 2주)
-            String accessToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 60000);
-            String refreshToken = jwtProvider.createToken(loginResponse.memberInfo().id(), 300000);
+            String accessToken = jwtProvider.createToken(loginResponse.memberInfo().id(), EXPIRATION_TIME_1H);
+            String refreshToken = jwtProvider.createToken(loginResponse.memberInfo().id(), EXPIRATION_TIME_2W);
 
-            // 1분 60000, 10초 10000
             // Access Token은 Authorization 헤더에 설정
             response.setHeader("Authorization", accessToken);
 
@@ -66,7 +69,7 @@ public class AuthController implements AuthSpecification {
             refreshTokenCookie.setSecure(true);
             refreshTokenCookie.setPath("/");
             refreshTokenCookie.setAttribute("SameSite", "None");
-            refreshTokenCookie.setMaxAge(1209600);
+            refreshTokenCookie.setMaxAge((int) EXPIRATION_TIME_2W);
             response.addCookie(refreshTokenCookie);
         }
 
