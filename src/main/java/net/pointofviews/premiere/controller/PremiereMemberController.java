@@ -1,18 +1,20 @@
 package net.pointofviews.premiere.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.premiere.dto.request.CreatePremiereRequest;
+import net.pointofviews.premiere.controller.specification.PremiereMemberSpecification;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/premieres")
-public class PremiereController implements PremiereSpecification {
+@PreAuthorize("hasRole('ROLE_USER')")
+@RequestMapping("/api/premieres")
+public class PremiereMemberController implements PremiereMemberSpecification {
+
     @Override
     @GetMapping
     public ResponseEntity<BaseResponse<ReadPremiereListResponse>> readPremiereList() {
@@ -21,19 +23,13 @@ public class PremiereController implements PremiereSpecification {
 
     @Override
     @GetMapping("/{premiereId}")
-    public ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetails(@PathVariable Long premiereId) {
+    public ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetails(Long premiereId) {
         return null;
     }
 
     @Override
     @PostMapping("/{premiereId}/entry")
     public ResponseEntity<BaseResponse<Void>> createEntryPremiere(@PathVariable Long premiereId) {
-        return null;
-    }
-
-    @Override
-    @PostMapping
-    public ResponseEntity<BaseResponse<CreatePremiereRequest>> createPremiere(@RequestBody @Valid CreatePremiereRequest premiere) {
         return null;
     }
 
