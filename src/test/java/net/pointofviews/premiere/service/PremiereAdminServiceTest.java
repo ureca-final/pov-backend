@@ -8,7 +8,7 @@ import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.premiere.domain.Premiere;
 import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
-import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
+import net.pointofviews.premiere.dto.response.ReadPremierePageResponse;
 import net.pointofviews.premiere.exception.PremiereException;
 import net.pointofviews.premiere.repository.PremiereRepository;
 import net.pointofviews.premiere.service.impl.PremiereAdminServiceImpl;
@@ -409,7 +409,7 @@ class PremiereAdminServiceTest {
                 given(premiereRepository.findAll(pageable)).willReturn(premieres);
 
                 // when -- 테스트하고자 하는 행동
-                ReadPremiereListResponse result = premiereAdminService.findAllPremiere(admin, pageable);
+                ReadPremierePageResponse result = premiereAdminService.findAllPremiere(admin, pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertThat(result.premieres().getSize()).isEqualTo(2);
@@ -427,7 +427,7 @@ class PremiereAdminServiceTest {
                 given(premiereRepository.findAll(pageable)).willReturn(premieres);
 
                 // when -- 테스트하고자 하는 행동
-                ReadPremiereListResponse result = premiereAdminService.findAllPremiere(admin, pageable);
+                ReadPremierePageResponse result = premiereAdminService.findAllPremiere(admin, pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertThat(result.premieres().getSize()).isEqualTo(0);
