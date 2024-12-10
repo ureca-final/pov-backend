@@ -4,22 +4,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Premiere-Admin", description = "시사회 관련 관리자 API")
@@ -39,10 +33,7 @@ public interface PremiereAdminSpecification {
                             """)
             ))
     })
-    ResponseEntity<BaseResponse<Void>> createPremiere(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
-            @RequestBody @Valid PremiereRequest request
-    );
+    ResponseEntity<BaseResponse<Void>> createPremiere(Member loginMember, PremiereRequest request);
 
     @Operation(
             summary = "시사회 수정",
@@ -59,11 +50,11 @@ public interface PremiereAdminSpecification {
             ))
     })
     ResponseEntity<BaseResponse<Void>> putPremiere(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            Member loginMember,
             @Parameter(description = "수정할 시사회 ID", example = "123") Long premiereId,
-            @RequestPart(value = "request") @Valid PremiereRequest request,
-            @RequestPart(value = "eventImage", required = false) MultipartFile eventImage,
-            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
+            PremiereRequest request,
+            MultipartFile eventImage,
+            MultipartFile thumbnail
     );
 
     @Operation(
@@ -89,7 +80,7 @@ public interface PremiereAdminSpecification {
             ))
     })
     ResponseEntity<BaseResponse<Void>> deletePremiere(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            Member loginMember,
             @Parameter(description = "삭제할 시사회 ID", example = "123") Long premiereId
     );
 
@@ -101,10 +92,7 @@ public interface PremiereAdminSpecification {
             @ApiResponse(responseCode = "200", description = "시사회 전체 조회 성공"),
             @ApiResponse(responseCode = "204", description = "아직 시사회 정보 없음")
     })
-    ResponseEntity<BaseResponse<ReadPremiereListResponse>> readPremiereList(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
-            @PageableDefault(size = 8, sort = "startAt", direction = Sort.Direction.DESC) Pageable pageable
-    );
+    ResponseEntity<BaseResponse<ReadPremiereListResponse>> readPremiereList(Member loginMember, Pageable pageable);
 
     @Operation(
             summary = "시사회 상세 조회",
@@ -123,7 +111,7 @@ public interface PremiereAdminSpecification {
 
     })
     ResponseEntity<BaseResponse<ReadDetailPremiereResponse>> readPremiereDetail(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            Member loginMember,
             @Parameter(description = "조회할 시사회 ID", example = "123") Long premiereId
     );
 }
