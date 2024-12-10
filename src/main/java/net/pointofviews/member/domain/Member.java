@@ -55,6 +55,10 @@ public class Member extends SoftDeleteEntity {
         this.profileImage = profileImage;
     }
 
+    public void updateNoticeActive(boolean isNoticeActive) {
+        this.isNoticeActive = isNoticeActive;
+    }
+
     public void delete() {
         this.setDeletedAt(LocalDateTime.now());
     }
