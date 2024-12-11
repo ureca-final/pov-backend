@@ -5,9 +5,7 @@ import static net.pointofviews.member.exception.MemberException.*;
 import net.pointofviews.auth.dto.response.CheckLoginResponse;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
-import net.pointofviews.member.domain.MemberFavorGenre;
-import net.pointofviews.member.domain.RoleType;
-import net.pointofviews.member.domain.SocialType;
+import net.pointofviews.member.domain.*;
 import net.pointofviews.member.repository.MemberFavorGenreRepository;
 
 import java.util.Arrays;
@@ -16,6 +14,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import net.pointofviews.member.repository.MemberFcmTokenRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +25,6 @@ import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
 import net.pointofviews.common.service.S3Service;
-import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
 import net.pointofviews.member.dto.request.PutMemberNicknameRequest;
 import net.pointofviews.member.dto.request.PutMemberNoticeRequest;
@@ -33,7 +32,6 @@ import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
 import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.dto.response.PutMemberNoticeResponse;
-import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.member.service.MemberService;
 
@@ -44,8 +42,12 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
 
+    private static final String GENRE_PREFERENCES_KEY = "genre:preferences:";
+    private final RedisTemplate<String, Object> redisTemplate;
+
     private final MemberRepository memberRepository;
     private final MemberFavorGenreRepository memberFavorGenreRepository;
+    private final MemberFcmTokenRepository memberFcmTokenRepository;
     private final CommonCodeService commonCodeService;
     private final S3Service s3Service;
 
@@ -91,6 +93,18 @@ public class MemberServiceImpl implements MemberService {
                         .genreCode(genreCode)
                         .build();
                 memberFavorGenreRepository.save(favorGenre);
+            });
+        }
+
+        // Redis에 선호 장르 저장
+        if (!request.favorGenres().isEmpty()) {
+            request.favorGenres().forEach(genreName -> {
+                String genreCode = commonCodeService.convertNameToCommonCode(
+                        genreName,
+                        CodeGroupEnum.MOVIE_GENRE
+                );
+                String redisKey = GENRE_PREFERENCES_KEY + genreCode;
+                redisTemplate.opsForSet().add(redisKey, savedMember.getId().toString());
             });
         }
 
@@ -179,6 +193,18 @@ public class MemberServiceImpl implements MemberService {
             memberFavorGenreRepository.save(newFavorGenre);
         });
 
+        // Redis에서 기존 장르 데이터 삭제
+        existingGenreCodes.forEach(genreCode -> {
+            String redisKey = GENRE_PREFERENCES_KEY + genreCode;
+            redisTemplate.opsForSet().remove(redisKey, loginMember.getId().toString());
+        });
+
+        // Redis에 새로운 장르 데이터 추가
+        requestGenreCodes.forEach(genreCode -> {
+            String redisKey = GENRE_PREFERENCES_KEY + genreCode;
+            redisTemplate.opsForSet().add(redisKey, loginMember.getId().toString());
+        });
+
         return new PutMemberGenreListResponse(request.genres());
     }
 
@@ -247,7 +273,34 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request) {
-        return null;
+    @Transactional
+    public PutMemberNoticeResponse updateNotice(Member loginMember, PutMemberNoticeRequest request) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        member.updateNoticeActive(request.isNoticeActive());
+
+        return new PutMemberNoticeResponse(member.isNoticeActive());
+    }
+
+    @Override
+    @Transactional
+    public void registerFcmToken(Member loginMember, String fcmToken) {
+        memberFcmTokenRepository.findByMemberAndIsActiveTrue(loginMember)
+                .ifPresentOrElse(
+                        token -> token.updateToken(fcmToken),
+                        () -> memberFcmTokenRepository.save(
+                                MemberFcmToken.builder()
+                                        .member(loginMember)
+                                        .fcmToken(fcmToken)
+                                        .build()
+                        )
+                );
+
+        // fcm 토큰 발생시 알림 허용으로 변경
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        member.updateNoticeActive(true);
     }
 }

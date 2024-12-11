@@ -34,3 +34,7 @@ jwt:
 
 TMDb:
   access:
+
+firebase:
+  config:
+    path: firebase/firebase-service-account.json

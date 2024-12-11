@@ -63,8 +63,18 @@ public class MemberController implements MemberSpecification {
 
     @Override
     @PutMapping("/notice")
-    public ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Valid PutMemberNoticeRequest request) {
-        PutMemberNoticeResponse response = memberService.updateNotice(request);
+    public ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Valid PutMemberNoticeRequest request, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
+        PutMemberNoticeResponse response = memberService.updateNotice(memberDetailsDto.member(), request);
         return BaseResponse.ok("알림 설정이 변경되었습니다.", response);
+    }
+
+    @PostMapping("/fcmToken")
+    @Override
+    public ResponseEntity<BaseResponse<Void>> registerFcmToken(
+            @Valid @RequestBody RegisterFcmTokenRequest request,
+            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
+    ) {
+        memberService.registerFcmToken(memberDetailsDto.member(), request.fcmToken());
+        return BaseResponse.ok("FCM 토큰이 성공적으로 등록되었습니다.");
     }
 }
