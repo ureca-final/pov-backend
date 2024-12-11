@@ -7,7 +7,7 @@ import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.premiere.domain.Premiere;
 import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
-import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
+import net.pointofviews.premiere.dto.response.ReadPremierePageResponse;
 import net.pointofviews.premiere.dto.response.ReadPremiereResponse;
 import net.pointofviews.premiere.repository.PremiereRepository;
 import net.pointofviews.premiere.service.PremiereAdminService;
@@ -116,7 +116,7 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
     }
 
     @Override
-    public ReadPremiereListResponse findAllPremiere(Member loginMember, Pageable pageable) {
+    public ReadPremierePageResponse findAllPremiere(Member loginMember, Pageable pageable) {
 
         if (memberRepository.findById(loginMember.getId()).isEmpty()) {
             throw adminNotFound(loginMember.getId());
@@ -133,7 +133,7 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
                 )
         );
 
-        return new ReadPremiereListResponse(premieres);
+        return new ReadPremierePageResponse(premieres);
     }
 
     @Override
