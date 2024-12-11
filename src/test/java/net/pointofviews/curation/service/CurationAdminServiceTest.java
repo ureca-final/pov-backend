@@ -8,8 +8,7 @@ import static org.mockito.BDDMockito.*;
 import net.pointofviews.curation.domain.Curation;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
-import net.pointofviews.curation.dto.response.ReadAdminCurationDetailResponse;
-import net.pointofviews.curation.dto.response.ReadCurationListResponse;
+import net.pointofviews.curation.dto.response.*;
 import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
 import net.pointofviews.curation.service.impl.CurationAdminServiceImpl;
@@ -23,7 +22,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -218,148 +219,99 @@ class CurationAdminServiceTest {
 
     @Nested
     class ReadAllCurations {
+        @Test
+        void 큐레이션_전체_조회_성공() {
+            // given
+            List<ReadAdminAllCurationResponse> mockCurations = List.of(
+                    new ReadAdminAllCurationResponse(1L, "Title1", LocalDateTime.now()),
+                    new ReadAdminAllCurationResponse(2L, "Title2", LocalDateTime.now())
+            );
 
-        @Nested
-        class Success {
+            given(curationRepository.findAllCurations()).willReturn(mockCurations);
 
-            @Test
-            void 모든_큐레이션_조회_성공() throws Exception {
-                // given
-                Curation curation1 = Curation.builder()
-                        .theme("Action Movies")
-                        .category(CurationCategory.GENRE)
-                        .title("Top Action")
-                        .description("Best action movies of 2024")
-                        .startTime(LocalDateTime.of(2024, 11, 28, 10, 0))
-                        .build();
+            // when
+            ReadAdminAllCurationListResponse response = curationAdminService.readAllCurations();
 
-                Curation curation2 = Curation.builder()
-                        .theme("Romantic Comedies")
-                        .category(CurationCategory.GENRE)
-                        .title("Love and Laughter")
-                        .description("Feel-good romantic comedies")
-                        .startTime(LocalDateTime.of(2024, 12, 1, 15, 30))
-                        .build();
+            // then
+            assertThat(response.curations()).hasSize(2);
+            assertThat(response.curations().get(0).title()).isEqualTo("Title1");
+            assertThat(response.curations().get(1).title()).isEqualTo("Title2");
 
-                // 리플렉션을 사용하여 id 설정
-                setCurationId(curation1, 1L);
-                setCurationId(curation2, 2L);
-
-                List<Curation> curations = List.of(curation1, curation2);
-                given(curationRepository.findAll()).willReturn(curations);
-
-                // when
-                ReadCurationListResponse response = curationAdminService.readAllCurations();
-
-                // then
-                assertSoftly(softly -> {
-                    softly.assertThat(response.curations()).hasSize(2);
-
-                    softly.assertThat(response.curations().get(0).id()).isEqualTo(1L);
-                    softly.assertThat(response.curations().get(0).theme()).isEqualTo("Action Movies");
-                    softly.assertThat(response.curations().get(0).category()).isEqualTo(CurationCategory.GENRE);
-                    softly.assertThat(response.curations().get(0).title()).isEqualTo("Top Action");
-                    softly.assertThat(response.curations().get(0).description()).isEqualTo("Best action movies of 2024");
-
-                    softly.assertThat(response.curations().get(1).id()).isEqualTo(2L);
-                    softly.assertThat(response.curations().get(1).theme()).isEqualTo("Romantic Comedies");
-                    softly.assertThat(response.curations().get(1).category()).isEqualTo(CurationCategory.GENRE);
-                    softly.assertThat(response.curations().get(1).title()).isEqualTo("Love and Laughter");
-                    softly.assertThat(response.curations().get(1).description()).isEqualTo("Feel-good romantic comedies");
-                });
-
-                verify(curationRepository, times(1)).findAll();
-            }
+            verify(curationRepository).findAllCurations();
         }
-
-        @Nested
-        class Failure {
-
-            @Test
-            void 큐레이션이_없으면_빈_목록_반환() {
-                // given
-                given(curationRepository.findAll()).willReturn(List.of());
-
-                // when
-                ReadCurationListResponse response = curationAdminService.readAllCurations();
-
-                // then
-                assertThat(response.curations()).isEmpty();
-                verify(curationRepository, times(1)).findAll();
-            }
-        }
-    }
-
-    // 리플렉션으로 id 필드 설정
-    private void setCurationId(Curation curation, Long id) throws Exception {
-        Field idField = Curation.class.getDeclaredField("id");
-        idField.setAccessible(true);
-        idField.set(curation, id);
     }
 
     @Nested
-    class ReadCuration {
+    class ReadCurationDetail {
+        @Test
+        void 큐레이션_상세_조회_성공() {
+            // given
+            Long curationId = 1L;
 
-        @Nested
-        class Success {
+            ReadAdminCurationResponse mockCuration = new ReadAdminCurationResponse(
+                    curationId, "Theme", CurationCategory.ACTOR, "Title", "Description", LocalDateTime.now()
+            );
 
-            @Test
-            void 특정_큐레이션_조회_성공() throws Exception {
-                // given
-                Long curationId = 1L;
+            Set<Long> mockMovieIds = Set.of(101L, 102L);
 
-                Curation curation = Curation.builder()
-                        .theme("Action Movies")
-                        .category(CurationCategory.GENRE)
-                        .title("Top Action")
-                        .description("Best action movies of 2024")
-                        .startTime(LocalDateTime.of(2024, 11, 28, 10, 0))
-                        .build();
+            List<ReadAdminCurationMovieResponse> mockMovies = List.of(
+                    new ReadAdminCurationMovieResponse( "Movie1", LocalDate.now()),
+                    new ReadAdminCurationMovieResponse( "Movie2", LocalDate.now())
+            );
 
-                // 리플렉션으로 id 설정
-                setCurationId(curation, curationId);
+            given(curationRepository.findCurationDetailById(curationId)).willReturn(Optional.of(mockCuration));
+            given(curationMovieRedisService.readMoviesForCuration(curationId)).willReturn(mockMovieIds);
+            given(curationRepository.findMoviesByIds(mockMovieIds)).willReturn(mockMovies);
 
-                Set<Long> cachedMovieIds = Set.of(101L, 102L, 103L);
+            // when
+            ReadAdminCurationDetailResponse response = curationAdminService.readCurationDetail(curationId);
 
-                given(curationRepository.findById(curationId)).willReturn(Optional.of(curation));
-                given(curationMovieRedisService.readMoviesForCuration(curationId)).willReturn(cachedMovieIds);
+            // then
+            assertThat(response.readAdminCurationResponse().title()).isEqualTo("Title");
+            assertThat(response.readAdminCurationMovieResponseList()).hasSize(2);
+            assertThat(response.readAdminCurationMovieResponseList().get(0).title()).isEqualTo("Movie1");
 
-                // when
-                ReadAdminCurationDetailResponse response = curationAdminService.readCuration(curationId);
-
-                // then
-                assertSoftly(softly -> {
-                    softly.assertThat(response.readAdminCurationResponse().id()).isEqualTo(curationId);
-                    softly.assertThat(response.readAdminCurationResponse().theme()).isEqualTo("Action Movies");
-                    softly.assertThat(response.readAdminCurationResponse().category()).isEqualTo(CurationCategory.GENRE);
-                    softly.assertThat(response.readAdminCurationResponse().title()).isEqualTo("Top Action");
-                    softly.assertThat(response.readAdminCurationResponse().description()).isEqualTo("Best action movies of 2024");
-                    softly.assertThat(response.readAdminCurationResponse().startTime()).isEqualTo(LocalDateTime.of(2024, 11, 28, 10, 0));
-
-                    softly.assertThat(response.movieIds()).containsExactlyInAnyOrder(101L, 102L, 103L);
-                });
-
-                verify(curationRepository, times(1)).findById(curationId);
-                verify(curationMovieRedisService, times(1)).readMoviesForCuration(curationId);
-            }
+            verify(curationRepository).findCurationDetailById(curationId);
+            verify(curationMovieRedisService).readMoviesForCuration(curationId);
+            verify(curationRepository).findMoviesByIds(mockMovieIds);
         }
 
-        @Nested
-        class Failure {
+        @Test
+        void 큐레이션_상세_조회_실패_큐레이션_ID_없음() {
+            // given
+            Long curationId = 1L;
 
-            @Test
-            void 존재하지_않는_큐레이션_조회시_CurationNotFound_예외발생() {
-                // given
-                Long curationId = 1L;
+            given(curationRepository.findCurationDetailById(curationId)).willReturn(Optional.empty());
 
-                given(curationRepository.findById(curationId)).willReturn(Optional.empty());
+            // when & then
+            assertThatThrownBy(() -> curationAdminService.readCurationDetail(curationId))
+                    .isInstanceOf(CurationException.class)
+                    .hasMessageContaining( "큐레이션(Id: 1)이 존재하지 않습니다.");
 
-                // when & then
-                assertThrows(CurationException.class, () -> curationAdminService.readCuration(curationId));
+            verify(curationRepository).findCurationDetailById(curationId);
+        }
 
-                verify(curationRepository, times(1)).findById(curationId);
-                verify(curationMovieRedisService, never()).readMoviesForCuration(anyLong());
-            }
+        @Test
+        void 큐레이션_상세_조회_성공_영화_ID_없음() {
+            // given
+            Long curationId = 1L;
+
+            ReadAdminCurationResponse mockCuration = new ReadAdminCurationResponse(
+                    curationId, "Theme", CurationCategory.ACTOR, "Title", "Description", LocalDateTime.now()
+            );
+
+            given(curationRepository.findCurationDetailById(curationId)).willReturn(Optional.of(mockCuration));
+            given(curationMovieRedisService.readMoviesForCuration(curationId)).willReturn(Collections.emptySet());
+
+            // when
+            ReadAdminCurationDetailResponse response = curationAdminService.readCurationDetail(curationId);
+
+            // then
+            assertThat(response.readAdminCurationResponse().title()).isEqualTo("Title");
+            assertThat(response.readAdminCurationMovieResponseList()).isEmpty();
+
+            verify(curationRepository).findCurationDetailById(curationId);
+            verify(curationMovieRedisService).readMoviesForCuration(curationId);
         }
     }
 
