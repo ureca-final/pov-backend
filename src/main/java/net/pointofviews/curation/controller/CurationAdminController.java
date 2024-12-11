@@ -3,6 +3,7 @@ package net.pointofviews.curation.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.curation.controller.specification.CurationAdminSpecification;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
