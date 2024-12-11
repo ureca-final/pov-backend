@@ -173,7 +173,7 @@ public class MovieAdminController implements MovieAdminSpecification {
     @Override
     @GetMapping("/tmdb-search/{tmdbId}/credits")
     public ResponseEntity<BaseResponse<SearchCreditApiResponse>> searchTMDbCreditsLimit10(@PathVariable String tmdbId) {
-        return BaseResponse.ok("OK", movieApiSearchService.searchLimit10Credit(tmdbId));
+        return BaseResponse.ok("OK", movieApiSearchService.searchLimit5Credit(tmdbId));
     }
 
     @Override

@@ -60,7 +60,7 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
     @Override
     public SearchFilteredMovieDetailResponse searchDetailsMovie(String movieId) {
         SearchMovieDetailApiResponse movieDetails = searchApiDetailsMovie(movieId);
-        SearchCreditApiResponse movieCredits = searchLimit10Credit(movieId);
+        SearchCreditApiResponse movieCredits = searchLimit5Credit(movieId);
         SearchReleaseApiResponse movieReleases = searchReleaseDate(movieId);
 
         SearchReleaseApiResponse.Result.ReleaseDate releaseDate = movieReleases.results().stream()
@@ -99,10 +99,10 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
     }
 
     @Override
-    public SearchCreditApiResponse searchLimit10Credit(String movieId) {
+    public SearchCreditApiResponse searchLimit5Credit(String movieId) {
         SearchCreditApiResponse response = searchApiCredit(movieId);
         List<SearchCreditApiResponse.CastResponse> limitCastList = response.cast()
-                .subList(0, Math.min(response.cast().size(), 10));
+                .subList(0, Math.min(response.cast().size(), 5));
         List<SearchCreditApiResponse.CrewResponse> directors = response.crew().stream()
                 .filter(crew -> "director".equalsIgnoreCase(crew.job()))
                 .toList();
