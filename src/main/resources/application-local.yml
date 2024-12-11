@@ -37,4 +37,4 @@ TMDb:
 
 firebase:
   config:
-    path: firebase/final-pov-firebase-adminsdk-uhdc9-1d5de17633.json
+    path: firebase/firebase-service-account.json
