@@ -13,9 +13,22 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TMDbMovieCreditReader {
 
+    private int totalItemsRead = 0;
+
     @Bean(name = "movieCreditJpaReader")
     public JpaPagingItemReader<Movie> movieCreditJpaReader(EntityManagerFactory entityManagerFactory) {
         JpaPagingItemReader<Movie> reader = new JpaPagingItemReader<>() {
+            @Override
+            protected Movie doRead() throws Exception {
+                Movie movie = super.doRead();
+                if (movie != null) {
+                    totalItemsRead++;
+                } else {
+                    log.info("Total items read: {}", totalItemsRead);
+                }
+                return movie;
+            }
+
             @Override
             public int getPage() {
                 return 0;
@@ -23,7 +36,12 @@ public class TMDbMovieCreditReader {
         };
 
         reader.setEntityManagerFactory(entityManagerFactory);
-        reader.setQueryString("SELECT m FROM Movie m LEFT JOIN m.casts c WHERE c IS NULL");
+        reader.setQueryString("""
+                SELECT m FROM Movie m
+                LEFT JOIN m.casts c
+                LEFT JOIN m.crews cr
+                WHERE c IS NULL AND cr IS NULL
+                """);
         reader.setPageSize(100);
         return reader;
     }

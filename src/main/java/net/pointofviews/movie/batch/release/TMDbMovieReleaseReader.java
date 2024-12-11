@@ -13,13 +13,27 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TMDbMovieReleaseReader {
 
+    private int totalItemsRead = 0;
+
     @Bean(name = "movieReleaseJpaReader")
     public JpaPagingItemReader<Movie> movieReleaseJpaReader(EntityManagerFactory entityManagerFactory) {
         JpaPagingItemReader<Movie> reader = new JpaPagingItemReader<>() {
             @Override
+            protected Movie doRead() throws Exception {
+                Movie movie = super.doRead();
+                if (movie != null) {
+                    totalItemsRead++;
+                } else {
+                    log.info("Total items read: {}", totalItemsRead);
+                }
+                return movie;
+            }
+
+            @Override
             public int getPage() {
                 return 0;
             }
+
         };
 
         reader.setEntityManagerFactory(entityManagerFactory);
