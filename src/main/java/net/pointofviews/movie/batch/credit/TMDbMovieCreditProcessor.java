@@ -21,11 +21,12 @@ public class TMDbMovieCreditProcessor implements ItemProcessor<Movie, CreditProc
     private final MovieTMDbSearchService searchService;
 
     public CreditProcessorResponse process(Movie item) {
-        SearchCreditApiResponse creditResponse = searchService.searchLimit10Credit(item.getTmdbId().toString());
+        SearchCreditApiResponse creditResponse = searchService.searchLimit5Credit(item.getTmdbId().toString());
 
         List<SearchCreditApiResponse.CastResponse> cast = creditResponse.cast();
         List<People> castPeoples = cast.stream()
-                .map(p -> People.builder().imageUrl(IMAGE_PATH + p.profile_path()).name(p.name()).tmdbId(p.id()).build())
+                .map(p -> People.builder().imageUrl(p.profile_path() == null ? null : IMAGE_PATH + p.profile_path())
+                        .name(p.name()).tmdbId(p.id()).build())
                 .toList();
         List<MovieCast> casts = cast.stream()
                 .map(p -> MovieCast.builder().roleName(p.character()).displayOrder(p.order()).build())
@@ -33,7 +34,8 @@ public class TMDbMovieCreditProcessor implements ItemProcessor<Movie, CreditProc
 
         List<SearchCreditApiResponse.CrewResponse> crew = creditResponse.crew();
         List<People> crewPeople = crew.stream()
-                .map(p -> People.builder().imageUrl(IMAGE_PATH + p.profile_path()).name(p.name()).tmdbId(p.id()).build())
+                .map(p -> People.builder().imageUrl(p.profile_path() == null ? null : IMAGE_PATH + p.profile_path())
+                        .name(p.name()).tmdbId(p.id()).build())
                 .toList();
         List<MovieCrew> crews = crew.stream()
                 .map(p -> new MovieCrew(p.job()))
