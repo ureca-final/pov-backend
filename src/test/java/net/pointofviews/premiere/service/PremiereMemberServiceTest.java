@@ -3,6 +3,7 @@ package net.pointofviews.premiere.service;
 import net.pointofviews.fixture.PremiereFixture;
 import net.pointofviews.premiere.domain.Premiere;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
+import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
 import net.pointofviews.premiere.exception.PremiereException;
 import net.pointofviews.premiere.repository.PremiereRepository;
 import net.pointofviews.premiere.service.impl.PremiereMemberServiceImpl;
@@ -14,8 +15,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +32,43 @@ class PremiereMemberServiceTest {
 
     @Mock
     private PremiereRepository premiereRepository;
+
+    @Nested
+    class FindAllPremiere {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 시사회_목록_전체_조회() {
+                // given -- 테스트의 상태 설정
+                Premiere premiere1 = PremiereFixture.createPremiere();
+                Premiere premiere2 = PremiereFixture.createPremiere();
+
+                List<Premiere> premieres = List.of(premiere1, premiere2);
+
+                given(premiereRepository.findAll()).willReturn(premieres);
+
+                // when -- 테스트하고자 하는 행동
+                ReadPremiereListResponse result = premiereMemberService.findAllPremiere();
+
+                // then -- 예상되는 변화 및 결과
+                assertThat(result.premieres().size()).isEqualTo(2);
+            }
+
+            @Test
+            void 시사회_빈_목록_전체_조회() {
+                // given -- 테스트의 상태 설정
+                given(premiereRepository.findAll()).willReturn(List.of());
+
+                // when -- 테스트하고자 하는 행동
+                ReadPremiereListResponse result = premiereMemberService.findAllPremiere();
+
+                // then -- 예상되는 변화 및 결과
+                assertThat(result.premieres().size()).isEqualTo(0);
+            }
+        }
+    }
 
     @Nested
     class FindPremiereDetail {

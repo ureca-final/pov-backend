@@ -11,7 +11,7 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
-import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
+import net.pointofviews.premiere.dto.response.ReadPremierePageResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,7 +92,7 @@ public interface PremiereAdminSpecification {
             @ApiResponse(responseCode = "200", description = "시사회 전체 조회 성공"),
             @ApiResponse(responseCode = "204", description = "아직 시사회 정보 없음")
     })
-    ResponseEntity<BaseResponse<ReadPremiereListResponse>> readPremiereList(Member loginMember, Pageable pageable);
+    ResponseEntity<BaseResponse<ReadPremierePageResponse>> readPremiereList(Member loginMember, Pageable pageable);
 
     @Operation(
             summary = "시사회 상세 조회",

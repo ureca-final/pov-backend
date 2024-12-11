@@ -7,7 +7,7 @@ import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.controller.specification.PremiereAdminSpecification;
 import net.pointofviews.premiere.dto.request.PremiereRequest;
 import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
-import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
+import net.pointofviews.premiere.dto.response.ReadPremierePageResponse;
 import net.pointofviews.premiere.service.PremiereAdminService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -63,11 +63,11 @@ public class PremiereAdminController implements PremiereAdminSpecification {
 
     @Override
     @GetMapping
-    public ResponseEntity<BaseResponse<ReadPremiereListResponse>> readPremiereList(
+    public ResponseEntity<BaseResponse<ReadPremierePageResponse>> readPremiereList(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
             @PageableDefault(size = 8, sort = "startAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        ReadPremiereListResponse response = premiereAdminService.findAllPremiere(loginMember, pageable);
+        ReadPremierePageResponse response = premiereAdminService.findAllPremiere(loginMember, pageable);
 
         if (response.premieres().isEmpty()) {
             return BaseResponse.noContent();
