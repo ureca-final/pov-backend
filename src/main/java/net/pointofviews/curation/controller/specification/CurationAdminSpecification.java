@@ -12,8 +12,10 @@ import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
+import net.pointofviews.member.domain.Member;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -61,6 +63,7 @@ public interface CurationAdminSpecification {
             )
     })
     ResponseEntity<?> createCuration(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
             @Valid @RequestBody CreateCurationRequest createCurationRequest
     );
 

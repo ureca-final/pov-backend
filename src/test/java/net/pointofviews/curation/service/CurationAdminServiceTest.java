@@ -13,6 +13,8 @@ import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
 import net.pointofviews.curation.service.impl.CurationAdminServiceImpl;
+import net.pointofviews.member.domain.Member;
+import net.pointofviews.member.repository.MemberRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +40,9 @@ class CurationAdminServiceTest {
     @Mock
     private CurationMovieRedisService curationMovieRedisService;
 
+    @Mock
+    private MemberRepository memberRepository;
+
     @Nested
     class SaveCuration {
 
@@ -46,6 +51,9 @@ class CurationAdminServiceTest {
             @Test
             void 큐레이션_저장_성공() {
                 // given
+                Member admin = mock(Member.class);
+                given(memberRepository.findById(any())).willReturn(Optional.of(admin));
+
                 CreateCurationRequest request = new CreateCurationRequest(
                         "Theme",
                         CurationCategory.GENRE,
@@ -67,7 +75,7 @@ class CurationAdminServiceTest {
                         });
 
                 // when
-                curationAdminService.saveCuration(request);
+                curationAdminService.saveCuration(admin, request);
 
                 // then
                 verify(curationRepository, times(1)).save(any(Curation.class));

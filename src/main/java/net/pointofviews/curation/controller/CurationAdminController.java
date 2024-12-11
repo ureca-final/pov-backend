@@ -10,7 +10,9 @@ import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.curation.service.CurationAdminService;
+import net.pointofviews.member.domain.Member;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,9 +25,10 @@ public class CurationAdminController implements CurationAdminSpecification{
     @PostMapping
     @Override
     public ResponseEntity<BaseResponse<ReadCurationResponse>> createCuration(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
             @Valid @RequestBody CreateCurationRequest createCurationRequest) {
 
-        curationAdminService.saveCuration(createCurationRequest);
+        curationAdminService.saveCuration(loginMember, createCurationRequest);
         return BaseResponse.ok("큐레이션이 성공적으로 생성되었습니다.");
     }
 

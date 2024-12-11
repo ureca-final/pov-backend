@@ -11,6 +11,8 @@ import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
 import net.pointofviews.curation.service.CurationAdminService;
 import net.pointofviews.curation.service.CurationMovieRedisService;
+import net.pointofviews.member.domain.Member;
+import net.pointofviews.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,18 +20,26 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static net.pointofviews.member.exception.MemberException.adminNotFound;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CurationAdminServiceImpl implements CurationAdminService {
     private final CurationRepository curationRepository;
+    private final MemberRepository memberRepository;
     private final CurationMovieRedisService curationMovieRedisService;
 
     @Override
     @Transactional
-    public void saveCuration(CreateCurationRequest request) {
+    public void saveCuration(Member member, CreateCurationRequest request) {
+
+        if (memberRepository.findById(member.getId()).isEmpty()) {
+            throw adminNotFound(member.getId());
+        }
 
         Curation curation = Curation.builder()
+                .member(member)
                 .theme(request.theme())
                 .category(request.category())
                 .title(request.title())
