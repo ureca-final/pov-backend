@@ -1,6 +1,7 @@
 package net.pointofviews.movie.batch.discover;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.movie.batch.config.MovieChunkListener;
 import net.pointofviews.movie.dto.response.BatchDiscoverMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDiscoverApiResponse;
 import org.springframework.batch.core.Step;
@@ -22,12 +23,13 @@ public class TMDbMovieDiscoverStep {
     private final TMDbMovieDiscoverWriter writer;
 
     @Bean
-    public Step tmdbMovieDiscoverStep(PlatformTransactionManager transactionManager) {
+    public Step tmdbMovieDiscoverStep(PlatformTransactionManager transactionManager, MovieChunkListener movieChunkListener) {
         return new StepBuilder("tmdbMovieDiscoverStep", jobRepository)
-                .<List<SearchMovieDiscoverApiResponse.MovieResult>, List<BatchDiscoverMovieResponse>>chunk(20, transactionManager)
+                .<List<SearchMovieDiscoverApiResponse.MovieResult>, List<BatchDiscoverMovieResponse>>chunk(100, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .listener(movieChunkListener)
                 .build();
     }
 }

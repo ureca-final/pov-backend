@@ -1,6 +1,7 @@
 package net.pointofviews.movie.batch.country;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.movie.batch.config.MovieChunkListener;
 import net.pointofviews.movie.domain.Movie;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -20,12 +21,13 @@ public class TMDbMovieCountryStep {
     private final TMDbMovieCountryProcessor processor;
 
     @Bean
-    public Step tmdbMovieCountryStep(PlatformTransactionManager transactionManager) {
+    public Step tmdbMovieCountryStep(PlatformTransactionManager transactionManager, MovieChunkListener movieChunkListener) {
         return new StepBuilder("tmdbMovieCountryStep", jobRepository)
-                .<Movie, Movie>chunk(20, transactionManager)
+                .<Movie, Movie>chunk(100, transactionManager)
                 .reader(movieCountryJpaReader)
                 .processor(processor)
                 .writer(writer)
+                .listener(movieChunkListener)
                 .build();
     }
 }

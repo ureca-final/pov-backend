@@ -1,6 +1,7 @@
 package net.pointofviews.movie.batch.credit;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.movie.batch.config.MovieChunkListener;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.dto.response.CreditProcessorResponse;
 import org.springframework.batch.core.Step;
@@ -21,12 +22,13 @@ public class TMDbMovieCreditStep {
     private final TMDbMovieCreditWriter writer;
 
     @Bean
-    public Step tmdbMovieCreditStep(PlatformTransactionManager transactionManager) {
+    public Step tmdbMovieCreditStep(PlatformTransactionManager transactionManager, MovieChunkListener movieChunkListener) {
         return new StepBuilder("tmdbMovieCreditStep", jobRepository)
-                .<Movie, CreditProcessorResponse>chunk(20, transactionManager)
+                .<Movie, CreditProcessorResponse>chunk(100, transactionManager)
                 .reader(movieCreditJpaReader)
                 .processor(processor)
                 .writer(writer)
+                .listener(movieChunkListener)
                 .build();
     }
 }
