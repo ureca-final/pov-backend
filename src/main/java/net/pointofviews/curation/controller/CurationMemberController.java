@@ -3,7 +3,6 @@ package net.pointofviews.curation.controller;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.controller.specification.CurationMemberSpecification;
-import net.pointofviews.curation.dto.response.ReadCurationListResponse;
 import net.pointofviews.curation.dto.response.ReadUserCurationListResponse;
 import net.pointofviews.curation.service.CurationMemberService;
 import org.springframework.data.domain.Pageable;

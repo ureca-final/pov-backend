@@ -2,9 +2,9 @@ package net.pointofviews.curation.service;
 
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
+import net.pointofviews.curation.dto.response.ReadAdminAllCurationListResponse;
+import net.pointofviews.curation.dto.response.ReadAdminCurationDetailResponse;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
-import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
-import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.member.domain.Member;
 
 public interface CurationAdminService {
@@ -13,6 +13,6 @@ public interface CurationAdminService {
     void updateCuration(Long curationId, CreateCurationRequest request);
     void deleteCuration(Long curationId);
 
-    ReadCurationListResponse readAllCurations();
-    ReadCurationMoviesResponse readCuration(Long curationId);
+    ReadAdminAllCurationListResponse readAllCurations();
+    ReadAdminCurationDetailResponse readCurationDetail(Long curationId);
 }

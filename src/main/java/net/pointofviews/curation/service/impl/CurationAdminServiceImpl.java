@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.pointofviews.curation.domain.Curation;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
-import net.pointofviews.curation.dto.response.ReadCurationListResponse;
-import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
-import net.pointofviews.curation.dto.response.ReadCurationResponse;
+import net.pointofviews.curation.dto.response.*;
 import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
 import net.pointofviews.curation.service.CurationAdminService;
@@ -16,10 +14,12 @@ import net.pointofviews.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static net.pointofviews.curation.exception.CurationException.CurationIdNotFound;
 import static net.pointofviews.member.exception.MemberException.adminNotFound;
 
 @Service
@@ -106,38 +106,25 @@ public class CurationAdminServiceImpl implements CurationAdminService {
 
 
     @Override
-    public ReadCurationListResponse readAllCurations() {
-        List<ReadCurationResponse> curationResponses = curationRepository.findAll()
-                .stream()
-                .map(curation -> new ReadCurationResponse(
-                        curation.getId(),
-                        curation.getTheme(),
-                        curation.getCategory(),
-                        curation.getTitle(),
-                        curation.getDescription(),
-                        curation.getStartTime()
-                ))
-                .collect(Collectors.toList());
-
-        return new ReadCurationListResponse(curationResponses);
+    public ReadAdminAllCurationListResponse readAllCurations() {
+        List<ReadAdminAllCurationResponse> responses = curationRepository.findAllCurations();
+        return new ReadAdminAllCurationListResponse(responses);
     }
 
     @Override
-    public ReadCurationMoviesResponse readCuration(Long curationId) {
-        Curation curation = curationRepository.findById(curationId)
-                .orElseThrow(CurationException::CurationNotFound);
+    public ReadAdminCurationDetailResponse readCurationDetail(Long curationId) {
+        // 큐레이션 상세 정보 가져오기
+        ReadAdminCurationResponse curation = curationRepository.findCurationDetailById(curationId)
+                .orElseThrow(() -> CurationIdNotFound(curationId));
 
+        // Redis에서 영화 ID 가져오기
         Set<Long> movieIds = curationMovieRedisService.readMoviesForCuration(curationId);
 
-        ReadCurationResponse curationResponse = new ReadCurationResponse(
-                curation.getId(),
-                curation.getTheme(),
-                curation.getCategory(),
-                curation.getTitle(),
-                curation.getDescription(),
-                curation.getStartTime()
-        );
+        // 영화 정보 가져오기
+        List<ReadAdminCurationMovieResponse> movies = movieIds.isEmpty()
+                ? Collections.emptyList()
+                : curationRepository.findMoviesByIds(movieIds);
 
-        return new ReadCurationMoviesResponse(curationResponse, movieIds);
+        return new ReadAdminCurationDetailResponse(curation, movies);
     }
 }

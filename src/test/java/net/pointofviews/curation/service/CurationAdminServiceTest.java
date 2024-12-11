@@ -8,8 +8,8 @@ import static org.mockito.BDDMockito.*;
 import net.pointofviews.curation.domain.Curation;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
+import net.pointofviews.curation.dto.response.ReadAdminCurationDetailResponse;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
-import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
 import net.pointofviews.curation.service.impl.CurationAdminServiceImpl;
@@ -325,16 +325,16 @@ class CurationAdminServiceTest {
                 given(curationMovieRedisService.readMoviesForCuration(curationId)).willReturn(cachedMovieIds);
 
                 // when
-                ReadCurationMoviesResponse response = curationAdminService.readCuration(curationId);
+                ReadAdminCurationDetailResponse response = curationAdminService.readCuration(curationId);
 
                 // then
                 assertSoftly(softly -> {
-                    softly.assertThat(response.readCurationResponse().id()).isEqualTo(curationId);
-                    softly.assertThat(response.readCurationResponse().theme()).isEqualTo("Action Movies");
-                    softly.assertThat(response.readCurationResponse().category()).isEqualTo(CurationCategory.GENRE);
-                    softly.assertThat(response.readCurationResponse().title()).isEqualTo("Top Action");
-                    softly.assertThat(response.readCurationResponse().description()).isEqualTo("Best action movies of 2024");
-                    softly.assertThat(response.readCurationResponse().startTime()).isEqualTo(LocalDateTime.of(2024, 11, 28, 10, 0));
+                    softly.assertThat(response.readAdminCurationResponse().id()).isEqualTo(curationId);
+                    softly.assertThat(response.readAdminCurationResponse().theme()).isEqualTo("Action Movies");
+                    softly.assertThat(response.readAdminCurationResponse().category()).isEqualTo(CurationCategory.GENRE);
+                    softly.assertThat(response.readAdminCurationResponse().title()).isEqualTo("Top Action");
+                    softly.assertThat(response.readAdminCurationResponse().description()).isEqualTo("Best action movies of 2024");
+                    softly.assertThat(response.readAdminCurationResponse().startTime()).isEqualTo(LocalDateTime.of(2024, 11, 28, 10, 0));
 
                     softly.assertThat(response.movieIds()).containsExactlyInAnyOrder(101L, 102L, 103L);
                 });

@@ -10,8 +10,9 @@ import jakarta.validation.Valid;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
+import net.pointofviews.curation.dto.response.ReadAdminAllCurationListResponse;
+import net.pointofviews.curation.dto.response.ReadAdminCurationDetailResponse;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
-import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.member.domain.Member;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -177,7 +178,7 @@ public interface CurationAdminSpecification {
                     description = "조회 성공"
             )
     })
-    ResponseEntity<BaseResponse<ReadCurationListResponse>> adminReadAllCurations();
+    ResponseEntity<BaseResponse<ReadAdminAllCurationListResponse>> readAllCurations();
 
     @Operation(summary = "관리자 큐레이션 상세 조회", description = "관리자가 큐레이션 상세 정보를 조회합니다.")
     @ApiResponses({
@@ -198,7 +199,7 @@ public interface CurationAdminSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadCurationMoviesResponse>> adminReadCuration(
+    ResponseEntity<BaseResponse<ReadAdminCurationDetailResponse>> readCurationDetail(
             @PathVariable Long curationId
     );
 

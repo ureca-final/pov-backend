@@ -4,10 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import net.pointofviews.curation.domain.CurationCategory;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
-@Schema(description = "큐레이션 응답 DTO")
-public record ReadCurationResponse(
+@Schema(description = "관리자 큐레이션 응답 DTO")
+public record ReadAdminCurationResponse(
         @Schema(description = "큐레이션 ID", example = "1")
         Long id,
 

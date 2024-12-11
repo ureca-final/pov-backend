@@ -6,8 +6,9 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.controller.specification.CurationAdminSpecification;
 import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.request.CreateCurationRequest;
+import net.pointofviews.curation.dto.response.ReadAdminAllCurationListResponse;
+import net.pointofviews.curation.dto.response.ReadAdminCurationDetailResponse;
 import net.pointofviews.curation.dto.response.ReadCurationListResponse;
-import net.pointofviews.curation.dto.response.ReadCurationMoviesResponse;
 import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.curation.service.CurationAdminService;
 import net.pointofviews.member.domain.Member;
@@ -63,15 +64,15 @@ public class CurationAdminController implements CurationAdminSpecification{
 
     @GetMapping
     @Override
-    public ResponseEntity<BaseResponse<ReadCurationListResponse>> adminReadAllCurations() {
-        ReadCurationListResponse response = curationAdminService.readAllCurations();
+    public ResponseEntity<BaseResponse<ReadAdminAllCurationListResponse>> readAllCurations() {
+        ReadAdminAllCurationListResponse response = curationAdminService.readAllCurations();
         return BaseResponse.ok("관리자용 큐레이션 전체 조회에 성공하였습니다.", response);
     }
 
     @GetMapping("/{curationId}")
     @Override
-    public ResponseEntity<BaseResponse<ReadCurationMoviesResponse>> adminReadCuration(@PathVariable Long curationId) {
-        ReadCurationMoviesResponse response = curationAdminService.readCuration(curationId);
+    public ResponseEntity<BaseResponse<ReadAdminCurationDetailResponse>> readCurationDetail(@PathVariable Long curationId) {
+        ReadAdminCurationDetailResponse response = curationAdminService.readCurationDetail(curationId);
         return BaseResponse.ok("관리자용 큐레이션 상세 조회에 성공하였습니다.", response);
     }
 
