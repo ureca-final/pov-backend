@@ -273,6 +273,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public PutMemberNoticeResponse updateNotice(Member loginMember, PutMemberNoticeRequest request) {
         Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> memberNotFound(loginMember.getId()));
@@ -284,16 +285,22 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void registerFcmToken(Member member, String fcmToken) {
-        memberFcmTokenRepository.findByMemberAndIsActiveTrue(member)
+    public void registerFcmToken(Member loginMember, String fcmToken) {
+        memberFcmTokenRepository.findByMemberAndIsActiveTrue(loginMember)
                 .ifPresentOrElse(
                         token -> token.updateToken(fcmToken),
                         () -> memberFcmTokenRepository.save(
                                 MemberFcmToken.builder()
-                                        .member(member)
+                                        .member(loginMember)
                                         .fcmToken(fcmToken)
                                         .build()
                         )
                 );
+
+        // fcm 토큰 발생시 알림 허용으로 변경
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        member.updateNoticeActive(true);
     }
 }

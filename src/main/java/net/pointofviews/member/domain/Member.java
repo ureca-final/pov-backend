@@ -44,7 +44,7 @@ public class Member extends SoftDeleteEntity {
         this.profileImage = profileImage;
         this.roleType = roleType;
         this.socialType = socialType;
-        this.isNoticeActive = true;
+        this.isNoticeActive = false;
     }
 
     public void updateNickname(String nickname) {

@@ -51,7 +51,7 @@ public class MemberTest {
 					softly.assertThat(member.getSocialType()).isEqualTo(socialType);
 					softly.assertThat(member.getRoleType()).isEqualTo(roleType);
 					softly.assertThat(member.getProfileImage()).isEqualTo(profileImage);
-					softly.assertThat(member.isNoticeActive()).isTrue();
+					softly.assertThat(member.isNoticeActive()).isFalse();
 					softly.assertThat(member.getCreatedAt()).isNull();
 					softly.assertThat(member.getDeletedAt()).isNull();
 				});
