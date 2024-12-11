@@ -9,7 +9,7 @@ public interface MovieApiSearchService {
 
     SearchFilteredMovieDetailResponse searchDetailsMovie(String movieId);
 
-    SearchCreditApiResponse searchLimit10Credit(String movieId);
+    SearchCreditApiResponse searchLimit5Credit(String movieId);
 
     SearchReleaseApiResponse searchReleaseDate(String movieId);
 

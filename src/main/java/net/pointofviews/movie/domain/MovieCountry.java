@@ -27,4 +27,8 @@ public class MovieCountry {
     public void updateMovie(Movie movie) {
         this.movie = movie;
     }
+
+    public void updateCountry(Country country) {
+        this.country = country;
+    }
 }

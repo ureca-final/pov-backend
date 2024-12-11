@@ -197,7 +197,7 @@ class MovieTMDbSearchServiceTest {
                 mockServer.expect(requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
 
                 // when
-                SearchCreditApiResponse result = movieTMDbSearchService.searchLimit10Credit(movieId);
+                SearchCreditApiResponse result = movieTMDbSearchService.searchLimit5Credit(movieId);
 
                 // then
                 assertThat(result.cast()).hasSize(10);

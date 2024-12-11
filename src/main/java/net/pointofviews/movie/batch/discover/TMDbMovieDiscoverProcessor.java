@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TMDbMovieDiscoverProcessor implements ItemProcessor<List<SearchMovieDiscoverApiResponse.MovieResult>, List<BatchDiscoverMovieResponse>> {
 
-    private static final String IMAGE_PATH = "https://image.tmdb.org/t/p/w500";
+    private static final String IMAGE_PATH = "https://image.tmdb.org/t/p/w154";
     private final CommonCodeService commonCodeService;
 
     @Override
