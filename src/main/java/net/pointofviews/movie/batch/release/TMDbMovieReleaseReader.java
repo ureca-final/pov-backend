@@ -21,7 +21,7 @@ public class TMDbMovieReleaseReader {
                 return 0;
             }
         };
-        reader.setPageSize(1);
+
         reader.setEntityManagerFactory(entityManagerFactory);
         reader.setQueryString("SELECT m FROM Movie m WHERE m.released IS NULL");
         reader.setPageSize(100);

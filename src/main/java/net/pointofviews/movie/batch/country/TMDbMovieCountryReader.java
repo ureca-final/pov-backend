@@ -21,7 +21,6 @@ public class TMDbMovieCountryReader {
             }
         };
 
-        reader.setPageSize(1);
         reader.setEntityManagerFactory(entityManagerFactory);
         reader.setQueryString("SELECT m FROM Movie m LEFT JOIN m.countries c WHERE c IS NULL");
         reader.setPageSize(100);

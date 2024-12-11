@@ -21,7 +21,7 @@ public class TMDbMovieCreditReader {
                 return 0;
             }
         };
-        reader.setPageSize(1);
+
         reader.setEntityManagerFactory(entityManagerFactory);
         reader.setQueryString("SELECT m FROM Movie m LEFT JOIN m.casts c WHERE c IS NULL");
         reader.setPageSize(100);
