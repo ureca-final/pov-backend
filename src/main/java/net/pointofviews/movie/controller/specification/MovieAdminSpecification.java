@@ -331,7 +331,7 @@ public interface MovieAdminSpecification {
 
     })
     ResponseEntity<BaseResponse<ReadDailyMovieLikeListResponse>> readDailyMovieLikeList(
-            Member loginMember
+            @AuthenticationPrincipal(expression = "member") Member loginMember
     );
 
 

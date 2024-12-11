@@ -23,5 +23,7 @@ public interface MemberService {
 
     PutMemberNicknameResponse updateNickname(Member loginMember, PutMemberNicknameRequest request);
 
-    PutMemberNoticeResponse updateNotice(PutMemberNoticeRequest request);
+    PutMemberNoticeResponse updateNotice(Member loginMember, PutMemberNoticeRequest request);
+
+    void registerFcmToken(Member member, String fcmToken);
 }
