@@ -26,17 +26,14 @@ public class TMDbMovieCountryWriter implements ItemWriter<Movie> {
             for (MovieCountry movieCountry : movie.getCountries()) {
                 Country transientCountry = movieCountry.getCountry();
 
-                // Country 캐싱 및 조회
                 Country persistedCountry = countryCache.computeIfAbsent(
                         transientCountry.getName(),
                         this::findOrSaveCountry
                 );
 
-                // MovieCountry에 영속화된 Country 주입
                 movieCountry.updateCountry(persistedCountry);
             }
 
-            // Movie 영속화 (Cascade 처리)
             entityManager.merge(movie);
         }
         entityManager.flush();

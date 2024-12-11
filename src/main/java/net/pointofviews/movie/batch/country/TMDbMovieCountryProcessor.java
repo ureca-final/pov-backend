@@ -20,12 +20,10 @@ public class TMDbMovieCountryProcessor implements ItemProcessor<Movie, Movie> {
         SearchFilteredMovieDetailResponse detailsResponse = searchService.searchDetailsMovie(item.getTmdbId().toString());
         List<String> stringCountries = detailsResponse.originCountries();
 
-        // MovieCountry 리스트 생성
         List<MovieCountry> movieCountries = stringCountries.stream()
-                .map(countryName -> new MovieCountry(new Country(countryName))) // 이름만 설정
+                .map(countryName -> new MovieCountry(new Country(countryName)))
                 .toList();
 
-        // Movie에 MovieCountry 추가
         movieCountries.forEach(item::addCountry);
         return item;
     }
