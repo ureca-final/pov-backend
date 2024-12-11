@@ -2,6 +2,9 @@ package net.pointofviews.curation.repository;
 
 import net.pointofviews.curation.domain.Curation;
 import net.pointofviews.curation.domain.CurationCategory;
+import net.pointofviews.curation.dto.response.ReadUserCurationResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +22,8 @@ public interface CurationRepository extends JpaRepository<Curation, Long> {
             @Param("category") CurationCategory category
     );
 
-
     boolean existsById(Long id);
+
+//    @Query("SELECT c FROM Curation c WHERE c.startTime <= CURRENT_TIMESTAMP")
+//    Page<Curation> findScheduledCurations(Pageable pageable);
 }
