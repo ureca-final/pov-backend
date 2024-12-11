@@ -2,6 +2,8 @@ package net.pointofviews.notice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.MemberFcmToken;
 import net.pointofviews.member.repository.MemberFcmTokenRepository;
 import net.pointofviews.notice.domain.Notice;
@@ -34,6 +36,7 @@ public class NoticeServiceImpl implements NoticeService {
     private final NoticeSendRepository noticeSendRepository;
     private final NoticeReceiveRepository noticeReceiveRepository;
     private final MemberFcmTokenRepository memberFcmTokenRepository;
+    private final CommonCodeService commonCodeService;
     private final FcmUtil fcmUtil;
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -76,8 +79,12 @@ public class NoticeServiceImpl implements NoticeService {
 
         noticeSendRepository.save(noticeSend);
 
+        // 장르명을 코드로 변환
+        String genreName = request.templateVariables().get("genre");
+        String genreCode = commonCodeService.convertNameToCommonCode(genreName, CodeGroupEnum.MOVIE_GENRE);
+
         // Redis에서 선호 장르 사용자 조회
-        String genreKey = "genre:preferences:" + request.templateVariables().get("genre");
+        String genreKey = "genre:preferences:" + genreCode;
         Set<UUID> targetMembers = getTargetMembers(genreKey);
 
         if (targetMembers.isEmpty()) {
@@ -164,13 +171,23 @@ public class NoticeServiceImpl implements NoticeService {
     private Set<UUID> getTargetMembers(String genreKey) {
         try {
             Set<Object> members = redisTemplate.opsForSet().members(genreKey);
-            if (members == null) return new HashSet<>();
+            if (members == null) {
+                return new HashSet<>();
+            }
 
             return members.stream()
-                    .map(member -> UUID.fromString(member.toString()))
+                    .map(member -> {
+                        try {
+                            return UUID.fromString(member.toString());
+                        } catch (IllegalArgumentException e) {
+                            log.error("Invalid UUID string: {}", member);
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            log.error("Failed to get target members from Redis", e);
+            log.error("Failed to get target members from Redis: {}", e.getMessage(), e);
             throw new NoticeException.RedisOperationFailedException();
         }
     }
