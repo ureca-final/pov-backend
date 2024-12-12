@@ -25,7 +25,7 @@ public record ReadUserCurationMovieResponse(
                 this.title = title;
                 this.poster = poster;
                 this.released = released;
-                this.movieLikeCount = movieLikeCount != null ? movieLikeCount : 0; // Null 처리
-                this.movieReviewCount = movieReviewCount != null ? movieReviewCount : 0; // Null 처리
+                this.movieLikeCount = movieLikeCount != null ? movieLikeCount : 0L; // Null 처리
+                this.movieReviewCount = movieReviewCount != null ? movieReviewCount : 0L; // Null 처리
         }
 }

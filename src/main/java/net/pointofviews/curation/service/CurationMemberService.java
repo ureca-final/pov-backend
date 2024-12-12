@@ -5,6 +5,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface CurationMemberService {
 
-    ReadUserCurationListResponse readScheduledCurations(Pageable pageable);
+    ReadUserCurationListResponse readUserCurations();
 
 }

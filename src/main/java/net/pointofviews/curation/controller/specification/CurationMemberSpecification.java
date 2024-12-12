@@ -19,5 +19,5 @@ public interface CurationMemberSpecification {
                     description = "조회 성공"
             )
     })
-    ResponseEntity<BaseResponse<ReadUserCurationListResponse>> readScheduledCurations(Pageable pageable);
+    ResponseEntity<BaseResponse<ReadUserCurationListResponse>> readScheduledCurations();
 }

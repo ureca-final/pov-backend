@@ -1,10 +1,8 @@
 package net.pointofviews.curation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.*;
-
-import net.pointofviews.curation.service.impl.CurationMovieRedisServiceImpl;
+import net.pointofviews.curation.exception.CurationException;
+import net.pointofviews.curation.exception.CurationMovieException;
+import net.pointofviews.curation.service.impl.CurationRedisServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,18 +11,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
-
-import net.pointofviews.curation.exception.CurationException;
-import net.pointofviews.curation.exception.CurationMovieException;
 import org.springframework.data.redis.core.SetOperations;
 
+import java.util.Collections;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.*;
+
 @ExtendWith(MockitoExtension.class)
-class CurationMovieRedisServiceTest {
+class CurationRedisServiceTest {
 
     @InjectMocks
-    private CurationMovieRedisServiceImpl curationMovieRedisService;
+    private CurationRedisServiceImpl curationRedisService;
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
@@ -53,11 +53,12 @@ class CurationMovieRedisServiceTest {
                 given(redisTemplate.hasKey(key)).willReturn(false);
 
                 // when
-                Set<Long> savedMovies = curationMovieRedisService.saveMoviesToCuration(curationId, movieIds);
+                Set<Long> savedMovies = curationRedisService.saveMoviesToCuration(curationId, movieIds);
 
                 // then
                 assertThat(savedMovies).containsExactlyInAnyOrderElementsOf(movieIds);
-                assertThat(savedMovies).containsExactlyInAnyOrder(101L, 102L, 103L);
+                verify(redisTemplate, times(1)).opsForSet();
+                verify(setOperations).add(eq(key), any());
             }
         }
 
@@ -74,7 +75,7 @@ class CurationMovieRedisServiceTest {
                 given(redisTemplate.hasKey(key)).willReturn(true);
 
                 // when & then
-                assertThrows(CurationException.class, () -> curationMovieRedisService.saveMoviesToCuration(curationId, movieIds));
+                assertThrows(CurationException.class, () -> curationRedisService.saveMoviesToCuration(curationId, movieIds));
                 verify(redisTemplate, never()).opsForSet();
             }
         }
@@ -91,13 +92,13 @@ class CurationMovieRedisServiceTest {
                 // given
                 Long curationId = 1L;
                 String key = "curation:movies:" + curationId;
-                Set<Object> cachedMovies = Set.of(101L, 102L);
+                Set<Object> cachedMovies = Set.of("101", "102");
 
                 given(redisTemplate.hasKey(key)).willReturn(true);
-                given(redisTemplate.opsForSet().members(key)).willReturn(cachedMovies);
+                given(setOperations.members(key)).willReturn(cachedMovies);
 
                 // when
-                Set<Long> result = curationMovieRedisService.readMoviesForCuration(curationId);
+                Set<Long> result = curationRedisService.readMoviesForCuration(curationId);
 
                 // then
                 assertThat(result).containsExactlyInAnyOrder(101L, 102L);
@@ -108,15 +109,18 @@ class CurationMovieRedisServiceTest {
         class Failure {
 
             @Test
-            void 키가_존재하지_않으면_CurationMovieKeyNotFound_예외발생() {
+            void 키가_존재하지_않으면_빈_결과반환() {
                 // given
                 Long curationId = 1L;
                 String key = "curation:movies:" + curationId;
 
                 given(redisTemplate.hasKey(key)).willReturn(false);
 
-                // when & then
-                assertThrows(CurationMovieException.class, () -> curationMovieRedisService.readMoviesForCuration(curationId));
+                // when
+                Set<Long> result = curationRedisService.readMoviesForCuration(curationId);
+
+                // then
+                assertThat(result).isEmpty();
             }
         }
     }
@@ -138,12 +142,12 @@ class CurationMovieRedisServiceTest {
                 given(redisTemplate.delete(key)).willReturn(true);
 
                 // when
-                Set<Long> updatedMovies = curationMovieRedisService.updateMoviesToCuration(curationId, movieIds);
+                Set<Long> updatedMovies = curationRedisService.updateMoviesToCuration(curationId, movieIds);
 
                 // then
                 assertThat(updatedMovies).containsExactlyInAnyOrderElementsOf(movieIds);
                 verify(redisTemplate, times(1)).delete(key);
-                assertThat(updatedMovies).containsExactlyInAnyOrder(201L, 202L);
+                verify(setOperations).add(eq(key), any());
             }
         }
 
@@ -160,7 +164,7 @@ class CurationMovieRedisServiceTest {
                 given(redisTemplate.hasKey(key)).willReturn(false);
 
                 // when & then
-                assertThrows(CurationMovieException.class, () -> curationMovieRedisService.updateMoviesToCuration(curationId, movieIds));
+                assertThrows(CurationMovieException.class, () -> curationRedisService.updateMoviesToCuration(curationId, movieIds));
             }
         }
     }
@@ -180,7 +184,7 @@ class CurationMovieRedisServiceTest {
                 given(redisTemplate.hasKey(key)).willReturn(true);
 
                 // when
-                curationMovieRedisService.deleteAllMoviesForCuration(curationId);
+                curationRedisService.deleteAllMoviesForCuration(curationId);
 
                 // then
                 verify(redisTemplate, times(1)).delete(key);
@@ -199,7 +203,7 @@ class CurationMovieRedisServiceTest {
                 given(redisTemplate.hasKey(key)).willReturn(false);
 
                 // when & then
-                assertThrows(CurationMovieException.class, () -> curationMovieRedisService.deleteAllMoviesForCuration(curationId));
+                assertThrows(CurationMovieException.class, () -> curationRedisService.deleteAllMoviesForCuration(curationId));
             }
         }
     }

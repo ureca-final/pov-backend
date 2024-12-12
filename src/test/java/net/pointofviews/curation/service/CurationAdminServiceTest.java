@@ -1,7 +1,6 @@
 package net.pointofviews.curation.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -39,7 +38,7 @@ class CurationAdminServiceTest {
     private CurationRepository curationRepository;
 
     @Mock
-    private CurationMovieRedisService curationMovieRedisService;
+    private CurationRedisService curationRedisService;
 
     @Mock
     private MemberRepository memberRepository;
@@ -80,7 +79,7 @@ class CurationAdminServiceTest {
 
                 // then
                 verify(curationRepository, times(1)).save(any(Curation.class));
-                verify(curationMovieRedisService, times(1))
+                verify(curationRedisService, times(1))
                         .saveMoviesToCuration(eq(1L), argThat(argument ->
                                 argument.containsAll(Set.of(101L, 102L, 103L))));
             }
@@ -150,7 +149,7 @@ class CurationAdminServiceTest {
                 curationAdminService.updateCuration(curationId, request);
 
                 // then
-                verify(curationMovieRedisService, times(1)).updateMoviesToCuration(curationId, request.movieIds());
+                verify(curationRedisService, times(1)).updateMoviesToCuration(curationId, request.movieIds());
                 assertThat(curation.getTheme()).isEqualTo(request.theme());
                 assertThat(curation.getTitle()).isEqualTo(request.title());
             }
@@ -197,7 +196,7 @@ class CurationAdminServiceTest {
 
                 // then
                 verify(curationRepository, times(1)).deleteById(curationId);
-                verify(curationMovieRedisService, times(1)).deleteAllMoviesForCuration(curationId);
+                verify(curationRedisService, times(1)).deleteAllMoviesForCuration(curationId);
             }
         }
 
@@ -260,7 +259,7 @@ class CurationAdminServiceTest {
             );
 
             given(curationRepository.findCurationDetailById(curationId)).willReturn(Optional.of(mockCuration));
-            given(curationMovieRedisService.readMoviesForCuration(curationId)).willReturn(mockMovieIds);
+            given(curationRedisService.readMoviesForCuration(curationId)).willReturn(mockMovieIds);
             given(curationRepository.findMoviesByIds(mockMovieIds)).willReturn(mockMovies);
 
             // when
@@ -272,7 +271,7 @@ class CurationAdminServiceTest {
             assertThat(response.readAdminCurationMovieResponseList().get(0).title()).isEqualTo("Movie1");
 
             verify(curationRepository).findCurationDetailById(curationId);
-            verify(curationMovieRedisService).readMoviesForCuration(curationId);
+            verify(curationRedisService).readMoviesForCuration(curationId);
             verify(curationRepository).findMoviesByIds(mockMovieIds);
         }
 
@@ -301,7 +300,7 @@ class CurationAdminServiceTest {
             );
 
             given(curationRepository.findCurationDetailById(curationId)).willReturn(Optional.of(mockCuration));
-            given(curationMovieRedisService.readMoviesForCuration(curationId)).willReturn(Collections.emptySet());
+            given(curationRedisService.readMoviesForCuration(curationId)).willReturn(Collections.emptySet());
 
             // when
             ReadAdminCurationDetailResponse response = curationAdminService.readCurationDetail(curationId);
@@ -311,7 +310,7 @@ class CurationAdminServiceTest {
             assertThat(response.readAdminCurationMovieResponseList()).isEmpty();
 
             verify(curationRepository).findCurationDetailById(curationId);
-            verify(curationMovieRedisService).readMoviesForCuration(curationId);
+            verify(curationRedisService).readMoviesForCuration(curationId);
         }
     }
 
