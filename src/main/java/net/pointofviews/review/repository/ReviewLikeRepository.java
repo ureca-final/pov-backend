@@ -6,6 +6,8 @@ import org.springframework.data.repository.query.Param;
 
 import net.pointofviews.review.domain.ReviewLike;
 
+import java.util.Optional;
+
 public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
 
 	@Query(value = """
@@ -13,5 +15,5 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
 		  FROM ReviewLike rl
 		 WHERE rl.review.id = :reviewId
 	""")
-	boolean getIsLikedByReviewId(@Param("reviewId") Long reviewId);
+	Optional<Boolean> getIsLikedByReviewId(@Param("reviewId") Long reviewId);
 }

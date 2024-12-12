@@ -548,7 +548,7 @@ class ReviewMemberServiceTest {
                 given(review.getMember()).willReturn(member);
 
                 given(reviewRepository.findReviewDetailById(any())).willReturn(Optional.of(review));
-                given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(true);
+                given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(Optional.of(true));
                 given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(10L);
                 given(reviewKeywordLinkRepository.findKeywordsByReviewId(any())).willReturn(List.of("흥미진진", "몰입감"));
 

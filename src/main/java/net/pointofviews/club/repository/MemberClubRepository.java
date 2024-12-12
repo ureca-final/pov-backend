@@ -29,6 +29,7 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
     @Query(value = """
             SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
                     r.id,
+                    mv.id,
                     mv.title,
                     r.title,
                     r.contents,
