@@ -195,7 +195,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
                 .orElseThrow(() -> reviewNotFound(reviewId));
 
         Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
-        boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId);
+        boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId).orElse(false);
         List<String> keywords = reviewKeywordLinkRepository.findKeywordsByReviewId(reviewId);
 
         ReadReviewDetailResponse response = new ReadReviewDetailResponse(
