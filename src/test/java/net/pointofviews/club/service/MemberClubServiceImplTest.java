@@ -1,6 +1,10 @@
 package net.pointofviews.club.service;
 
+import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.club.repository.ClubRepository;
+import net.pointofviews.club.service.impl.ClubServiceImpl;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.club.exception.ClubException;
@@ -20,8 +24,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MemberClubServiceImplTest {
@@ -30,7 +33,13 @@ class MemberClubServiceImplTest {
     private MemberClubServiceImpl memberClubService;
 
     @Mock
+    private ClubServiceImpl clubService;
+
+    @Mock
     private MemberClubRepository memberClubRepository;
+
+    @Mock
+    private ClubRepository clubRepository;
 
     @Nested
     class ReadMembersByClubId {
@@ -128,4 +137,65 @@ class MemberClubServiceImplTest {
                     .hasMessageContaining(String.format("클럽(ID: %s)의 리더를 찾을 수 없습니다.", clubId));
         }
     }
+
+
+    @Nested
+    class JoinClub {
+
+        @Test
+        void 클럽_가입_성공() {
+            // given
+            Member member = mock(Member.class);
+            Club club = mock(Club.class);
+            UUID clubId = UUID.randomUUID();
+
+            when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
+            when(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).thenReturn(Optional.empty());
+
+            // when
+            memberClubService.joinClub(clubId, member);
+
+            // then
+            verify(clubRepository).findById(clubId);
+            verify(memberClubRepository).findByClubIdAndMemberId(clubId, member.getId());
+            verify(memberClubRepository).save(any(MemberClub.class));
+        }
+
+        @Test
+        void 클럽_가입_실패_클럽_존재하지_않음() {
+            // given
+            Member member = mock(Member.class);
+            UUID clubId = UUID.randomUUID();
+
+            when(clubRepository.findById(clubId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> memberClubService.joinClub(clubId, member))
+                    .isInstanceOf(ClubException.class)
+                    .hasMessage(String.format("클럽(Id: %s)이 존재하지 않습니다.", clubId));
+            verify(clubRepository).findById(clubId);
+            verify(memberClubRepository, never()).findByClubIdAndMemberId(clubId, member.getId());
+            verify(memberClubRepository, never()).save(any(MemberClub.class));
+        }
+
+        @Test
+        void 클럽_가입_실패_이미_가입된_사용자() {
+            // given
+            Member member = mock(Member.class);
+            Club club = mock(Club.class);
+            UUID clubId = UUID.randomUUID();
+
+            when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
+            when(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).thenReturn(Optional.of(MemberClub.builder().build()));
+
+            // when & then
+            assertThatThrownBy(() -> memberClubService.joinClub(clubId, member))
+                    .isInstanceOf(ClubException.class)
+                    .hasMessage("이미 클럽에 가입된 회원입니다.");
+            verify(clubRepository).findById(clubId);
+            verify(memberClubRepository).findByClubIdAndMemberId(clubId, member.getId());
+            verify(memberClubRepository, never()).save(any(MemberClub.class));
+        }
+    }
+
 }

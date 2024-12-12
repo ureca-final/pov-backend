@@ -30,4 +30,8 @@ public class ClubException extends BusinessException {
     public static ClubException clubLeaderNotFound(UUID clubId) {
         return new ClubException(HttpStatus.NOT_FOUND, String.format("클럽(ID: %s)의 리더를 찾을 수 없습니다.", clubId));
     }
+
+    public static ClubException memberAlreadyInClub() {
+        return new ClubException( HttpStatus.CONFLICT, "이미 클럽에 가입된 회원입니다.");
+    }
 }

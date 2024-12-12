@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -70,8 +71,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 m.title,
                 m.poster,
                 m.released,
-                COALESCE(mlc.likeCount, 0) AS movieLikeCount,
-                COUNT(r.id) AS movieReviewCount
+                mlc.likeCount,
+                COUNT(r.id)
             )
             FROM Movie m
             LEFT JOIN m.reviews r
@@ -79,7 +80,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             WHERE m.id IN :movieIds
             GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
             """)
-    Slice<ReadUserCurationMovieResponse> findUserCurationMoviesByIds(@Param("movieIds") Set<Long> movieIds, Pageable pageable);
+    List<ReadUserCurationMovieResponse> findUserCurationMoviesByIds(@Param("movieIds") Set<Long> movieIds);
 
     @EntityGraph(attributePaths = {"genres", "countries.country", "crews.people", "casts.people"})
     @Query("SELECT DISTINCT m FROM Movie m WHERE m.id = :movieId")
