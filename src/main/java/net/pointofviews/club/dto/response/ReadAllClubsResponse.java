@@ -20,7 +20,7 @@ public record ReadAllClubsResponse(
         int participant,
 
         @Schema(description = "최대 참가자 수", example = "100")
-        int maxParticipant,
+        int maxParticipants,
 
         @Schema(description = "북마크 개수", example = "5")
         int clubMovieCount,
