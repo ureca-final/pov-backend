@@ -185,7 +185,7 @@ class MovieTMDbSearchServiceTest {
 
             @Test
             @SneakyThrows
-            void 영화_크레딧_배우_최대_10명과_갑독_찾기() {
+            void 영화_크레딧_배우_최대_5명과_갑독_찾기() {
                 // given
                 String movieId = "27205";
                 String koreanIsoCode = LocaleUtils.KOREAN_LANGUAGE_CODE;
@@ -197,10 +197,10 @@ class MovieTMDbSearchServiceTest {
                 mockServer.expect(requestTo(uri)).andRespond(withSuccess(validJsonResponse, MediaType.APPLICATION_JSON));
 
                 // when
-                SearchCreditApiResponse result = movieTMDbSearchService.searchLimit10Credit(movieId);
+                SearchCreditApiResponse result = movieTMDbSearchService.searchLimit5Credit(movieId);
 
                 // then
-                assertThat(result.cast()).hasSize(10);
+                assertThat(result.cast()).hasSize(5);
                 assertThat(result.crew()).hasSize(1);
                 assertThat(result.crew().get(0).job()).isEqualToIgnoringCase("director");
             }

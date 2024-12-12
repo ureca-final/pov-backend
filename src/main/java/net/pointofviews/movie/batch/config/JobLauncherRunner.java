@@ -28,7 +28,6 @@ public class JobLauncherRunner implements ApplicationRunner {
                 .addString("endDate", endDate)
                 .toJobParameters();
 
-        // 이미 실행된 JobInstance가 있는지 확인
         if (jobRepository.isJobInstanceExists(tmdbMovieDiscoverJob.getName(), parameters)) {
             log.info("이미 실행된 JobInstance가 있습니다. Job을 실행하지 않습니다.");
             return;

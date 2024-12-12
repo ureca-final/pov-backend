@@ -122,5 +122,28 @@ public interface MemberSpecification {
 			)
 		)
 	})
-	ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Valid @RequestBody PutMemberNoticeRequest request);
+	ResponseEntity<BaseResponse<PutMemberNoticeResponse>> putNotice(@Valid PutMemberNoticeRequest request, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto);
+
+	@Tag(name = "Member", description = "회원 FCM 토큰 관리 API")
+	@Operation(summary = "FCM 토큰 등록", description = "회원의 FCM 토큰을 등록합니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "등록 성공"),
+			@ApiResponse(
+					responseCode = "401",
+					description = "로그인이 필요한 서비스입니다.",
+					content = @Content(
+							mediaType = MediaType.APPLICATION_JSON_VALUE,
+							examples = @ExampleObject(value = """
+                {
+                    "message": "로그인이 필요한 서비스입니다."
+                }
+                """)
+					)
+			)
+	})
+	ResponseEntity<BaseResponse<Void>> registerFcmToken(
+			@Valid @RequestBody RegisterFcmTokenRequest request,
+			@AuthenticationPrincipal MemberDetailsDto memberDetailsDto
+	);
+
 }

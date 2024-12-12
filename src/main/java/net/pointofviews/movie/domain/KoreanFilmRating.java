@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum KoreanFilmRating {
     ALL("ALL"),
+    SEVEN("7"),
     TWELVE("12"),
     FIFTEEN("15"),
     EIGHTEEN("18"),
@@ -18,11 +19,18 @@ public enum KoreanFilmRating {
     }
 
     public static KoreanFilmRating of(String tmdbCode) {
-        for (KoreanFilmRating rating : values()) {
-            if (rating.tmdbCode.equals(tmdbCode)) {
-                return rating;
-            }
+        if (tmdbCode == null) {
+            return KoreanFilmRating.NONE; // 기본값 처리
         }
-        return NONE;
+
+        return switch (tmdbCode) {
+            case "ALL" -> KoreanFilmRating.ALL;
+            case "7" -> KoreanFilmRating.SEVEN;
+            case "12" -> KoreanFilmRating.TWELVE;
+            case "15" -> KoreanFilmRating.FIFTEEN;
+            case "18", "19" -> KoreanFilmRating.EIGHTEEN;
+            default -> KoreanFilmRating.NONE;
+        };
     }
+
 }

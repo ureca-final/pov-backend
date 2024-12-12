@@ -36,7 +36,7 @@ public class Movie {
     @Convert(converter = FilmRatingConverter.class)
     private KoreanFilmRating filmRating;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     private final List<MovieCountry> countries = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
@@ -102,5 +102,10 @@ public class Movie {
         this.genres.addAll(genres);
         this.casts.addAll(casts);
         this.crews.addAll(crews);
+    }
+
+    public void updateMovie(LocalDate release, KoreanFilmRating certification) {
+        this.released = release;
+        filmRating = certification;
     }
 }

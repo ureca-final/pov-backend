@@ -74,8 +74,13 @@ jobs:
           export S3_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET_ACCESS_KEY }}"
           export TMDB_ACCESS_TOKEN="${{ secrets.TMDB_ACCESS_TOKEN }}"
           export REDIS_HOST="${{ secrets.REDIS_HOST }}"
+          export FIREBASE_CONFIG='${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
   
           cd /home/ubuntu/pov-backend
+          
+          mkdir -p src/main/resources/firebase
+          echo "$FIREBASE_CONFIG" > src/main/resources/firebase/firebase-service-account.json
+          
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
           EOF
@@ -87,6 +92,7 @@ jobs:
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
           TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
       # 두 번째 인스턴스 배포
       - name: Deploy to EC2 Instance 2
         run: |
@@ -100,7 +106,13 @@ jobs:
           export S3_SECRET_ACCESS_KEY="${{ secrets.S3_SECRET_ACCESS_KEY }}"
           export TMDB_ACCESS_TOKEN="${{ secrets.TMDB_ACCESS_TOKEN }}"
           export REDIS_HOST="${{ secrets.REDIS_HOST }}"
+          export FIREBASE_CONFIG='${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          
           cd /home/ubuntu/pov-backend
+          
+          mkdir -p src/main/resources/firebase
+          echo "$FIREBASE_CONFIG" > src/main/resources/firebase/firebase-service-account.json
+          
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
           EOF
@@ -112,3 +124,4 @@ jobs:
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
           TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

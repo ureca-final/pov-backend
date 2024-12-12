@@ -1,14 +1,17 @@
 package net.pointofviews.review.dto.response;
 
-import java.time.LocalDateTime;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDateTime;
 
 @Schema(description = "리뷰 DTO")
 public record ReadReviewResponse(
 
 	@Schema(description = "리뷰 ID", example = "1")
 	Long reviewId,
+
+	@Schema(description = "영화 ID", example = "1")
+	Long movieId,
 
 	@Schema(description = "영화 제목", example = "Inception")
 	String movieTitle,

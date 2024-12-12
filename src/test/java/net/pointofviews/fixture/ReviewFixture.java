@@ -14,6 +14,7 @@ public class ReviewFixture {
 
         return new ReadReviewResponse(
                 (long) RANDOM.nextInt(100),
+                (long) RANDOM.nextInt(100),
                 "영화 제목 " + RANDOM.nextInt(10),
                 "리뷰 제목 " + UUID.randomUUID(),
                 "리뷰 내용 " + UUID.randomUUID(),

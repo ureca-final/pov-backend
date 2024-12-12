@@ -10,12 +10,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 import net.pointofviews.auth.dto.response.CheckLoginResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -23,7 +26,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
-import net.pointofviews.auth.dto.response.LoginMemberResponse;
 import net.pointofviews.common.exception.CommonCodeException;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.S3Service;
@@ -58,6 +60,17 @@ class MemberServiceTest {
 
     @Mock
     private S3Service s3Service;
+
+    @Mock(strictness = Mock.Strictness.LENIENT)
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private SetOperations<String, Object> setOperations;
+
+    @BeforeEach
+    void setUp() {
+        given(redisTemplate.opsForSet()).willReturn(setOperations);
+    }
 
     // test data
     private static final String TEST_EMAIL = "test@example.com";
@@ -105,9 +118,18 @@ class MemberServiceTest {
                 List<String> genres = List.of("로맨스", "코미디", "액션");
                 CreateMemberRequest request = createBaseMemberRequest(SocialType.NAVER, genres);
                 Member savedMember = mock(Member.class);
+                UUID mockUUID = UUID.randomUUID();
+                given(savedMember.getId()).willReturn(mockUUID);
 
                 given(memberRepository.existsByEmail(request.email())).willReturn(false);
                 given(memberRepository.save(any(Member.class))).willReturn(savedMember);
+
+                // Redis mocking
+                given(setOperations.add(any(), any())).willReturn(1L);
+
+                // 장르 코드 변환 mocking 추가
+                given(commonCodeService.convertNameToCommonCode(any(), any()))
+                        .willReturn("14", "04", "01");
 
                 // when
                 CreateMemberResponse response = memberService.signup(request);
@@ -317,7 +339,6 @@ class MemberServiceTest {
 
     @Nested
     class UpdateGenre {
-
         @Nested
         class Success {
 
@@ -325,6 +346,8 @@ class MemberServiceTest {
             void 선호하는_장르_변경_시_기존_장르와_비교_후_장르_추가() {
                 // given -- 테스트의 상태 설정
                 Member member = mock(Member.class);
+                UUID mockUUID = UUID.randomUUID();
+                given(member.getId()).willReturn(mockUUID);
                 given(memberRepository.findById(any())).willReturn(Optional.of(member));
 
                 List<String> existingGenres = List.of("01", "02", "03");
@@ -334,6 +357,10 @@ class MemberServiceTest {
                 PutMemberGenreListRequest request = new PutMemberGenreListRequest(newGenres);
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "04", "05");
+
+                // Redis mocking
+                given(setOperations.remove(any(), any())).willReturn(1L);
+                given(setOperations.add(any(), any())).willReturn(1L);
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -353,6 +380,8 @@ class MemberServiceTest {
             void 기존_장르와_선호하는_장르가_겹치지_않을_경우_추가_작업만_진행() {
                 // given -- 테스트의 상태 설정
                 Member member = mock(Member.class);
+                UUID mockUUID = UUID.randomUUID();
+                given(member.getId()).willReturn(mockUUID);
                 given(memberRepository.findById(any())).willReturn(Optional.of(member));
 
                 List<String> existingGenres = List.of("01", "02", "03");
@@ -362,6 +391,10 @@ class MemberServiceTest {
                 PutMemberGenreListRequest request = new PutMemberGenreListRequest(newGenres);
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("04", "05", "06");
+
+                // Redis mocking
+                given(setOperations.remove(any(), any())).willReturn(1L);
+                given(setOperations.add(any(), any())).willReturn(1L);
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -381,6 +414,8 @@ class MemberServiceTest {
             void 기존_장르와_요청된_장르가_동일한_경우_삭제작업_미수행() {
                 // given -- 테스트의 상태 설정
                 Member member = mock(Member.class);
+                UUID mockUUID = UUID.randomUUID();
+                given(member.getId()).willReturn(mockUUID);
                 given(memberRepository.findById(any())).willReturn(Optional.of(member));
 
                 // 기존 장르와 요청된 장르가 동일
@@ -391,6 +426,10 @@ class MemberServiceTest {
                 PutMemberGenreListRequest request = new PutMemberGenreListRequest(newGenres);
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "02", "03");
+
+                // Redis mocking
+                given(setOperations.remove(any(), any())).willReturn(1L);
+                given(setOperations.add(any(), any())).willReturn(1L);
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
