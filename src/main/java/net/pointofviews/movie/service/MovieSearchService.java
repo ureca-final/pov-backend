@@ -7,4 +7,6 @@ public interface MovieSearchService {
     SearchMovieListResponse searchMovies(String query, Pageable pageable);
 
     AdminSearchMovieListResponse adminSearchMovies(String query, Pageable pageable);
+
+    ReadDetailMovieResponse readDetailMovie(Long movieId);
 }
