@@ -107,7 +107,17 @@ public class NoticeServiceImpl implements NoticeService {
             List<NoticeReceive> noticeReceives = new ArrayList<>();
             for (MemberFcmToken fcmToken : fcmTokens) {
                 try {
-                    fcmUtil.sendMessage(fcmToken.getFcmToken(), noticeTemplate.getNoticeTitle(), content);
+                    String noticeContent = request.templateVariables().getOrDefault("notice_content", content);
+
+                    Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
+
+                    fcmUtil.sendMessage(
+                            fcmToken.getFcmToken(),
+                            noticeTemplate.getNoticeTitle(),
+                            content,
+                            reviewId,
+                            noticeContent
+                    );
 
                     NoticeReceive noticeReceive = NoticeReceive.builder()
                             .member(fcmToken.getMember())
@@ -122,16 +132,6 @@ public class NoticeServiceImpl implements NoticeService {
                     log.error("Failed to send notification to member: {}", fcmToken.getMember().getId(), e);
                     noticeSend.setSucceed(false);
                 }
-            }
-
-            try {
-                if (!noticeReceives.isEmpty()) {
-                    noticeReceiveRepository.saveAll(noticeReceives);
-                }
-            } catch (Exception e) {
-                log.error("Failed to save notice receives", e);
-                noticeSend.setSucceed(false);
-                throw new NoticeException.NoticeReceiveSaveFailedException();
             }
         }
     }
@@ -163,7 +163,12 @@ public class NoticeServiceImpl implements NoticeService {
     private String replaceTemplateVariables(String template, Map<String, String> variables) {
         String result = template;
         for (Map.Entry<String, String> entry : variables.entrySet()) {
-            result = result.replace("{" + entry.getKey() + "}", entry.getValue());
+            String value = entry.getValue();
+            if (value != null) {
+                result = result.replace("{" + entry.getKey() + "}", value);
+            } else {
+                result = result.replace("{" + entry.getKey() + "}", "");  // null인 경우 빈 문자열로 대체
+            }
         }
         return result;
     }
@@ -189,6 +194,14 @@ public class NoticeServiceImpl implements NoticeService {
         } catch (Exception e) {
             log.error("Failed to get target members from Redis: {}", e.getMessage(), e);
             throw new NoticeException.RedisOperationFailedException();
+        }
+    }
+
+    private Long parseIdOrNull(String idStr) {
+        try {
+            return !idStr.isEmpty() ? Long.parseLong(idStr) : null;
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 

@@ -104,7 +104,7 @@ public class MemberServiceImpl implements MemberService {
                         CodeGroupEnum.MOVIE_GENRE
                 );
                 String key = GENRE_PREFERENCES_KEY + genreCode;
-                redisTemplate.opsForSet().add(key, "\"" + savedMember.getId().toString() + "\"");
+                redisTemplate.opsForSet().add(key, savedMember.getId().toString());
             });
         }
 
@@ -196,12 +196,12 @@ public class MemberServiceImpl implements MemberService {
         // Redis 업데이트
         existingGenreCodes.forEach(genreCode -> {
             String key = GENRE_PREFERENCES_KEY + genreCode;
-            redisTemplate.opsForSet().remove(key, "\"" + loginMember.getId().toString() + "\"");
+            redisTemplate.opsForSet().remove(key, loginMember.getId().toString());
         });
 
         requestGenreCodes.forEach(genreCode -> {
             String key = GENRE_PREFERENCES_KEY + genreCode;
-            redisTemplate.opsForSet().add(key, "\"" + loginMember.getId().toString() + "\"");
+            redisTemplate.opsForSet().add(key, loginMember.getId().toString());
         });
 
         return new PutMemberGenreListResponse(request.genres());
