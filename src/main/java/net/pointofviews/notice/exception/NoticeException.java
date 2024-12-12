@@ -1,7 +1,10 @@
 package net.pointofviews.notice.exception;
 
 import net.pointofviews.common.exception.BusinessException;
+import net.pointofviews.member.exception.MemberException;
 import org.springframework.http.HttpStatus;
+
+import java.util.UUID;
 
 public class NoticeException extends BusinessException {
 
@@ -34,8 +37,8 @@ public class NoticeException extends BusinessException {
     }
 
     public static class NoTargetMembersFoundException extends NoticeException {
-        public NoTargetMembersFoundException() {
-            super(HttpStatus.NOT_FOUND, "알림을 받을 대상자가 없습니다.");
+        public NoTargetMembersFoundException(String genre, String code) {
+            super(HttpStatus.NOT_FOUND, String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.", genre, code));
         }
     }
 
