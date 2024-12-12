@@ -9,7 +9,6 @@ import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.repository.MovieRepository;
-import net.pointofviews.notice.service.NoticeService;
 import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.domain.ReviewKeywordLink;
 import net.pointofviews.review.dto.request.CreateReviewRequest;

@@ -40,9 +40,6 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
 
-    private static final String GENRE_PREFERENCES_KEY = "genre:preferences:";
-    private final RedisTemplate<String, Object> redisTemplate;
-
     private final MemberRepository memberRepository;
     private final MemberFavorGenreRepository memberFavorGenreRepository;
     private final MemberFcmTokenRepository memberFcmTokenRepository;

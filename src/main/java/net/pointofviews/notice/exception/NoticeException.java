@@ -1,10 +1,7 @@
 package net.pointofviews.notice.exception;
 
 import net.pointofviews.common.exception.BusinessException;
-import net.pointofviews.member.exception.MemberException;
 import org.springframework.http.HttpStatus;
-
-import java.util.UUID;
 
 public class NoticeException extends BusinessException {
 
