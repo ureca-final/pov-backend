@@ -28,8 +28,8 @@ public class MovieController implements MovieSpecification {
     @Override
     @GetMapping("/{movieId}")
     public ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(@PathVariable Long movieId) {
-        return null;
+        ReadDetailMovieResponse readDetailMovieResponse = movieSearchService.readDetailMovie(movieId);
+
+        return BaseResponse.ok("OK", readDetailMovieResponse);
     }
-
-
 }
