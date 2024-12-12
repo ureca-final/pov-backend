@@ -50,8 +50,8 @@ public class CurationMovieRedisServiceImpl implements CurationMovieRedisService 
 
         // 키가 존재하지 않으면 예외 발생 or 빈 SET 반환
         if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
-//            throw CurationMovieException.CurationMovieKeyNotFound();
-            return Collections.emptySet();
+            throw CurationMovieException.CurationMovieKeyNotFound();
+//            return Collections.emptySet();
 
         }
 
