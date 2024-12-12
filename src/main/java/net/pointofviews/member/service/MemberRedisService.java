@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +17,7 @@ public class MemberRedisService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String GENRE_PREFERENCES_KEY = "genre:preferences:";
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void saveGenresToRedis(UUID memberId, List<String> genreCodes) {
         genreCodes.forEach(genreCode -> {
             String key = GENRE_PREFERENCES_KEY + genreCode;
@@ -22,6 +25,7 @@ public class MemberRedisService {
         });
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void updateGenresInRedis(UUID memberId, List<String> existingGenreCodes, List<String> newGenreCodes) {
         // 기존 장르 삭제
         existingGenreCodes.forEach(genreCode -> {
