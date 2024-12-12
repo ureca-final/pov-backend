@@ -22,7 +22,9 @@ public class CorsConfig {
         configuration.setAllowedOrigins(List.of(
                 "https://point-of-views.com",
                 "https://www.point-of-views.com",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "https://localhost:5173",
+                "https://172.30.1.6:5173"
         ));
 
         // 허용할 헤더

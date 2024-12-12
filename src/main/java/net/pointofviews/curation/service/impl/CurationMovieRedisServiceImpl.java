@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,9 +48,11 @@ public class CurationMovieRedisServiceImpl implements CurationMovieRedisService 
     public Set<Long> readMoviesForCuration(Long curationId) {
         String key = generateKey(curationId);
 
-        // 키가 존재하지 않으면 예외 발생
+        // 키가 존재하지 않으면 예외 발생 or 빈 SET 반환
         if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
             throw CurationMovieException.CurationMovieKeyNotFound();
+//            return Collections.emptySet();
+
         }
 
         Set<Object> cachedMovies = redisTemplate.opsForSet().members(key);

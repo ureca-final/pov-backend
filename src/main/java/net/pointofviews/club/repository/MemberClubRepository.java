@@ -29,6 +29,7 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
     @Query(value = """
             SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
                     r.id,
+                    mv.id,
                     mv.title,
                     r.title,
                     r.contents,
@@ -45,7 +46,7 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
              JOIN mc.club c
              JOIN Review r ON r.member.id = m.id
              JOIN r.movie mv
-            WHERE c.id = :clubId
+            WHERE c.id = :clubId AND r.deletedAt IS NULL
             ORDER BY r.createdAt DESC
             """)
     Slice<ReadReviewResponse> findReviewsWithLikesByClubId(@Param("clubId") UUID clubId, Pageable pageable);

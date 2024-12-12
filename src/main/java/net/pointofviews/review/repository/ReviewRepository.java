@@ -16,6 +16,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query(value = """
             	SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
             			r.id,
+                        mv.id,
             			mv.title,
             			r.title,
             			r.contents,
@@ -30,7 +31,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             	 FROM Review r
             	 JOIN r.member m
             	 JOIN r.movie mv
-            	 WHERE mv.id = :movieId
+            	 WHERE mv.id = :movieId AND r.deletedAt IS NULL
                 ORDER BY r.createdAt DESC
             """)
     Slice<ReadReviewResponse> findReviewsWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
@@ -38,6 +39,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query(value = """
             	SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
             			r.id,
+                        mv.id,
             			mv.title,
             			r.title,
             			r.contents,
@@ -52,7 +54,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             	 FROM Review r
             	 JOIN r.member m
             	 JOIN r.movie mv
-            	 WHERE m.id = :memberId
+            	 WHERE m.id = :memberId AND r.deletedAt IS NULL
                 ORDER BY r.createdAt DESC
             """)
     Slice<ReadReviewResponse> findReviewsWithLikesByMemberId(@Param("memberId") UUID memberId, Pageable pageable);
