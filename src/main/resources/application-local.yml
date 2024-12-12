@@ -33,7 +33,7 @@ jwt:
     secretKey: "urecapointofviewsurecapointofviewsurecapoin"
 
 TMDb:
-  access:
+  access: "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwOGVjMDViOTA3NjM5NTg3ODViMzQ3NGQ5Y2VlNTM3YiIsIm5iZiI6MTczMjcxMjgyMy40MjQ2NDk1LCJzdWIiOiI2NzM0MGEzMzc2YWYzYWU3YjYzOGIwYzUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.DRhXvpF7u3F3X1t54qR_56Oq93xVciy7XexDZI5dTAQ"
 
 firebase:
   config:
