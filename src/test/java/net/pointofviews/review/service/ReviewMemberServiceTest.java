@@ -99,7 +99,7 @@ class ReviewMemberServiceTest {
                 CreateReviewRequest request = new CreateReviewRequest(
                         "제목",
                         "내용",
-                        "긍정적",
+                        "GOOD",
                         List.of("감동적인", "몰입감 있는"),
                         false
                 );
@@ -123,7 +123,7 @@ class ReviewMemberServiceTest {
                 CreateReviewRequest request = new CreateReviewRequest(
                         "제목",
                         "내용",
-                        "긍정적",
+                        "GOOD",
                         List.of(),
                         false
                 );
