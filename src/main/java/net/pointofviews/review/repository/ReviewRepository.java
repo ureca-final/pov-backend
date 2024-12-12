@@ -85,6 +85,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             	 FROM Review r
             	 LEFT JOIN r.member m
             	 LEFT JOIN r.movie mv
+            	 WHERE r.deletedAt IS NULL
                 ORDER BY r.createdAt DESC
             """)
     Slice<ReadReviewResponse> findAllSliced(Pageable pageable);
