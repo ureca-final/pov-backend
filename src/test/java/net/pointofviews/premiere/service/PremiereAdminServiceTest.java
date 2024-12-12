@@ -88,6 +88,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         10000,
+                        100,
                         true
                 );
 
@@ -129,6 +130,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         10000,
+                        100,
                         true
                 );
 
@@ -167,6 +169,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         10000,
+                        100,
                         true
                 );
 
@@ -194,6 +197,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         10000,
+                        100,
                         true
                 );
 
@@ -226,6 +230,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         10000,
+                        100,
                         true
                 );
 
@@ -275,7 +280,6 @@ class PremiereAdminServiceTest {
             void 존재하지_않는_시사회_PremiereException_premiereNotFound_예외발생() {
                 // given -- 테스트의 상태 설정
                 Member admin = mock(Member.class);
-                Premiere premiere = mock(Premiere.class);
 
                 given(memberRepository.findById(any())).willReturn(Optional.of(admin));
                 given(premiereRepository.findById(any())).willReturn(Optional.empty());

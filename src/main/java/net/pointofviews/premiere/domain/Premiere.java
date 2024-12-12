@@ -28,6 +28,8 @@ public class Premiere {
 
     private Integer price;
 
+    private Integer maxQuantity;
+
     private boolean isPaymentRequired;
 
     private LocalDateTime startAt;
@@ -39,6 +41,7 @@ public class Premiere {
             String title,
             String thumbnail,
             String eventImage,
+            Integer maxQuantity,
             Integer price,
             boolean isPaymentRequired,
             LocalDateTime startAt,
@@ -48,6 +51,7 @@ public class Premiere {
         this.thumbnail = thumbnail;
         this.eventImage = eventImage;
         this.price = price;
+        this.maxQuantity = maxQuantity;
         this.isPaymentRequired = isPaymentRequired;
         this.startAt = startAt;
         this.endAt = endAt;
@@ -56,6 +60,7 @@ public class Premiere {
     public void updatePremiere(PremiereRequest request) {
         this.title = request.title();
         this.price = request.price();
+        this.maxQuantity = request.maxQuantity();
         this.isPaymentRequired = request.isPaymentRequired();
         this.startAt = request.startAt();
         this.endAt = request.endAt();

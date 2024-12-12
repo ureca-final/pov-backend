@@ -88,6 +88,7 @@ class PremiereTest {
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         LocalDateTime.of(2024, 12, 22, 14, 30),
                         20000,
+                        100,
                         true
                 );
 

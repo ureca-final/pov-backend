@@ -22,6 +22,9 @@ public record PremiereRequest(
         @Schema(description = "응모 가격", example = "10000")
         int price,
 
+        @Schema(description = "시사회 응모 최대 인원 수", example = "100")
+        int maxQuantity,
+
         @Schema(description = "결제 필요 여부", example = "true")
         Boolean isPaymentRequired
 ) {
