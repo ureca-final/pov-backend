@@ -9,6 +9,7 @@ import net.pointofviews.club.dto.response.*;
 import net.pointofviews.club.dto.request.*;
 import net.pointofviews.club.service.ClubSearchService;
 import net.pointofviews.club.service.ClubService;
+import net.pointofviews.club.service.MemberClubService;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ public class ClubController implements ClubSpecification {
 
     private final ClubService clubService;
     private final ClubSearchService clubSearchService;
+    private final MemberClubService memberClubService;
 
     @GetMapping
     @Override
@@ -133,5 +135,13 @@ public class ClubController implements ClubSpecification {
     @Override
     public ResponseEntity<BaseResponse<ReadClubMemberListResponse>> readClubMembers(@PathVariable UUID clubId) {
         return null;
+    }
+
+    @Override
+    @PostMapping("/{clubId}/member")
+    public ResponseEntity<BaseResponse<Void>> joinClub(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember)
+    {
+        memberClubService.joinClub(clubId, loginMember);
+        return BaseResponse.ok("클럽 가입에 성공했습니다");
     }
 }
