@@ -25,7 +25,7 @@ public interface ReviewMemberService {
 
 	ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable);
 
-	ReadReviewListResponse findAllReview();
+	ReadReviewListResponse findAllReview(Pageable pageable);
 
 	ReadReviewDetailResponse findReviewDetail(Long reviewId);
 
