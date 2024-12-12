@@ -184,8 +184,9 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public ReadReviewListResponse findAllReview() {
-        return null;
+    public ReadReviewListResponse findAllReview(Pageable pageable) {
+        Slice<ReadReviewResponse> reviews = reviewRepository.findAllSliced(pageable);
+        return new ReadReviewListResponse(reviews);
     }
 
     @Override

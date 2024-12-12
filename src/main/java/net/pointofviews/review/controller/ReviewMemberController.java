@@ -75,8 +75,8 @@ public class ReviewMemberController implements ReviewMemberSpecification {
 
     @Override
     @GetMapping("/reviews")
-    public ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews() {
-        ReadReviewListResponse response = reviewMemberService.findAllReview();
+    public ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(@PageableDefault Pageable pageable) {
+        ReadReviewListResponse response = reviewMemberService.findAllReview(pageable);
 
         return BaseResponse.ok("모든 리뷰가 성공적으로 조회되었습니다.", response);
     }
