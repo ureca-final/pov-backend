@@ -20,7 +20,7 @@ public record PremiereRequest(
         LocalDateTime endAt,
 
         @Schema(description = "응모 가격", example = "10000")
-        int price,
+        int amount,
 
         @Schema(description = "시사회 응모 최대 인원 수", example = "100")
         int maxQuantity,

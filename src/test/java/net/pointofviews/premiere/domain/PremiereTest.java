@@ -27,7 +27,7 @@ class PremiereTest {
                 String title = "premiere title";
                 String thumbnail = "https://example.com/premieres/1/thumbnail/new-thumbnail.jpg";
                 String eventImage = "https://example.com/premieres/1/event/new-eventImage.jpg";
-                int price = 10000;
+                int amount = 10000;
                 boolean isPaymentRequired = true;
                 LocalDateTime startAt = LocalDateTime.of(2024, 11, 22, 14, 30);
                 LocalDateTime endAt = LocalDateTime.of(2024, 11, 28, 14, 30);
@@ -37,7 +37,7 @@ class PremiereTest {
                         .title(title)
                         .thumbnail(thumbnail)
                         .eventImage(eventImage)
-                        .price(price)
+                        .amount(amount)
                         .isPaymentRequired(isPaymentRequired)
                         .startAt(startAt)
                         .endAt(endAt)
@@ -49,7 +49,7 @@ class PremiereTest {
                     softly.assertThat(premiere.getTitle()).isEqualTo(title);
                     softly.assertThat(premiere.getThumbnail()).isEqualTo(thumbnail);
                     softly.assertThat(premiere.getEventImage()).isEqualTo(eventImage);
-                    softly.assertThat(premiere.getPrice()).isEqualTo(price);
+                    softly.assertThat(premiere.getAmount()).isEqualTo(amount);
                     softly.assertThat(premiere.isPaymentRequired()).isEqualTo(isPaymentRequired);
                     softly.assertThat(premiere.getStartAt()).isEqualTo(startAt);
                     softly.assertThat(premiere.getEndAt()).isEqualTo(endAt);
@@ -77,7 +77,7 @@ class PremiereTest {
                         .title("title")
                         .thumbnail(thumbnail)
                         .eventImage(eventImage)
-                        .price(10000)
+                        .amount(10000)
                         .isPaymentRequired(true)
                         .startAt(startAt)
                         .endAt(endAt)

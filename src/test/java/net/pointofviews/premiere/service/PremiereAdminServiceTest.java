@@ -100,7 +100,7 @@ class PremiereAdminServiceTest {
                     softly.assertThat(premiere.getTitle()).isEqualTo(request.title());
                     softly.assertThat(premiere.getStartAt()).isEqualTo(request.startAt());
                     softly.assertThat(premiere.getEndAt()).isEqualTo(request.endAt());
-                    softly.assertThat(premiere.getPrice()).isEqualTo(request.price());
+                    softly.assertThat(premiere.getAmount()).isEqualTo(request.amount());
                     softly.assertThat(premiere.isPaymentRequired()).isEqualTo(request.isPaymentRequired());
                 });
             }
