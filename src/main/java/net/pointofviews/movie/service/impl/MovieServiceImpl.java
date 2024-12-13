@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.country.domain.Country;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
@@ -103,6 +104,7 @@ public class MovieServiceImpl implements MovieService {
 
         movie.updateMovie(request, casts, crews, countries, genres);
     }
+
 
     private List<MovieGenre> convertStringsToMovieGenre(List<String> stringGenres) {
         return stringGenres.stream()
