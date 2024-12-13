@@ -1,6 +1,8 @@
 package net.pointofviews.review.repository;
 
 import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto;
+import net.pointofviews.review.dto.ReviewPreferenceCountDto;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -8,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -90,4 +93,26 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                 ORDER BY r.createdAt DESC
             """)
     Slice<ReadReviewResponse> findAllSliced(Pageable pageable);
+
+    @Query("""
+                SELECT new net.pointofviews.review.dto.ReviewPreferenceCountDto(
+                    COALESCE(SUM(CASE WHEN r.preference = 'GOOD' THEN 1 ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN r.preference = 'BAD' THEN 1 ELSE 0 END), 0)
+                )
+                FROM Review r
+                WHERE r.movie.id = :movieId
+            """)
+    List<ReviewPreferenceCountDto> countReviewPreferenceByMovieId(Long movieId);
+
+    @Query("""
+                SELECT new net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto(
+                    r,
+                    rlc.reviewLikeCount
+                )
+                FROM Review r
+                LEFT JOIN ReviewLikeCount rlc on r.id = rlc.review.id
+                WHERE r.movie.id = :movieId
+            """)
+    List<ReviewDetailsWithLikeCountDto> findTop3ByMovieIdOrderByReviewLikeCountDesc(@Param("movieId") Long movieId, Pageable pageable);
+
 }

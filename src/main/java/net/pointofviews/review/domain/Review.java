@@ -1,25 +1,17 @@
 package net.pointofviews.review.domain;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.util.Assert;
-
-import net.pointofviews.common.domain.SoftDeleteEntity;
-import net.pointofviews.member.domain.Member;
-import net.pointofviews.movie.domain.Movie;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.common.domain.SoftDeleteEntity;
+import net.pointofviews.member.domain.Member;
+import net.pointofviews.movie.domain.Movie;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.util.Assert;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -42,7 +34,8 @@ public class Review extends SoftDeleteEntity {
 
     private String thumbnail;
 
-    private String preference;
+    @Enumerated(EnumType.STRING)
+    private ReviewPreference preference;
 
     private boolean isSpoiler;
 
@@ -59,7 +52,7 @@ public class Review extends SoftDeleteEntity {
         setMovie(movie);
         this.title = title;
         this.contents = contents;
-        this.preference = preference;
+        this.preference = ReviewPreference.from(preference);
         this.isSpoiler = isSpoiler;
         this.disabled = false;
     }
@@ -79,7 +72,7 @@ public class Review extends SoftDeleteEntity {
 
         this.title = title;
         this.contents = contents;
-        this.preference = preference;
+        this.preference = ReviewPreference.from(preference);
         this.isSpoiler = isSpoiler;
     }
 
