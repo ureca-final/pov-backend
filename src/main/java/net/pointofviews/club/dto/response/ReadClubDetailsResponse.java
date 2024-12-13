@@ -42,6 +42,9 @@ public record ReadClubDetailsResponse(
         ReadClubMoviesListResponse clubMovieList,
 
         @Schema(description = "이 클럽의 북마크 수", example = "5")
-        Long movieCount
+        Long movieCount,
+
+        @Schema(description = "로그인 사용자 해당 클럽 가입 여부", example = "5")
+        boolean isMember
 
 ) {}
