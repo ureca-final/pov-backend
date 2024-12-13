@@ -19,4 +19,6 @@ public interface MovieContentRepository extends JpaRepository<MovieContent, Long
     @Modifying
     @Query("DELETE FROM MovieContent mc WHERE mc.id IN :ids")
     void deleteAllByIds(@Param("ids") List<Long> ids);
+
+    List<MovieContent> findAllByMovieId(Long movieId);
 }
