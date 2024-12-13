@@ -3,6 +3,7 @@ package net.pointofviews.movie.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.service.S3Service;
+import net.pointofviews.common.utils.ValidationUtils;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.domain.MovieContent;
 import net.pointofviews.movie.domain.MovieContentType;
@@ -84,11 +85,17 @@ public class MovieContentServiceImpl implements MovieContentService{
     }
 
     @Override
+    @Transactional
     public List<String> saveMovieContentVideos(Long movieId, List<String> urls) {
+
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> movieNotFound(movieId));
 
         for(String url : urls) {
+            if (!ValidationUtils.isValidYouTubeUrl(url)) {
+                throw MovieContentException.invalidYouTubeURL();
+            }
+
             MovieContent movieContent = MovieContent.builder()
                     .movie(movie)
                     .content(url)
@@ -100,7 +107,9 @@ public class MovieContentServiceImpl implements MovieContentService{
     }
 
     @Override
+    @Transactional
     public void deleteMovieContentVideos(List<Long> ids) {
+
         List<MovieContent> contents = movieContentRepository.findAllByIdAndType(ids, MovieContentType.YOUTUBE);
 
         // ID 개수 비교

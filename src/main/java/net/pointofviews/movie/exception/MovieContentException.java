@@ -22,4 +22,8 @@ public class MovieContentException extends BusinessException {
                 String.format("MovieContent(Id: %d)의 타입이 %s가 아닙니다.", contentId, expectedType)
         );
     }
+
+    public static MovieContentException invalidYouTubeURL() {
+        return new MovieContentException(HttpStatus.BAD_REQUEST, "유효하지 않은 URL 입니다.");
+    }
 }
