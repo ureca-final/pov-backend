@@ -35,11 +35,4 @@ public class PremiereMemberController implements PremiereMemberSpecification {
 
         return BaseResponse.ok("시사회 상제 정보가 성공적으로 조회되었습니다.", response);
     }
-
-    @Override
-    @PostMapping("/{premiereId}/entry")
-    public ResponseEntity<BaseResponse<Void>> createEntryPremiere(@PathVariable Long premiereId) {
-        return null;
-    }
-
 }

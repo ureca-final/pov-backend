@@ -181,7 +181,7 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
                 premiere.getTitle(),
                 premiere.getStartAt(),
                 premiere.getEndAt(),
-                premiere.getPrice(),
+                premiere.getAmount(),
                 premiere.isPaymentRequired(),
                 premiere.getEventImage(),
                 premiere.getThumbnail()
