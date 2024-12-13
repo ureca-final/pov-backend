@@ -11,8 +11,8 @@ public class PremiereFixture {
 
     public static Premiere createPremiere() {
 
-        LocalDateTime startAt = LocalDateTime.now().minusDays(RANDOM.nextInt(30));
-        LocalDateTime endAt = startAt.plusDays(RANDOM.nextInt(10));
+        LocalDateTime startAt = LocalDateTime.now().minusDays(1);
+        LocalDateTime endAt = startAt.plusDays(2);
 
         return Premiere.builder()
                 .title("시사회 제목" + RANDOM.nextInt(10))

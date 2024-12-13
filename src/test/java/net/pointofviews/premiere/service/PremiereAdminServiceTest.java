@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.any;
@@ -53,6 +54,149 @@ class PremiereAdminServiceTest {
 
     @Mock
     private S3Service s3Service;
+
+    @Nested
+    class SavePremiere {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 썸네일과_시사회_이미지가_모두_포함된_시사회_생성() {
+                // given
+                Member admin = mock(Member.class);
+
+                MockMultipartFile thumbnail = new MockMultipartFile(
+                        "thumbnail",
+                        "thumbnail.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "thumbnail".getBytes()
+                );
+
+                MockMultipartFile eventImage = new MockMultipartFile(
+                        "eventImage",
+                        "eventImage.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "eventImage".getBytes()
+                );
+
+                PremiereRequest request = new PremiereRequest(
+                        "어벤저스 시사회",
+                        LocalDateTime.now().plusDays(1),
+                        LocalDateTime.now().plusDays(3),
+                        10000,
+                        true
+                );
+
+                // Mocking
+                given(memberRepository.existsById(any())).willReturn(true);
+                given(premiereRepository.save(any(Premiere.class))).willAnswer(invocation -> invocation.getArgument(0));
+
+                // when
+                premiereAdminService.savePremiere(admin, request, eventImage, thumbnail);
+
+                // then
+                verify(premiereRepository, times(1)).save(any(Premiere.class));
+                verify(s3Service, times(2)).saveImage(any(MultipartFile.class), anyString());
+            }
+        }
+
+        @Nested
+        class Failure {
+
+            @Test
+            void 관리자_계정이_없으면_예외_발생() {
+                // given
+                Member admin = mock(Member.class);
+                UUID adminId = UUID.randomUUID();
+
+                when(admin.getId()).thenReturn(adminId);
+                when(memberRepository.existsById(admin.getId())).thenReturn(false);
+
+                MockMultipartFile thumbnail = new MockMultipartFile(
+                        "thumbnail",
+                        "thumbnail.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "thumbnail".getBytes()
+                );
+
+                MockMultipartFile eventImage = new MockMultipartFile(
+                        "eventImage",
+                        "eventImage.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "eventImage".getBytes()
+                );
+
+                PremiereRequest request = new PremiereRequest(
+                        "어벤저스 시사회",
+                        LocalDateTime.now().plusDays(1),
+                        LocalDateTime.now().plusDays(3),
+                        10000,
+                        true
+                );
+
+                // when & then
+                assertThatThrownBy(() -> premiereAdminService.savePremiere(admin, request, eventImage, thumbnail))
+                        .isInstanceOf(MemberException.class).hasMessage(MemberException.adminNotFound(adminId).getMessage());
+            }
+
+            @Test
+            void 썸네일이_없으면_예외_발생() {
+                // given
+                Member admin = mock(Member.class);
+
+                MockMultipartFile eventImage = new MockMultipartFile(
+                        "eventImage",
+                        "eventImage.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "eventImage".getBytes()
+                );
+
+                PremiereRequest request = new PremiereRequest(
+                        "어벤저스 시사회",
+                        LocalDateTime.now().plusDays(1),
+                        LocalDateTime.now().plusDays(3),
+                        10000,
+                        true
+                );
+
+                when(memberRepository.existsById(any())).thenReturn(true);
+
+                // when & then
+                assertThatThrownBy(
+                        () -> premiereAdminService.savePremiere(admin, request, eventImage, null)
+                ).isInstanceOf(PremiereException.class).hasMessage(PremiereException.missingImage().getMessage());
+            }
+
+            @Test
+            void 이벤트_이미지가_없으면_예외_발생() {
+                // given
+                Member admin = mock(Member.class);
+
+                MockMultipartFile thumbnail = new MockMultipartFile(
+                        "thumbnail",
+                        "thumbnail.jpg",
+                        MediaType.IMAGE_JPEG_VALUE,
+                        "thumbnail".getBytes()
+                );
+
+                PremiereRequest request = new PremiereRequest(
+                        "어벤저스 시사회",
+                        LocalDateTime.now().plusDays(1),
+                        LocalDateTime.now().plusDays(3),
+                        10000,
+                        true
+                );
+
+                when(memberRepository.existsById(any())).thenReturn(true);
+
+                // when & then
+                assertThatThrownBy(
+                        () -> premiereAdminService.savePremiere(admin, request, null, thumbnail)
+                ).isInstanceOf(PremiereException.class).hasMessage(PremiereException.missingImage().getMessage());
+            }
+        }
+    }
 
     @Nested
     class UpdatePremiere {
