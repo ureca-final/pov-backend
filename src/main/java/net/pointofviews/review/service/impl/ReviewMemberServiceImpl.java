@@ -8,10 +8,7 @@ import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.movie.domain.Movie;
-import net.pointofviews.movie.domain.MovieGenre;
 import net.pointofviews.movie.repository.MovieRepository;
-import net.pointofviews.notice.dto.request.SendNoticeRequest;
-import net.pointofviews.notice.service.NoticeService;
 import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.domain.ReviewKeywordLink;
 import net.pointofviews.review.dto.request.CreateReviewRequest;
@@ -23,6 +20,7 @@ import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.ReviewMemberService;
+import net.pointofviews.review.service.ReviewNotificationService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -51,10 +49,8 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     private final ReviewLikeCountRepository reviewLikeCountRepository;
     private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
     private final CommonCodeService commonCodeService;
+    private final ReviewNotificationService reviewNotificationService;
     private final S3Service s3Service;
-    private final NoticeService noticeService;
-    private static final Long REVIEW_NOTICE_TEMPLATE_ID = 1L;  // 알림 템플릿 ID
-
 
     @Override
     @Transactional
@@ -94,34 +90,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         }
 
         // 알림 발송
-        try {
-            movie = review.getMovie();
-
-            // 영화의 모든 장르에 대해 알림을 발송
-            for (MovieGenre movieGenre : movie.getGenres()) {
-                String genreName = commonCodeService.convertCommonCodeToName(
-                        movieGenre.getGenreCode(),
-                        CodeGroupEnum.MOVIE_GENRE
-                );
-
-                String noticeContent = String.format("%s 장르의 '%s'에 새로운 리뷰가 작성되었습니다.", genreName, movie.getTitle());
-
-                Map<String, String> templateVariables = new HashMap<>();
-                templateVariables.put("genre", genreName);
-                templateVariables.put("movieTitle", movie.getTitle());
-                templateVariables.put("review_id", String.valueOf(review.getId()));
-                templateVariables.put("notice_content", noticeContent);
-
-                SendNoticeRequest noticeRequest = new SendNoticeRequest(
-                        REVIEW_NOTICE_TEMPLATE_ID,
-                        templateVariables
-                );
-
-                noticeService.sendNotice(noticeRequest);
-            }
-        } catch (Exception e) {
-            log.error("Failed to send review notification: {}", e.getMessage(), e);
-        }
+        reviewNotificationService.sendReviewNotifications(review);
     }
 
     @Override
