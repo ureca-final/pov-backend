@@ -18,7 +18,7 @@ public class PremiereFixture {
                 .title("시사회 제목" + RANDOM.nextInt(10))
                 .thumbnail("https://example.com/premieres/1/thumbnail/" + RANDOM.nextInt(10) + ".jpg")
                 .eventImage("https://example.com/premieres/1/event/" + RANDOM.nextInt(10) + ".jpg")
-                .price(RANDOM.nextInt(1000))
+                .amount(RANDOM.nextInt(1000))
                 .isPaymentRequired(RANDOM.nextBoolean())
                 .startAt(startAt)
                 .endAt(endAt)

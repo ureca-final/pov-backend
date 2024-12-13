@@ -53,7 +53,7 @@ public class PremiereMemberServiceImpl implements PremiereMemberService {
                 premiere.getTitle(),
                 premiere.getStartAt(),
                 premiere.getEndAt(),
-                premiere.getPrice(),
+                premiere.getAmount(),
                 premiere.isPaymentRequired(),
                 premiere.getEventImage(),
                 premiere.getThumbnail()

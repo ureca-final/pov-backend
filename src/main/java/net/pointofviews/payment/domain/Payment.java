@@ -22,19 +22,36 @@ public class Payment extends BaseEntity {
     private Member member;
 
     private String paymentKey;
+
+    private String orderId;
+
     private String vendor;
+
     private Integer amount;
+
+    private LocalDateTime requestedAt;
+
     private LocalDateTime approvedAt;
 
 
     @Builder
-    public Payment(Member member, String paymentKey, String vendor, Integer amount, LocalDateTime approvedAt) {
+    public Payment(
+            Member member,
+            String paymentKey,
+            String orderId,
+            String vendor,
+            Integer amount,
+            LocalDateTime requestedAt,
+            LocalDateTime approvedAt
+    ) {
         Assert.notNull(paymentKey, "Payment key must not be null");
 
         this.member = member;
         this.paymentKey = paymentKey;
+        this.orderId = orderId;
         this.vendor = vendor;
         this.amount = amount;
+        this.requestedAt = requestedAt;
         this.approvedAt = approvedAt;
     }
 }

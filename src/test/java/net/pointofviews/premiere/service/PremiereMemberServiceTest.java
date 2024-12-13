@@ -90,7 +90,7 @@ class PremiereMemberServiceTest {
                     softly.assertThat(result.title()).isEqualTo(premiere.getTitle());
                     softly.assertThat(result.startAt()).isEqualTo(premiere.getStartAt());
                     softly.assertThat(result.endAt()).isEqualTo(premiere.getEndAt());
-                    softly.assertThat(result.price()).isEqualTo(premiere.getPrice());
+                    softly.assertThat(result.price()).isEqualTo(premiere.getAmount());
                     softly.assertThat(result.isPaymentRequired()).isEqualTo(premiere.isPaymentRequired());
                     softly.assertThat(result.eventImage()).isEqualTo(premiere.getEventImage());
                     softly.assertThat(result.thumbnail()).isEqualTo(premiere.getThumbnail());

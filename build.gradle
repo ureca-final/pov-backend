@@ -58,6 +58,9 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // Redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.39.0'
+
     // Batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
 
