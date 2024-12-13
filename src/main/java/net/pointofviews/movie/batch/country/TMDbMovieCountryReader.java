@@ -36,7 +36,9 @@ public class TMDbMovieCountryReader {
         };
 
         reader.setEntityManagerFactory(entityManagerFactory);
-        reader.setQueryString("SELECT m FROM Movie m LEFT JOIN m.countries c WHERE c IS NULL");
+        reader.setQueryString("""
+                    SELECT m FROM Movie m WHERE m.countries IS EMPTY
+                """);
         reader.setPageSize(100);
         return reader;
     }

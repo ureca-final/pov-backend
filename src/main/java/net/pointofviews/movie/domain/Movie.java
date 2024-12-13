@@ -11,7 +11,9 @@ import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -37,19 +39,19 @@ public class Movie {
     private KoreanFilmRating filmRating;
 
     @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private final List<MovieCountry> countries = new ArrayList<>();
+    private final Set<MovieCountry> countries = new HashSet<>();
 
     @OneToMany(mappedBy = "movie")
     private final List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private final List<MovieGenre> genres = new ArrayList<>();
+    private final Set<MovieGenre> genres = new HashSet<>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private final List<MovieCrew> crews = new ArrayList<>();
+    private final Set<MovieCrew> crews = new HashSet<>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private final List<MovieCast> casts = new ArrayList<>();
+    private final Set<MovieCast> casts = new HashSet<>();
 
     @Builder
     private Movie(String title, String plot, String poster,

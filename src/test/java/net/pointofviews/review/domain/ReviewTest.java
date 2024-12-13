@@ -1,18 +1,19 @@
 package net.pointofviews.review.domain;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.mockito.BDDMockito.*;
-
-import java.util.ArrayList;
-
+import net.pointofviews.member.domain.Member;
+import net.pointofviews.movie.domain.Movie;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import net.pointofviews.member.domain.Member;
-import net.pointofviews.movie.domain.Movie;
+import java.util.ArrayList;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewTest {
@@ -31,7 +32,7 @@ class ReviewTest {
                 String title = "리뷰 제목";
                 String contents = "리뷰 내용";
                 boolean isSpoiler = true;
-                String preference = "긍정적";
+                String preference = "GOOD";
 
                 given(movie.getReviews()).willReturn(new ArrayList<>());
 
@@ -53,7 +54,7 @@ class ReviewTest {
                     softly.assertThat(review.getTitle()).isEqualTo(title);
                     softly.assertThat(review.getContents()).isEqualTo(contents);
                     softly.assertThat(review.isSpoiler()).isEqualTo(isSpoiler);
-                    softly.assertThat(review.getPreference()).isEqualTo(preference);
+                    softly.assertThat(review.getPreference().name()).isEqualTo(preference);
                     softly.assertThat(review.isDisabled()).isFalse();
                     softly.assertThat(review.getModifiedAt()).isNull();
                 });
@@ -97,13 +98,13 @@ class ReviewTest {
                 Movie movie = mock(Movie.class);
 
                 Review review = Review.builder()
-                    .member(member)
-                    .movie(movie)
-                    .title("리뷰 제목")
-                    .contents("리뷰 내용")
-                    .preference("긍정적")
-                    .isSpoiler(false)
-                    .build();
+                        .member(member)
+                        .movie(movie)
+                        .title("리뷰 제목")
+                        .contents("리뷰 내용")
+                        .preference("GOOD")
+                        .isSpoiler(false)
+                        .build();
 
                 // when -- 테스트하고자 하는 행동
                 review.toggleDisabled();
@@ -119,13 +120,13 @@ class ReviewTest {
                 Movie movie = mock(Movie.class);
 
                 Review review = Review.builder()
-                    .member(member)
-                    .movie(movie)
-                    .title("리뷰 제목")
-                    .contents("리뷰 내용")
-                    .preference("긍정적")
-                    .isSpoiler(false)
-                    .build();
+                        .member(member)
+                        .movie(movie)
+                        .title("리뷰 제목")
+                        .contents("리뷰 내용")
+                        .preference("GOOD")
+                        .isSpoiler(false)
+                        .build();
 
                 // when -- 테스트하고자 하는 행동
                 review.toggleDisabled();
