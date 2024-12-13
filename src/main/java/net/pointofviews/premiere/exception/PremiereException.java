@@ -9,7 +9,11 @@ public class PremiereException extends BusinessException {
         super(status, message);
     }
 
-    public static PremiereException premiereNotFound (Long premiereId) {
+    public static PremiereException premiereNotFound(Long premiereId) {
         return new PremiereException(HttpStatus.NOT_FOUND, String.format("시사회(Id: %d)가 존재하지 않습니다.", premiereId));
+    }
+
+    public static PremiereException missingImage() {
+        return new PremiereException(HttpStatus.BAD_REQUEST, "이미지가 존재하지 않습니다.");
     }
 }
