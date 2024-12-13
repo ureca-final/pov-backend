@@ -22,6 +22,9 @@ public record ReadNoticeResponse(
         boolean isRead,
 
         @Schema(description = "생성일시")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        @Schema(description = "리뷰 ID")
+        Long reviewId
 ) {
 }

@@ -128,13 +128,25 @@ public class NoticeServiceImpl implements NoticeService {
                             .noticeContent(content)
                             .noticeTitle(noticeTemplate.getNoticeTitle())
                             .noticeType(noticeTemplate.getNoticeType())
+                            .reviewId(parseIdOrNull(request.templateVariables().get("review_id")))
                             .build();
 
                     noticeReceives.add(noticeReceive);
                 } catch (NoticeException.NoticeSendFailedException e) {
                     log.error("Failed to send notification to member: {}", fcmToken.getMember().getId(), e);
                     noticeSend.setSucceed(false);
+                    noticeSendRepository.save(noticeSend);
                 }
+            }
+
+            try {
+                if (!noticeReceives.isEmpty()) {
+                    noticeReceiveRepository.saveAll(noticeReceives);
+                }
+            } catch (Exception e) {
+                log.error("Failed to save notice receives", e);
+                noticeSend.setSucceed(false);
+                throw new NoticeException.NoticeReceiveSaveFailedException();
             }
         }
     }
@@ -149,7 +161,8 @@ public class NoticeServiceImpl implements NoticeService {
                         receive.getNoticeContent(),
                         receive.getNoticeType(),
                         receive.isRead(),
-                        receive.getCreatedAt()
+                        receive.getCreatedAt(),
+                        receive.getReviewId()
                 ))
                 .toList();
     }
@@ -160,7 +173,8 @@ public class NoticeServiceImpl implements NoticeService {
         NoticeReceive noticeReceive = noticeReceiveRepository.findByIdAndMemberId(noticeId, memberId)
                 .orElseThrow(NoticeException.NoticeNotFoundException::new);
 
-        noticeReceive.setRead(true);
+        // 알림 확인시, 알림 내역 삭제
+        noticeReceiveRepository.delete(noticeReceive);
     }
 
     private String replaceTemplateVariables(String template, Map<String, String> variables) {

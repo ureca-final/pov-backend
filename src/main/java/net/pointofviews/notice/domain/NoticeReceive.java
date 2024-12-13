@@ -33,13 +33,16 @@ public class NoticeReceive extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String noticeContent;
 
+    private Long reviewId;
+
     @Builder
-    private NoticeReceive(boolean isRead, Member member, String noticeContent, Long noticeSendId, String noticeTitle, NoticeType noticeType) {
+    private NoticeReceive(boolean isRead, Member member, String noticeContent, Long noticeSendId, String noticeTitle, NoticeType noticeType, Long reviewId) {
         this.isRead = false;
         this.member = member;
         this.noticeContent = noticeContent;
         this.noticeSendId = noticeSendId;
         this.noticeTitle = noticeTitle;
         this.noticeType = noticeType;
+        this.reviewId = reviewId;
     }
 }
