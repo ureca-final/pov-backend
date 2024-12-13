@@ -134,7 +134,18 @@ public class NoticeServiceImpl implements NoticeService {
                 } catch (NoticeException.NoticeSendFailedException e) {
                     log.error("Failed to send notification to member: {}", fcmToken.getMember().getId(), e);
                     noticeSend.setSucceed(false);
+                    noticeSendRepository.save(noticeSend);
                 }
+            }
+
+            try {
+                if (!noticeReceives.isEmpty()) {
+                    noticeReceiveRepository.saveAll(noticeReceives);
+                }
+            } catch (Exception e) {
+                log.error("Failed to save notice receives", e);
+                noticeSend.setSucceed(false);
+                throw new NoticeException.NoticeReceiveSaveFailedException();
             }
         }
     }
