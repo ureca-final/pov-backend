@@ -27,12 +27,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
@@ -703,7 +705,7 @@ class ClubServiceImplTest {
         class Success {
 
             @Test
-            void 클럽_상세정보_조회_성공_가입한_클럽_리뷰와_영화가_없는_경우() {
+            void 클럽_상세정보_조회_성공() {
                 // given
                 UUID clubId = UUID.randomUUID();
                 Member loginMember = mock(Member.class);
@@ -714,76 +716,50 @@ class ClubServiceImplTest {
                         true,
                         3L, // 참여 인원
                         100, // 최대 참여 인원
-                        5L  // 북마크 수
+                        5L // 북마크 수
                 );
 
                 List<String> genres = List.of("액션", "로맨스");
                 ReadClubMemberListResponse members = mock(ReadClubMemberListResponse.class);
-                ReadMyClubReviewListResponse reviews = null; // 리뷰 없음
-                ReadClubMoviesListResponse bookmarks = null; // 영화 없음
+                ReadMyClubReviewListResponse reviews = new ReadMyClubReviewListResponse(clubId, new PageImpl<>(List.of()));
+                ReadClubMoviesListResponse bookmarks = new ReadClubMoviesListResponse(new PageImpl<>(List.of()));
 
-                // 리뷰와 영화 설정
+
                 given(clubRepository.findBasicClubInfoById(clubId)).willReturn(Optional.of(basicInfo));
                 given(clubFavorGenreService.readGenreNamesByClubId(clubId)).willReturn(genres);
                 given(memberClubService.isMemberOfClub(clubId, loginMember.getId())).willReturn(true);
                 given(memberClubService.readMembersByClubId(clubId)).willReturn(members);
                 given(reviewClubService.findReviewByClub(clubId, Pageable.unpaged())).willReturn(reviews);
+                given(clubMovieService.readClubMovies(clubId, Pageable.unpaged())).willReturn(bookmarks);
 
                 // when
                 ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember, Pageable.unpaged());
+
 
                 // then
                 assertSoftly(softly -> {
                     softly.assertThat(response.clubName()).isEqualTo(basicInfo.name());
                     softly.assertThat(response.clubDescription()).isEqualTo(basicInfo.description());
                     softly.assertThat(response.clubImage()).isEqualTo(basicInfo.image());
-                    softly.assertThat(response.clubReviewList()).isNull(); // 리뷰가 null임을 확인
-                    softly.assertThat(response.reviewCount()).isEqualTo(0); // 리뷰 수가 0으로 처리됨
-                    softly.assertThat(response.clubMovieList()).isNull(); // 영화 북마크가 null임을 확인
-                });
-            }
-
-            @Test
-            void 클럽_상세정보_조회_성공_가입하지_않은_클럽() {
-                // given
-                UUID clubId = UUID.randomUUID();
-                Member loginMember = mock(Member.class);
-                Pageable pageable = mock(Pageable.class);
-
-                FindBasicClubInfo basicInfo = new FindBasicClubInfo(
-                        "클럽명", "클럽 설명", "이미지 URL", true, 10L, 100, 5L
-                );
-
-                ReadClubMemberResponse leader = mock(ReadClubMemberResponse.class);
-
-                given(clubRepository.findBasicClubInfoById(clubId)).willReturn(Optional.of(basicInfo));
-                given(memberClubService.isMemberOfClub(clubId, loginMember.getId())).willReturn(false);
-                given(memberClubService.readClubLeaderByClubId(clubId)).willReturn(leader);
-
-                // when
-                ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember, pageable);
-
-                // then
-                assertSoftly(softly -> {
-                    softly.assertThat(response.clubName()).isEqualTo("클럽명");
-                    softly.assertThat(response.clubDescription()).isEqualTo("클럽 설명");
-                    softly.assertThat(response.clubFavorGenres()).isEmpty();
-                    softly.assertThat(response.members().memberList()).containsExactly(leader);
-
-                    softly.assertThat(response.clubReviewList().reviews().hasContent()).isFalse(); // Slice에 내용이 없는지 확인
-                    softly.assertThat(response.clubReviewList().reviews().getContent()).isEmpty(); // 내부 리스트가 비었는지 확인
-                    softly.assertThat(response.clubMovieList().clubMovies().hasContent()).isFalse();
-                    softly.assertThat(response.clubMovieList().clubMovies().getContent()).isEmpty();
+                    softly.assertThat(response.clubFavorGenres()).containsExactlyElementsOf(genres);
+                    softly.assertThat(response.members()).isEqualTo(members);
+                    softly.assertThat(response.reviewCount()).isEqualTo(0);
+                    softly.assertThat(response.clubMovieList()).isEqualTo(bookmarks);
                 });
 
-                verify(clubRepository, times(1)).findBasicClubInfoById(clubId);
-                verify(memberClubService, times(1)).isMemberOfClub(clubId, loginMember.getId());
-                verify(memberClubService, times(1)).readClubLeaderByClubId(clubId);
+                verify(clubRepository).findBasicClubInfoById(clubId);
+                verify(clubFavorGenreService).readGenreNamesByClubId(clubId);
+                verify(memberClubService).isMemberOfClub(clubId, loginMember.getId());
+                verify(memberClubService).readMembersByClubId(clubId);
+                verify(reviewClubService).findReviewByClub(clubId, Pageable.unpaged());
+                verify(clubMovieService).readClubMovies(clubId, Pageable.unpaged());
+
             }
         }
 
         @Nested
         class Failure {
+
             @Test
             void 존재하지_않는_클럽() {
                 // given
@@ -793,9 +769,14 @@ class ClubServiceImplTest {
                 given(clubRepository.findBasicClubInfoById(clubId)).willReturn(Optional.empty());
 
                 // when & then
-                assertThrows(ClubException.class,
-                        () -> clubService.readClubDetails(clubId, loginMember, mock(Pageable.class)));
+                assertThatThrownBy(() -> clubService.readClubDetails(clubId, loginMember, Pageable.unpaged()))
+                        .isInstanceOf(ClubException.class)
+                        .hasMessage(String.format("클럽(Id: %s)이 존재하지 않습니다.", clubId));
+
+                verify(clubRepository).findBasicClubInfoById(clubId);
+                verifyNoInteractions(clubFavorGenreService, memberClubService, reviewClubService, clubMovieService);
             }
         }
     }
+
 }

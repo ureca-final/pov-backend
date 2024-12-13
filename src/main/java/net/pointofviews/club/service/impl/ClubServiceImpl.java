@@ -373,49 +373,28 @@ public class ClubServiceImpl implements ClubService {
 
         int validatedMaxParticipants = validateMaxParticipants(basicInfo.maxParticipants());
 
+        ReadClubMemberListResponse members = memberClubService.readMembersByClubId(clubId);
+        ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, pageable);
+        ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, pageable);
 
-        if (isMember) {
-            // 가입한 클럽: 모든 데이터를 반환
+        int reviewCount = reviews != null ? reviews.reviews().getSize() : 0;
 
-            ReadClubMemberListResponse members = memberClubService.readMembersByClubId(clubId);
-            ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, pageable);
-            ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, pageable);
+        return new ReadClubDetailsResponse(
+                basicInfo.name(),
+                basicInfo.description(),
+                basicInfo.image(),
+                genres,
+                members,
+                basicInfo.participant(),
+                validatedMaxParticipants,
+                basicInfo.isPublic(),
+                reviews,
+                reviewCount,
+                bookmarks,
+                basicInfo.movieCount(),
+                isMember
+        );
 
-            int reviewCount = reviews != null ? reviews.reviews().getSize() : 0;
-
-            return new ReadClubDetailsResponse(
-                    basicInfo.name(),
-                    basicInfo.description(),
-                    basicInfo.image(),
-                    genres,
-                    members,
-                    basicInfo.participant(),
-                    validatedMaxParticipants,
-                    basicInfo.isPublic(),
-                    reviews,
-                    reviewCount,
-                    bookmarks,
-                    basicInfo.movieCount()
-            );
-        } else {
-            // 가입하지 않은 클럽: 제한된 데이터만 반환
-            ReadClubMemberResponse leader = memberClubService.readClubLeaderByClubId(clubId);
-
-            return new ReadClubDetailsResponse(
-                    basicInfo.name(),
-                    basicInfo.description(),
-                    basicInfo.image(),
-                    List.of(), // 장르 제외
-                    new ReadClubMemberListResponse(List.of(leader)), // 리더 정보만 반환
-                    basicInfo.participant(),
-                    validatedMaxParticipants,
-                    basicInfo.isPublic(),
-                    new ReadMyClubReviewListResponse(clubId, Page.empty(Pageable.unpaged())), // 리뷰 제외
-                    0, // 리뷰 수 제외
-                    new ReadClubMoviesListResponse(Page.empty(Pageable.unpaged())), // 영화 북마크 제외
-                    basicInfo.movieCount()
-            );
-        }
     }
 
     private Integer validateMaxParticipants(Integer maxParticipants) {
