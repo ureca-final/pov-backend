@@ -33,7 +33,10 @@ public interface PremiereAdminSpecification {
                             """)
             ))
     })
-    ResponseEntity<BaseResponse<Void>> createPremiere(Member loginMember, PremiereRequest request);
+    ResponseEntity<BaseResponse<Void>> createPremiere(Member loginMember,
+                                                      PremiereRequest request,
+                                                      MultipartFile eventImage,
+                                                      MultipartFile thumbnail);
 
     @Operation(
             summary = "시사회 수정",

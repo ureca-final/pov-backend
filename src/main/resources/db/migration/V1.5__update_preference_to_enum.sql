@@ -1,0 +1,2 @@
+ALTER TABLE review
+    MODIFY COLUMN preference ENUM('GOOD', 'BAD') NOT NULL;

@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface CommonCodeGroupRepository extends JpaRepository<CommonCodeGroup, String> {
 
-    @Cacheable(cacheNames = "commonCodeGroup", cacheManager = "commonCodeCacheManager")
+    @Cacheable(cacheNames = "commonCodeGroup", cacheManager = "cacheManagerNoTTL")
     List<CommonCodeGroup> findAll();
 }

@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface PremiereAdminService {
 
-    void savePremiere(Member loginMember, PremiereRequest request);
+    void savePremiere(Member loginMember, PremiereRequest request, MultipartFile eventImage, MultipartFile thumbnail);
 
     void updatePremiere(Member loginMember, Long premiereId, PremiereRequest request, MultipartFile eventImage, MultipartFile thumbnail);
 

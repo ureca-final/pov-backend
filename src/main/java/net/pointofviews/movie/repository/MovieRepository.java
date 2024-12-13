@@ -4,11 +4,13 @@ import net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse;
 import net.pointofviews.movie.domain.Movie;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
@@ -42,42 +44,46 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             nativeQuery = true)
     Slice<Object[]> searchMoviesByTitleOrPeople(@Param("query") String query, Pageable pageable);
 
-    boolean existsByTmdbId(Integer title);
+    boolean existsByTmdbId(Integer id);
 
 
     @Query(value = """
-    SELECT DISTINCT m.id AS id,
-           m.title AS title,
-           m.released AS released
-    FROM movie m
-             LEFT JOIN movie_cast mc ON mc.movie_id = m.id
-             LEFT JOIN movie_crew mcr ON mcr.movie_id = m.id
-             LEFT JOIN people p_cast ON p_cast.id = mc.people_id
-             LEFT JOIN people p_crew ON p_crew.id = mcr.people_id
-             LEFT JOIN movie_genre mg ON mg.movie_id = m.id
-             LEFT JOIN common_code cc ON cc.code = mg.genre_code
-    WHERE (:query IS NULL OR m.title LIKE CONCAT('%', :query, '%'))
-       OR (:query IS NULL OR p_cast.name LIKE CONCAT('%', :query, '%'))
-       OR (:query IS NULL OR p_crew.name LIKE CONCAT('%', :query, '%'))
-       OR (:query IS NULL OR CAST(m.released AS CHAR) LIKE CONCAT('%', :query, '%'))
-       OR (:query IS NULL OR cc.common_code_description LIKE CONCAT('%', :query, '%'))
-    """, nativeQuery = true)
+            SELECT DISTINCT m.id AS id,
+                   m.title AS title,
+                   m.released AS released
+            FROM movie m
+                     LEFT JOIN movie_cast mc ON mc.movie_id = m.id
+                     LEFT JOIN movie_crew mcr ON mcr.movie_id = m.id
+                     LEFT JOIN people p_cast ON p_cast.id = mc.people_id
+                     LEFT JOIN people p_crew ON p_crew.id = mcr.people_id
+                     LEFT JOIN movie_genre mg ON mg.movie_id = m.id
+                     LEFT JOIN common_code cc ON cc.code = mg.genre_code
+            WHERE (:query IS NULL OR m.title LIKE CONCAT('%', :query, '%'))
+               OR (:query IS NULL OR p_cast.name LIKE CONCAT('%', :query, '%'))
+               OR (:query IS NULL OR p_crew.name LIKE CONCAT('%', :query, '%'))
+               OR (:query IS NULL OR CAST(m.released AS CHAR) LIKE CONCAT('%', :query, '%'))
+               OR (:query IS NULL OR cc.common_code_description LIKE CONCAT('%', :query, '%'))
+            """, nativeQuery = true)
     Slice<Object[]> adminSearchMovies(@Param("query") String query, Pageable pageable);
 
     @Query("""
-       SELECT new net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse(
-           m.title,
-           m.poster,
-           m.released,
-           mlc.likeCount,
-           COUNT(r.id)
-       )
-       FROM Movie m
-       LEFT JOIN m.reviews r
-       LEFT JOIN MovieLikeCount mlc ON mlc.movie.id = m.id
-       WHERE m.id IN :movieIds
-       GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
-       """)
+            SELECT new net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse(
+                m.title,
+                m.poster,
+                m.released,
+                mlc.likeCount,
+                COUNT(r.id)
+            )
+            FROM Movie m
+            LEFT JOIN m.reviews r
+            LEFT JOIN MovieLikeCount mlc ON mlc.movie.id = m.id
+            WHERE m.id IN :movieIds
+            GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
+            """)
     List<ReadUserCurationMovieResponse> findUserCurationMoviesByIds(@Param("movieIds") Set<Long> movieIds);
+
+    @EntityGraph(attributePaths = {"genres", "countries.country", "crews.people", "casts.people"})
+    @Query("SELECT DISTINCT m FROM Movie m WHERE m.id = :movieId")
+    Optional<Movie> findMovieWithDetailsById(Long movieId);
 
 }

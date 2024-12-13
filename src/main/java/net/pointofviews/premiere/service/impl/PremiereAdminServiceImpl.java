@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import static net.pointofviews.member.exception.MemberException.adminNotFound;
+import static net.pointofviews.premiere.exception.PremiereException.missingImage;
 import static net.pointofviews.premiere.exception.PremiereException.premiereNotFound;
 
 @Service
@@ -30,7 +31,37 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
     private final S3Service s3Service;
 
     @Override
-    public void savePremiere(Member loginMember, PremiereRequest premiere) {
+    @Transactional
+    public void savePremiere(Member loginMember,
+                             PremiereRequest request,
+                             MultipartFile premiereImage,
+                             MultipartFile thumbnail) {
+
+        if (!memberRepository.existsById(loginMember.getId())) {
+            throw adminNotFound(loginMember.getId());
+        }
+
+        if (isMultipartFileNullOrEmpty(premiereImage) || isMultipartFileNullOrEmpty(thumbnail)) {
+            throw missingImage();
+        }
+
+        Premiere premiere = premiereRepository.save(request.toPremiere());
+
+        String newEventImage = processImage(
+                premiereImage,
+                premiere.getEventImage(),
+                "premieres/" + premiere.getId() + "/event/"
+        );
+
+        premiere.updateEventImage(newEventImage);
+
+        String newThumbnail = processImage(
+                thumbnail,
+                premiere.getThumbnail(),
+                "premieres/" + premiere.getId() + "/thumbnail/"
+        );
+
+        premiere.updateThumbnail(newThumbnail);
     }
 
     @Override
@@ -157,5 +188,9 @@ public class PremiereAdminServiceImpl implements PremiereAdminService {
         );
 
         return response;
+    }
+
+    private boolean isMultipartFileNullOrEmpty(MultipartFile file) {
+        return file == null || file.isEmpty();
     }
 }

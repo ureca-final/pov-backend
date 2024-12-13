@@ -2,59 +2,43 @@ package net.pointofviews.movie.batch.country;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import net.pointofviews.country.domain.Country;
-import net.pointofviews.movie.domain.Movie;
+import net.pointofviews.country.service.CountryService;
 import net.pointofviews.movie.domain.MovieCountry;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Component
-public class TMDbMovieCountryWriter implements ItemWriter<Movie> {
+@RequiredArgsConstructor
+public class TMDbMovieCountryWriter implements ItemWriter<List<MovieCountry>> {
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Override
-    public void write(Chunk<? extends Movie> movies) {
-        Map<String, Country> countryCache = new HashMap<>();
+    private final CountryService countryService;
 
-        for (Movie movie : movies) {
-            for (MovieCountry movieCountry : movie.getCountries()) {
+    @Override
+    public void write(Chunk<? extends List<MovieCountry>> movieCountryChunk) {
+
+        for (List<MovieCountry> movieCountries : movieCountryChunk) {
+            for (MovieCountry movieCountry : movieCountries) {
                 Country transientCountry = movieCountry.getCountry();
 
-                Country persistedCountry = countryCache.computeIfAbsent(
-                        transientCountry.getName(),
-                        this::findOrSaveCountry
-                );
-
+                Country persistedCountry = findOrSaveCountry(transientCountry.getName());
                 movieCountry.updateCountry(persistedCountry);
+                entityManager.persist(movieCountry);
             }
-
-            entityManager.merge(movie);
         }
         entityManager.flush();
+        entityManager.clear();
     }
 
 
     private Country findOrSaveCountry(String name) {
-        Country country = findCountryByName(name);
-        if (country == null) {
-            country = new Country(name);
-            entityManager.persist(country);
-            entityManager.flush();
-        }
-        return country;
-    }
-
-    private Country findCountryByName(String name) {
-        return entityManager.createQuery("SELECT c FROM Country c WHERE c.name = :name", Country.class)
-                .setParameter("name", name)
-                .getResultStream()
-                .findFirst()
-                .orElse(null);
+        return countryService.findCountryByName(name).orElseGet(() -> countryService.saveCountry(name));
     }
 }

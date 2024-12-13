@@ -21,7 +21,7 @@ public class CommonCodeCacheServiceImpl implements CommonCodeCacheService {
     private final CommonCodeRepository commonCodeRepository;
 
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "commonCode", cacheManager = "commonCodeCacheManager")
+    @Cacheable(cacheNames = "commonCode", cacheManager = "cacheManagerWithTTL")
     public List<CommonCode> findAll() {
         List<CommonCode> commonCodeList = commonCodeRepository.findAllByIsActiveTrue();
 

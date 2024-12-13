@@ -1,12 +1,21 @@
 package net.pointofviews.movie.service;
 
-import net.pointofviews.movie.dto.response.SearchMovieListResponse;
-import net.pointofviews.movie.dto.response.SearchMovieResponse;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.country.domain.Country;
+import net.pointofviews.movie.domain.*;
+import net.pointofviews.movie.dto.response.*;
+import net.pointofviews.movie.repository.MovieContentRepository;
+import net.pointofviews.movie.repository.MovieLikeCountRepository;
 import net.pointofviews.movie.service.impl.MovieSearchServiceImpl;
+import net.pointofviews.people.domain.People;
+import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto;
+import net.pointofviews.review.dto.ReviewPreferenceCountDto;
+import net.pointofviews.review.repository.ReviewRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import net.pointofviews.movie.dto.response.AdminSearchMovieListResponse;
-import net.pointofviews.movie.dto.response.AdminSearchMovieResponse;
 import net.pointofviews.movie.repository.MovieRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,10 +30,14 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class MovieSearchServiceImplTest {
@@ -33,6 +46,18 @@ class MovieSearchServiceImplTest {
 
     @Mock
     private MovieRepository movieRepository;
+
+    @Mock
+    private MovieLikeCountRepository movieLikeCountRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private MovieContentRepository movieContentRepository;
+
+    @Mock
+    private CommonCodeService commonCodeService;
 
     @Nested
     class SearchMovies {
@@ -215,5 +240,80 @@ class MovieSearchServiceImplTest {
                 });
             }
         }
+    }
+
+    @Nested
+    class ReadDetailMovie {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 영화_상세_조회() {
+                // given
+                Long movieId = 1L;
+
+                Movie mockMovie = movieFixture();
+                mockMovie.addGenre(MovieGenre.builder().genreCode("01").movie(mockMovie).build());
+
+                MovieCountry movieCountry = new MovieCountry(mock(Country.class));
+                mockMovie.addCountry(movieCountry);
+                MovieCrew mockCrew = mock(MovieCrew.class);
+                mockMovie.addCrew(mockCrew);
+                MovieCast mockCast = mock(MovieCast.class);
+                mockMovie.addCast(mockCast);
+                given(mockCrew.getPeople()).willReturn(mock(People.class));
+                given(mockCast.getPeople()).willReturn(mock(People.class));
+
+                List<ReviewPreferenceCountDto> mockReviewPreferences = List.of(
+                        new ReviewPreferenceCountDto(10L, 2L)
+                );
+
+                List<MovieContent> mockMovieContents = List.of(
+                        MovieContent.builder().content("https://image1.jpg").movie(mockMovie).contentType(MovieContentType.IMAGE).build(),
+                        MovieContent.builder().content("https://video1.mp4").movie(mockMovie).contentType(MovieContentType.YOUTUBE).build()
+                );
+
+                List<ReviewDetailsWithLikeCountDto> mockTopReviews = List.of(
+                        new ReviewDetailsWithLikeCountDto(mock(Review.class), 10L),
+                        new ReviewDetailsWithLikeCountDto(mock(Review.class), 20L)
+                );
+
+                given(movieRepository.findMovieWithDetailsById(movieId)).willReturn(Optional.of(mockMovie));
+                given(commonCodeService.convertCommonCodeToName("01", CodeGroupEnum.MOVIE_GENRE)).willReturn("액션");
+                given(movieLikeCountRepository.findById(movieId)).willReturn(Optional.of(MovieLikeCount.builder().movie(mockMovie).build()));
+                given(reviewRepository.countReviewPreferenceByMovieId(movieId)).willReturn(mockReviewPreferences);
+                given(movieContentRepository.findAllByMovieId(movieId)).willReturn(mockMovieContents);
+                given(reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(eq(movieId), any(PageRequest.class)))
+                        .willReturn(mockTopReviews);
+
+                // when
+                ReadDetailMovieResponse response = movieSearchService.readDetailMovie(movieId);
+
+                // then
+                Assertions.assertThat(response.title()).isEqualTo(mockMovie.getTitle());
+                Assertions.assertThat(response.released()).isEqualTo(mockMovie.getReleased());
+                Assertions.assertThat(response.movieLikeCount()).isEqualTo(0L);
+                Assertions.assertThat(response.genre()).containsExactly("액션");
+                Assertions.assertThat(response.preferenceCounts()).hasSize(1);
+                Assertions.assertThat(response.preferenceCounts().get(0).goodCount()).isEqualTo(10L);
+                Assertions.assertThat(response.preferenceCounts().get(0).badCount()).isEqualTo(2L);
+                Assertions.assertThat(response.images()).containsExactly("https://image1.jpg");
+                Assertions.assertThat(response.videos()).containsExactly("https://video1.mp4");
+                Assertions.assertThat(response.reviews()).hasSize(2);
+            }
+        }
+    }
+
+    private Movie movieFixture() {
+        return Movie.builder()
+                .title("인셉션")
+                .plot("인셉션 스토리")
+                .tmdbId(27205)
+                .released(LocalDate.parse("2010-07-15"))
+                .filmRating(KoreanFilmRating.TWELVE)
+                .poster("인셉션 포스터")
+                .backdrop("인셉션 배경")
+                .build();
     }
 }
