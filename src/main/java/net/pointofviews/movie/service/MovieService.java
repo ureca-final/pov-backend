@@ -1,5 +1,6 @@
 package net.pointofviews.movie.service;
 
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
 

@@ -1,5 +1,6 @@
 package net.pointofviews.movie.exception;
 
+import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.common.exception.BusinessException;
 import org.springframework.http.HttpStatus;
 
@@ -19,5 +20,9 @@ public class MovieException extends BusinessException {
 
     public static MovieException duplicateMovie(Integer tmdbId) {
         return new MovieException(HttpStatus.CONFLICT, String.format("영화(tmdb id: %d)는 존재하는 영화입니다.", tmdbId));
+    }
+
+    public static MovieException movieAlreadyInBookmark(Long movieId) {
+        return new MovieException( HttpStatus.CONFLICT, String.format("이미 클럽 북마크에 존재하는 영화(Id: %d) 입니다.", movieId));
     }
 }

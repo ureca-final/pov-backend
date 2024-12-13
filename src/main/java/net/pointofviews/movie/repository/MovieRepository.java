@@ -1,11 +1,15 @@
 package net.pointofviews.movie.repository;
 
+import net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse;
 import net.pointofviews.movie.domain.Movie;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Set;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
@@ -59,4 +63,21 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
        OR (:query IS NULL OR cc.common_code_description LIKE CONCAT('%', :query, '%'))
     """, nativeQuery = true)
     Slice<Object[]> adminSearchMovies(@Param("query") String query, Pageable pageable);
+
+    @Query("""
+       SELECT new net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse(
+           m.title,
+           m.poster,
+           m.released,
+           mlc.likeCount,
+           COUNT(r.id)
+       )
+       FROM Movie m
+       LEFT JOIN m.reviews r
+       LEFT JOIN MovieLikeCount mlc ON mlc.movie.id = m.id
+       WHERE m.id IN :movieIds
+       GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
+       """)
+    List<ReadUserCurationMovieResponse> findUserCurationMoviesByIds(@Param("movieIds") Set<Long> movieIds);
+
 }

@@ -28,4 +28,7 @@ public interface ClubMoviesRepository extends JpaRepository<ClubMovie, Long> {
        GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
        """)
     Slice<ReadClubMovieResponse> findMovieDetailsByClubId(@Param("clubId") UUID clubId,  Pageable pageable);
+
+    boolean existsByMovieIdAndClubId(Long movieId, UUID clubId);
+
 }

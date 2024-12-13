@@ -37,7 +37,7 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
                     m.profileImage,
                     mv.poster,
                     r.createdAt,
-                    (SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id),
+                    COALESCE((SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id), 0),
                     CASE WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.isLiked = true) THEN true ELSE false END,
                     r.isSpoiler
              )
@@ -46,7 +46,7 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
              JOIN mc.club c
              JOIN Review r ON r.member.id = m.id
              JOIN r.movie mv
-            WHERE c.id = :clubId
+            WHERE c.id = :clubId AND r.deletedAt IS NULL
             ORDER BY r.createdAt DESC
             """)
     Slice<ReadReviewResponse> findReviewsWithLikesByClubId(@Param("clubId") UUID clubId, Pageable pageable);
@@ -103,4 +103,5 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
        WHERE mc.club.id = :clubId AND mc.isLeader = true
        """)
     Optional<ReadClubMemberResponse> findLeaderByClubId(@Param("clubId") UUID clubId);
+
 }

@@ -14,7 +14,7 @@ public record ReadCurationResponse(
         @Schema(description = "큐레이션 주제", example = "Top Action Movies")
         String theme,
 
-        @Schema(description = "큐레이션 카테고리", example = "GENRE", allowableValues = {"ACTOR", "GENRE", "DIRECTOR", "AWARD", "RELEASE", "OTHER", "COUNTRY"})
+        @Schema(description = "큐레이션 카테고리", example = "GENRE", allowableValues = {"ACTOR", "GENRE", "DIRECTOR", "RELEASE", "OTHER"})
         CurationCategory category,
 
         @Schema(description = "큐레이션 제목", example = "Best Action Movies of the Year")

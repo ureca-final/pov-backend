@@ -28,6 +28,7 @@ import net.pointofviews.review.service.impl.ReviewMemberServiceImpl;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,10 +41,12 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
@@ -78,6 +81,9 @@ class ReviewMemberServiceTest {
     @Mock
     private S3Service s3Service;
 
+    @Mock
+    private ReviewNotificationService reviewNotificationService;
+
     @Nested
     class SaveReview {
         @Nested
@@ -100,6 +106,8 @@ class ReviewMemberServiceTest {
                         List.of("감동적인", "몰입감 있는"),
                         false
                 );
+
+                doNothing().when(reviewNotificationService).sendReviewNotifications(any(Review.class));
 
                 // when & then
                 assertSoftly(softly -> {
@@ -124,6 +132,8 @@ class ReviewMemberServiceTest {
                         List.of(),
                         false
                 );
+
+                doNothing().when(reviewNotificationService).sendReviewNotifications(any(Review.class));
 
                 // when & then
                 assertSoftly(softly -> {
@@ -546,7 +556,7 @@ class ReviewMemberServiceTest {
 
                 given(reviewRepository.findReviewDetailById(any())).willReturn(Optional.of(review));
                 given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(Optional.of(true));
-                given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(10L);
+                given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(Optional.of(10L));
                 given(reviewKeywordLinkRepository.findKeywordsByReviewId(any())).willReturn(List.of("흥미진진", "몰입감"));
 
                 // when -- 테스트하고자 하는 행동
@@ -722,6 +732,35 @@ class ReviewMemberServiceTest {
                     softly.assertThatThrownBy(() -> reviewService.deleteReviewImagesFolder(1L, loginMember))
                             .isInstanceOf(MovieException.class);
                 });
+            }
+        }
+    }
+
+    @Nested
+    class FindAllReview {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 전체_리뷰_조회() {
+                // given
+                Pageable pageable = PageRequest.of(0, 10);
+
+                List<ReadReviewResponse> reviewResponses = Arrays.asList(
+                        mock(ReadReviewResponse.class), mock(ReadReviewResponse.class), mock(ReadReviewResponse.class)
+                );
+
+                Slice<ReadReviewResponse> mockSlice = new SliceImpl<>(reviewResponses, pageable, true);
+
+                BDDMockito.given(reviewRepository.findAllSliced(pageable))
+                        .willReturn(mockSlice);
+
+                // when
+                ReadReviewListResponse allReview = reviewService.findAllReview(pageable);
+
+                // then
+                assertThat(allReview.reviews()).hasSize(3);
             }
         }
     }

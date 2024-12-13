@@ -20,6 +20,7 @@ import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
 import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.ReviewMemberService;
+import net.pointofviews.review.service.ReviewNotificationService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     private final ReviewLikeCountRepository reviewLikeCountRepository;
     private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
     private final CommonCodeService commonCodeService;
+    private final ReviewNotificationService reviewNotificationService;
     private final S3Service s3Service;
 
     @Override
@@ -86,6 +88,9 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
                 reviewKeywordLinkRepository.save(reviewKeywordLink);
             });
         }
+
+        // 알림 발송
+        reviewNotificationService.sendReviewNotifications(review);
     }
 
     @Override
@@ -184,8 +189,9 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public ReadReviewListResponse findAllReview() {
-        return null;
+    public ReadReviewListResponse findAllReview(Pageable pageable) {
+        Slice<ReadReviewResponse> reviews = reviewRepository.findAllSliced(pageable);
+        return new ReadReviewListResponse(reviews);
     }
 
     @Override
@@ -194,7 +200,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         Review review = reviewRepository.findReviewDetailById(reviewId)
                 .orElseThrow(() -> reviewNotFound(reviewId));
 
-        Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId);
+        Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId).orElse(0L);
         boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId).orElse(false);
         List<String> keywords = reviewKeywordLinkRepository.findKeywordsByReviewId(reviewId);
 
