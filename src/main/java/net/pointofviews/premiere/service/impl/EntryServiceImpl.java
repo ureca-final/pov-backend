@@ -53,18 +53,19 @@ public class EntryServiceImpl implements EntryService {
             throw quantityExceeded();
         }
 
+        String orderId = UUID.randomUUID().toString();
+
         Entry entry = Entry.builder()
                 .member(member)
                 .premiere(premiere)
+                .orderId(orderId)
                 .quantity(request.quantity())
                 .amount(request.amount())
                 .build();
 
         entryRepository.save(entry);
 
-        String orderId = UUID.randomUUID().toString();
-
-        return new CreateEntryResponse(orderId);
+        return new CreateEntryResponse(entry.getOrderId());
     }
 
 }

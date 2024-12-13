@@ -13,6 +13,10 @@ public class EntryException extends BusinessException {
         return new EntryException(HttpStatus.CONFLICT, "시사회 응모 최대 인원 수를 초과했습니다.");
     }
 
+    public static EntryException entryNotFound() {
+        return new EntryException(HttpStatus.NOT_FOUND, "응모 내역이 존재하지 않습니다.");
+    }
+
     public static EntryException entryBadRequest() {
         return new EntryException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.");
     }
