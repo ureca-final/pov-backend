@@ -1,0 +1,7 @@
+ALTER TABLE entry
+    ADD COLUMN order_id VARCHAR(255) NULL;
+
+ALTER TABLE payment
+    ADD COLUMN order_id VARCHAR(255) NOT NULL,
+    ADD COLUMN requested_at DATETIME NOT NULL;
+
