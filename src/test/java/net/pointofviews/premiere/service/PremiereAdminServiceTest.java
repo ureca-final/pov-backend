@@ -110,8 +110,8 @@ class PremiereAdminServiceTest {
                 Member admin = mock(Member.class);
                 UUID adminId = UUID.randomUUID();
 
-                when(admin.getId()).thenReturn(adminId);
-                when(memberRepository.existsById(admin.getId())).thenReturn(false);
+                given(admin.getId()).willReturn(adminId);
+                given(memberRepository.existsById(adminId)).willReturn(false);
 
                 MockMultipartFile thumbnail = new MockMultipartFile(
                         "thumbnail",
@@ -160,7 +160,7 @@ class PremiereAdminServiceTest {
                         true
                 );
 
-                when(memberRepository.existsById(any())).thenReturn(true);
+                given(memberRepository.existsById(any())).willReturn(true);
 
                 // when & then
                 assertThatThrownBy(
@@ -188,7 +188,7 @@ class PremiereAdminServiceTest {
                         true
                 );
 
-                when(memberRepository.existsById(any())).thenReturn(true);
+                given(memberRepository.existsById(any())).willReturn(true);
 
                 // when & then
                 assertThatThrownBy(
