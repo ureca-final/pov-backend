@@ -8,13 +8,11 @@ import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.*;
 import net.pointofviews.member.repository.MemberFavorGenreRepository;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import net.pointofviews.member.repository.MemberFcmTokenRepository;
+import net.pointofviews.member.service.MemberRedisService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,13 +40,11 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
 
-    private static final String GENRE_PREFERENCES_KEY = "genre:preferences:";
-    private final RedisTemplate<String, Object> redisTemplate;
-
     private final MemberRepository memberRepository;
     private final MemberFavorGenreRepository memberFavorGenreRepository;
     private final MemberFcmTokenRepository memberFcmTokenRepository;
     private final CommonCodeService commonCodeService;
+    private final MemberRedisService memberRedisService;
     private final S3Service s3Service;
 
     @Override
@@ -82,30 +78,22 @@ public class MemberServiceImpl implements MemberService {
 
         // 관심 장르 저장
         if (!request.favorGenres().isEmpty()) {
-            request.favorGenres().forEach(genreName -> {
-                String genreCode = commonCodeService.convertNameToCommonCode(
-                        genreName,
-                        CodeGroupEnum.MOVIE_GENRE
-                );
+            List<String> genreCodes = request.favorGenres().stream()
+                    .map(genreName -> commonCodeService.convertNameToCommonCode(
+                            genreName,
+                            CodeGroupEnum.MOVIE_GENRE
+                    ))
+                    .toList();
 
+            genreCodes.forEach(genreCode -> {
                 MemberFavorGenre favorGenre = MemberFavorGenre.builder()
                         .member(savedMember)
                         .genreCode(genreCode)
                         .build();
                 memberFavorGenreRepository.save(favorGenre);
             });
-        }
 
-        // Redis에 선호 장르 저장
-        if (!request.favorGenres().isEmpty()) {
-            request.favorGenres().forEach(genreName -> {
-                String genreCode = commonCodeService.convertNameToCommonCode(
-                        genreName,
-                        CodeGroupEnum.MOVIE_GENRE
-                );
-                String key = GENRE_PREFERENCES_KEY + genreCode;
-                redisTemplate.opsForSet().add(key, savedMember.getId().toString());
-            });
+            memberRedisService.saveGenresToRedis(savedMember.getId(), genreCodes);
         }
 
         return new CreateMemberResponse(
@@ -194,15 +182,7 @@ public class MemberServiceImpl implements MemberService {
         });
 
         // Redis 업데이트
-        existingGenreCodes.forEach(genreCode -> {
-            String key = GENRE_PREFERENCES_KEY + genreCode;
-            redisTemplate.opsForSet().remove(key, loginMember.getId().toString());
-        });
-
-        requestGenreCodes.forEach(genreCode -> {
-            String key = GENRE_PREFERENCES_KEY + genreCode;
-            redisTemplate.opsForSet().add(key, loginMember.getId().toString());
-        });
+        memberRedisService.updateGenresInRedis(member.getId(), existingGenreCodes, requestGenreCodes);
 
         return new PutMemberGenreListResponse(request.genres());
     }
