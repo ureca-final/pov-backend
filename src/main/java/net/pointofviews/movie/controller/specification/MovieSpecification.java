@@ -6,13 +6,18 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.UUID;
 
 @Tag(name = "Movie", description = "공통 영화 관련 API")
 public interface MovieSpecification {
@@ -36,8 +41,11 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(@RequestParam String query,
-                                                                          Pageable pageable);
+    ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(
+            @RequestParam String query,
+            Pageable pageable
+    );
+
 
     @Operation(summary = "영화 상세 조회", description = "영화 단건 상세 조회 API.")
     @ApiResponses({
@@ -59,4 +67,69 @@ public interface MovieSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(Long movieId);
+
+
+
+
+    @Operation(summary = "영화 좋아요 토글", description = "영화 ID를 기반으로 사용자의 좋아요 상태를 토글하는 API.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "좋아요 요청 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "좋아요 요청이 성공적으로 등록되었습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "좋아요 요청 실패 - 없는 영화 또는 사용자",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "영화 또는 사용자를 찾을 수 없습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "좋아요 요청 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<?> putMovieLike(
+            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto,
+            Long movieId
+    );
+
+
+    @Operation(summary = "내 클럽 영화 북마크", description = "내 클럽에 영화 북마크 가입합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "영화 북마크 성공",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "내 클럽에 해당 영화 북마크가 완료되었습니다."
+                                    }""")
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<Void>> saveMovieToMyClub(
+            @PathVariable Long movieId,
+            @PathVariable UUID clubId
+    );
+
 }

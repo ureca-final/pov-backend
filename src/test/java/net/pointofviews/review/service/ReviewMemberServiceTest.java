@@ -81,6 +81,9 @@ class ReviewMemberServiceTest {
     @Mock
     private S3Service s3Service;
 
+    @Mock
+    private ReviewNotificationService reviewNotificationService;
+
     @Nested
     class SaveReview {
         @Nested
@@ -103,6 +106,8 @@ class ReviewMemberServiceTest {
                         List.of("감동적인", "몰입감 있는"),
                         false
                 );
+
+                doNothing().when(reviewNotificationService).sendReviewNotifications(any(Review.class));
 
                 // when & then
                 assertSoftly(softly -> {
@@ -127,6 +132,8 @@ class ReviewMemberServiceTest {
                         List.of(),
                         false
                 );
+
+                doNothing().when(reviewNotificationService).sendReviewNotifications(any(Review.class));
 
                 // when & then
                 assertSoftly(softly -> {
@@ -549,7 +556,7 @@ class ReviewMemberServiceTest {
 
                 given(reviewRepository.findReviewDetailById(any())).willReturn(Optional.of(review));
                 given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(Optional.of(true));
-                given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(10L);
+                given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(Optional.of(10L));
                 given(reviewKeywordLinkRepository.findKeywordsByReviewId(any())).willReturn(List.of("흥미진진", "몰입감"));
 
                 // when -- 테스트하고자 하는 행동
