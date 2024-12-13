@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit;
 public class CaffeineCacheConfig {
 
     @Primary
-    @Bean(name = "commonCodeCacheManager")
+    @Bean(name = "cacheManagerWithTTL")
     public CaffeineCacheManager commonCodeCacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("commonCode");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("commonCode", "country");
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .recordStats());
         return cacheManager;
     }
 
-    @Bean(name = "commonCodeGroupCacheManager")
+    @Bean(name = "cacheManagerNoTTL")
     public CaffeineCacheManager commonCodeGroupCacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("commonCodeGroup");
         cacheManager.setCaffeine(Caffeine.newBuilder()

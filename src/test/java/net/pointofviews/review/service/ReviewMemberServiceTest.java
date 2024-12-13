@@ -102,7 +102,7 @@ class ReviewMemberServiceTest {
                 CreateReviewRequest request = new CreateReviewRequest(
                         "제목",
                         "내용",
-                        "긍정적",
+                        "GOOD",
                         List.of("감동적인", "몰입감 있는"),
                         false
                 );
@@ -128,7 +128,7 @@ class ReviewMemberServiceTest {
                 CreateReviewRequest request = new CreateReviewRequest(
                         "제목",
                         "내용",
-                        "긍정적",
+                        "GOOD",
                         List.of(),
                         false
                 );
@@ -556,7 +556,7 @@ class ReviewMemberServiceTest {
 
                 given(reviewRepository.findReviewDetailById(any())).willReturn(Optional.of(review));
                 given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(Optional.of(true));
-                given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(10L);
+                given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(Optional.of(10L));
                 given(reviewKeywordLinkRepository.findKeywordsByReviewId(any())).willReturn(List.of("흥미진진", "몰입감"));
 
                 // when -- 테스트하고자 하는 행동

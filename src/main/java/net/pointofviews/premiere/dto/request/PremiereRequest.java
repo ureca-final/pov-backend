@@ -2,6 +2,7 @@ package net.pointofviews.premiere.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import net.pointofviews.premiere.domain.Premiere;
 
 import java.time.LocalDateTime;
 
@@ -25,4 +26,13 @@ public record PremiereRequest(
         @Schema(description = "결제 필요 여부", example = "true")
         Boolean isPaymentRequired
 ) {
+    public Premiere toPremiere() {
+        return Premiere.builder()
+                .title(title)
+                .startAt(startAt)
+                .endAt(endAt)
+                .price(price)
+                .isPaymentRequired(isPaymentRequired)
+                .build();
+    }
 }

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.pointofviews.people.domain.People;
 
+import java.util.Objects;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,5 +34,23 @@ public class MovieCrew {
 
     public void updatePeople(People people) {
         this.people = people;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MovieCrew movieCrew = (MovieCrew) o;
+        return Objects.equals(getId(), movieCrew.getId()) && Objects.equals(getPeople(), movieCrew.getPeople()) && Objects.equals(getMovie(), movieCrew.getMovie()) && Objects.equals(getRole(), movieCrew.getRole());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(getId());
+        result = 31 * result + Objects.hashCode(getPeople());
+        result = 31 * result + Objects.hashCode(getMovie());
+        result = 31 * result + Objects.hashCode(getRole());
+        return result;
     }
 }
