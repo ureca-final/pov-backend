@@ -21,6 +21,8 @@ public class Entry extends BaseEntity {
 
     private Integer quantity;
 
+    private String orderId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
@@ -28,11 +30,12 @@ public class Entry extends BaseEntity {
     private Premiere premiere;
 
     @Builder
-    private Entry(Integer amount, Integer quantity, Member member, Premiere premiere) {
+    private Entry(Integer amount, Integer quantity, String orderId, Member member, Premiere premiere) {
         Assert.notNull(quantity, "Amount must not be null");
 
         this.amount = amount;
         this.quantity = quantity;
+        this.orderId = orderId;
         this.member = member;
         this.premiere = premiere;
     }

@@ -34,7 +34,7 @@ public record PremiereRequest(
                 .title(title)
                 .startAt(startAt)
                 .endAt(endAt)
-                .price(price)
+                .amount(amount)
                 .isPaymentRequired(isPaymentRequired)
                 .build();
     }

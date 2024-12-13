@@ -85,6 +85,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.now().plusDays(1),
                         LocalDateTime.now().plusDays(3),
                         10000,
+                        100,
                         true
                 );
 
@@ -132,6 +133,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.now().plusDays(1),
                         LocalDateTime.now().plusDays(3),
                         10000,
+                        100,
                         true
                 );
 
@@ -157,6 +159,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.now().plusDays(1),
                         LocalDateTime.now().plusDays(3),
                         10000,
+                        100,
                         true
                 );
 
@@ -185,6 +188,7 @@ class PremiereAdminServiceTest {
                         LocalDateTime.now().plusDays(1),
                         LocalDateTime.now().plusDays(3),
                         10000,
+                        100,
                         true
                 );
 
