@@ -171,7 +171,8 @@ public class NoticeServiceImpl implements NoticeService {
         NoticeReceive noticeReceive = noticeReceiveRepository.findByIdAndMemberId(noticeId, memberId)
                 .orElseThrow(NoticeException.NoticeNotFoundException::new);
 
-        noticeReceive.setRead(true);
+        // 알림 확인시, 알림 내역 삭제
+        noticeReceiveRepository.delete(noticeReceive);
     }
 
     private String replaceTemplateVariables(String template, Map<String, String> variables) {

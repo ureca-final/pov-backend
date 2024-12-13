@@ -55,6 +55,6 @@ public class NoticeController implements NoticeSpecification {
             @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     ) {
         noticeService.updateNotice(memberDetailsDto.member().getId(), noticeId);
-        return BaseResponse.ok("알림을 성공적으로 읽음 처리했습니다.");
+        return BaseResponse.ok("알림을 성공적으로 읽음 처리했습니다. 알림 내역에서 삭제됩니다.");
     }
 }
