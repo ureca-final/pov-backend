@@ -1,6 +1,5 @@
 package net.pointofviews.premiere.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
@@ -31,9 +30,12 @@ public class PremiereAdminController implements PremiereAdminSpecification {
     @PostMapping
     public ResponseEntity<BaseResponse<Void>> createPremiere(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
-            @RequestBody @Valid PremiereRequest request
+            @RequestPart(value = "request") PremiereRequest request,
+            @RequestPart(value = "eventImage", required = false) MultipartFile eventImage,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
     ) {
-        return null;
+        premiereAdminService.savePremiere(loginMember, request, eventImage, thumbnail);
+        return BaseResponse.ok("시사회가 등록되었습니다.");
     }
 
     @Override
