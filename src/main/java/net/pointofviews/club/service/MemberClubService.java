@@ -10,6 +10,7 @@ public interface MemberClubService {
     ReadClubMemberListResponse readMembersByClubId(UUID clubId);
 
     boolean isMemberOfClub(UUID clubId, UUID memberId);
+
     ReadClubMemberResponse readClubLeaderByClubId(UUID clubId);
 
     void joinClub(UUID clubId, Member member);
