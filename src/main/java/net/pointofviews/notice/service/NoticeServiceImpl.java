@@ -128,6 +128,7 @@ public class NoticeServiceImpl implements NoticeService {
                             .noticeContent(content)
                             .noticeTitle(noticeTemplate.getNoticeTitle())
                             .noticeType(noticeTemplate.getNoticeType())
+                            .reviewId(parseIdOrNull(request.templateVariables().get("review_id")))
                             .build();
 
                     noticeReceives.add(noticeReceive);
@@ -160,7 +161,8 @@ public class NoticeServiceImpl implements NoticeService {
                         receive.getNoticeContent(),
                         receive.getNoticeType(),
                         receive.isRead(),
-                        receive.getCreatedAt()
+                        receive.getCreatedAt(),
+                        receive.getReviewId()
                 ))
                 .toList();
     }
