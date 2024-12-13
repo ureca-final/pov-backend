@@ -38,3 +38,6 @@ TMDb:
 firebase:
   config:
     path: firebase/firebase-service-account.json
+
+toss:
+  secret-key:
