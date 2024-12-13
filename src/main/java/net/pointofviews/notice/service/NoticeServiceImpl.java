@@ -18,7 +18,7 @@ import net.pointofviews.notice.repository.NoticeReceiveRepository;
 import net.pointofviews.notice.repository.NoticeRepository;
 import net.pointofviews.notice.repository.NoticeSendRepository;
 import net.pointofviews.notice.utils.FcmUtil;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +38,7 @@ public class NoticeServiceImpl implements NoticeService {
     private final MemberFcmTokenRepository memberFcmTokenRepository;
     private final CommonCodeService commonCodeService;
     private final FcmUtil fcmUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     @Transactional
@@ -66,6 +66,21 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     @Transactional
     public void sendNotice(SendNoticeRequest request) {
+        // 장르명을 코드로 변환
+        String genreName = request.templateVariables().get("genre");
+        String genreCode = commonCodeService.convertNameToCommonCode(genreName, CodeGroupEnum.MOVIE_GENRE);
+
+        // Redis에서 선호 장르 사용자 조회
+        String genreKey = generateRedisKey(genreCode);
+        Set<UUID> targetMembers = getTargetMembers(genreKey);
+
+        if (targetMembers.isEmpty()) {
+            String message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.",
+                    genreName, genreCode);
+            log.info(message);
+            return;
+        }
+
         Notice noticeTemplate = noticeRepository.findByIdAndIsActiveTrue(request.noticeTemplateId())
                 .orElseThrow(NoticeException.NoticeTemplateNotFoundException::new);
 
@@ -78,21 +93,6 @@ public class NoticeServiceImpl implements NoticeService {
                 .build();
 
         noticeSendRepository.save(noticeSend);
-
-        // 장르명을 코드로 변환
-        String genreName = request.templateVariables().get("genre");
-        String genreCode = commonCodeService.convertNameToCommonCode(genreName, CodeGroupEnum.MOVIE_GENRE);
-
-        // Redis에서 선호 장르 사용자 조회
-        String genreKey = "genre:preferences:" + genreCode;
-        Set<UUID> targetMembers = getTargetMembers(genreKey);
-
-        if (targetMembers.isEmpty()) {
-            String message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.",
-                    genreName, genreCode);
-            log.info(message);
-            return;
-        }
 
         // 배치 처리
         List<UUID> memberList = new ArrayList<>(targetMembers);
@@ -178,7 +178,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     private Set<UUID> getTargetMembers(String genreKey) {
         try {
-            Set<Object> members = redisTemplate.opsForSet().members(genreKey);
+            Set<String> members = stringRedisTemplate.opsForSet().members(genreKey);
             if (members == null) {
                 return new HashSet<>();
             }
@@ -186,7 +186,7 @@ public class NoticeServiceImpl implements NoticeService {
             return members.stream()
                     .map(member -> {
                         try {
-                            return UUID.fromString(member.toString());
+                            return UUID.fromString(member);
                         } catch (IllegalArgumentException e) {
                             log.error("Invalid UUID string: {}", member);
                             return null;
@@ -217,5 +217,9 @@ public class NoticeServiceImpl implements NoticeService {
                 .build();
 
         noticeReceiveRepository.save(noticeReceive);
+    }
+
+    private String generateRedisKey(String genreCode) {
+        return "genre:preferences:" + genreCode;
     }
 }
