@@ -34,8 +34,8 @@ public class NoticeException extends BusinessException {
     }
 
     public static class NoTargetMembersFoundException extends NoticeException {
-        public NoTargetMembersFoundException() {
-            super(HttpStatus.NOT_FOUND, "알림을 받을 대상자가 없습니다.");
+        public NoTargetMembersFoundException(String genre, String code) {
+            super(HttpStatus.NOT_FOUND, String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.", genre, code));
         }
     }
 

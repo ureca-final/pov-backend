@@ -88,7 +88,10 @@ public class NoticeServiceImpl implements NoticeService {
         Set<UUID> targetMembers = getTargetMembers(genreKey);
 
         if (targetMembers.isEmpty()) {
-            throw new NoticeException.NoTargetMembersFoundException();
+            String message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.",
+                    genreName, genreCode);
+            log.info(message);
+            return;
         }
 
         // 배치 처리

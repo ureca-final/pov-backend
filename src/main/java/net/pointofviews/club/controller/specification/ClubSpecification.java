@@ -298,4 +298,26 @@ public interface ClubSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadClubMemberListResponse>> readClubMembers(@PathVariable UUID clubId);
+
+
+    @Operation(summary = "클럽 가입", description = "클럽에 가입합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "가입 성공",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "클럽 가입이 완료되었습니다."
+                                    }""")
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "로그인이 필요한 서비스입니다."
+                                    }""")
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<Void>> joinClub(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember);
 }

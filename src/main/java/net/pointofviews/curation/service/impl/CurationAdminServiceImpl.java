@@ -8,7 +8,7 @@ import net.pointofviews.curation.dto.response.*;
 import net.pointofviews.curation.exception.CurationException;
 import net.pointofviews.curation.repository.CurationRepository;
 import net.pointofviews.curation.service.CurationAdminService;
-import net.pointofviews.curation.service.CurationMovieRedisService;
+import net.pointofviews.curation.service.CurationRedisService;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ import static net.pointofviews.member.exception.MemberException.adminNotFound;
 public class CurationAdminServiceImpl implements CurationAdminService {
     private final CurationRepository curationRepository;
     private final MemberRepository memberRepository;
-    private final CurationMovieRedisService curationMovieRedisService;
+    private final CurationRedisService curationRedisService;
 
     @Override
     @Transactional
@@ -50,7 +50,7 @@ public class CurationAdminServiceImpl implements CurationAdminService {
         Curation savedCuration = curationRepository.save(curation);
 
         // 캐싱 영화 ID 저장
-        curationMovieRedisService.saveMoviesToCuration(savedCuration.getId(), request.movieIds());
+        curationRedisService.saveMoviesToCuration(savedCuration.getId(), request.movieIds());
     }
 
     @Override
@@ -89,7 +89,7 @@ public class CurationAdminServiceImpl implements CurationAdminService {
         );
 
         // 영화 목록 캐싱 갱신
-        curationMovieRedisService.updateMoviesToCuration(curationId, request.movieIds());
+        curationRedisService.updateMoviesToCuration(curationId, request.movieIds());
     }
 
     @Override
@@ -101,7 +101,7 @@ public class CurationAdminServiceImpl implements CurationAdminService {
         };
 
         curationRepository.deleteById(curationId);
-        curationMovieRedisService.deleteAllMoviesForCuration(curationId);
+        curationRedisService.deleteAllMoviesForCuration(curationId);
     }
 
 
@@ -118,7 +118,7 @@ public class CurationAdminServiceImpl implements CurationAdminService {
                 .orElseThrow(() -> CurationIdNotFound(curationId));
 
         // Redis에서 영화 ID 가져오기
-        Set<Long> movieIds = curationMovieRedisService.readMoviesForCuration(curationId);
+        Set<Long> movieIds = curationRedisService.readMoviesForCuration(curationId);
 
         // 영화 정보 가져오기
         List<ReadAdminCurationMovieResponse> movies = movieIds.isEmpty()

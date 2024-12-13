@@ -81,6 +81,9 @@ class ReviewMemberServiceTest {
     @Mock
     private S3Service s3Service;
 
+    @Mock
+    private ReviewNotificationService reviewNotificationService;
+
     @Nested
     class SaveReview {
         @Nested
@@ -103,6 +106,8 @@ class ReviewMemberServiceTest {
                         List.of("감동적인", "몰입감 있는"),
                         false
                 );
+
+                doNothing().when(reviewNotificationService).sendReviewNotifications(any(Review.class));
 
                 // when & then
                 assertSoftly(softly -> {
@@ -127,6 +132,8 @@ class ReviewMemberServiceTest {
                         List.of(),
                         false
                 );
+
+                doNothing().when(reviewNotificationService).sendReviewNotifications(any(Review.class));
 
                 // when & then
                 assertSoftly(softly -> {

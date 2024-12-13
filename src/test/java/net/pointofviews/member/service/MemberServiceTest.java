@@ -67,6 +67,9 @@ class MemberServiceTest {
     @Mock
     private SetOperations<String, Object> setOperations;
 
+    @Mock
+    private MemberRedisService memberRedisService;
+
     @BeforeEach
     void setUp() {
         given(redisTemplate.opsForSet()).willReturn(setOperations);
@@ -124,12 +127,11 @@ class MemberServiceTest {
                 given(memberRepository.existsByEmail(request.email())).willReturn(false);
                 given(memberRepository.save(any(Member.class))).willReturn(savedMember);
 
-                // Redis mocking
-                given(setOperations.add(any(), any())).willReturn(1L);
-
                 // 장르 코드 변환 mocking 추가
                 given(commonCodeService.convertNameToCommonCode(any(), any()))
                         .willReturn("14", "04", "01");
+
+                doNothing().when(memberRedisService).saveGenresToRedis(any(UUID.class), anyList());
 
                 // when
                 CreateMemberResponse response = memberService.signup(request);
@@ -358,9 +360,7 @@ class MemberServiceTest {
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "04", "05");
 
-                // Redis mocking
-                given(setOperations.remove(any(), any())).willReturn(1L);
-                given(setOperations.add(any(), any())).willReturn(1L);
+                doNothing().when(memberRedisService).updateGenresInRedis(any(UUID.class), anyList(), anyList());
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -392,9 +392,7 @@ class MemberServiceTest {
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("04", "05", "06");
 
-                // Redis mocking
-                given(setOperations.remove(any(), any())).willReturn(1L);
-                given(setOperations.add(any(), any())).willReturn(1L);
+                doNothing().when(memberRedisService).updateGenresInRedis(any(UUID.class), anyList(), anyList());
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -427,9 +425,7 @@ class MemberServiceTest {
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "02", "03");
 
-                // Redis mocking
-                given(setOperations.remove(any(), any())).willReturn(1L);
-                given(setOperations.add(any(), any())).willReturn(1L);
+                doNothing().when(memberRedisService).updateGenresInRedis(any(UUID.class), anyList(), anyList());
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);

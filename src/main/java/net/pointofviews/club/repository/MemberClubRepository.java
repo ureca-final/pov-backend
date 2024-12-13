@@ -103,4 +103,5 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
        WHERE mc.club.id = :clubId AND mc.isLeader = true
        """)
     Optional<ReadClubMemberResponse> findLeaderByClubId(@Param("clubId") UUID clubId);
+
 }

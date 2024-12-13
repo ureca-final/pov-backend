@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -65,6 +66,11 @@ public interface CurationRepository extends JpaRepository<Curation, Long> {
 
     boolean existsById(Long id);
 
-//    @Query("SELECT c FROM Curation c WHERE c.startTime <= CURRENT_TIMESTAMP")
-//    Page<Curation> findScheduledCurations(Pageable pageable);
+
+    @Query("""
+       SELECT c
+       FROM Curation c
+       WHERE c.startTime >= :startTime AND c.startTime < :endTime
+       """)
+    List<Curation> findByStartTimeBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 }
