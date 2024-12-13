@@ -769,8 +769,11 @@ class ClubServiceImplTest {
                     softly.assertThat(response.clubDescription()).isEqualTo("클럽 설명");
                     softly.assertThat(response.clubFavorGenres()).isEmpty();
                     softly.assertThat(response.members().memberList()).containsExactly(leader);
-                    softly.assertThat(response.clubReviewList()).isNull();
-                    softly.assertThat(response.clubMovieList()).isNull();
+
+                    softly.assertThat(response.clubReviewList().reviews().hasContent()).isFalse(); // Slice에 내용이 없는지 확인
+                    softly.assertThat(response.clubReviewList().reviews().getContent()).isEmpty(); // 내부 리스트가 비었는지 확인
+                    softly.assertThat(response.clubMovieList().clubMovies().hasContent()).isFalse();
+                    softly.assertThat(response.clubMovieList().clubMovies().getContent()).isEmpty();
                 });
 
                 verify(clubRepository, times(1)).findBasicClubInfoById(clubId);
