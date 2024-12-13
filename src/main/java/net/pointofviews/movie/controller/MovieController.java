@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.service.ClubMovieService;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieSpecification;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
@@ -26,7 +25,6 @@ public class MovieController implements MovieSpecification {
     private final MovieMemberService movieMemberService;
     private final ClubMovieService clubMovieService;
 
-
     @Override
     @GetMapping("/search")
     public ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(@RequestParam String query,
@@ -42,6 +40,7 @@ public class MovieController implements MovieSpecification {
 
         return BaseResponse.ok("OK", readDetailMovieResponse);
     }
+
     @Override
     @PutMapping("/{movieId}/likes")
     public ResponseEntity<BaseResponse<Void>> putMovieLike(
@@ -54,8 +53,7 @@ public class MovieController implements MovieSpecification {
 
     @Override
     @PostMapping("/{movieId}/bookmark/{clubId}")
-    public ResponseEntity<BaseResponse<Void>> saveMovieToMyClub(@PathVariable Long movieId, @PathVariable UUID clubId)
-    {
+    public ResponseEntity<BaseResponse<Void>> saveMovieToMyClub(@PathVariable Long movieId, @PathVariable UUID clubId) {
         clubMovieService.saveMovieToMyClub(movieId, clubId);
         return BaseResponse.ok("내 클럽에 영화 북마크를 성공했습니다");
     }
