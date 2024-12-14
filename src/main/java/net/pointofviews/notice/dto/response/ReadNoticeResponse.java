@@ -25,6 +25,9 @@ public record ReadNoticeResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "리뷰 ID")
-        Long reviewId
+        Long reviewId,
+
+        @Schema(description = "영화 ID")
+        Long movieId
 ) {
 }

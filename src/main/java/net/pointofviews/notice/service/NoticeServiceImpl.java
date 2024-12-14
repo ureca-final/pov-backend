@@ -18,6 +18,7 @@ import net.pointofviews.notice.repository.NoticeReceiveRepository;
 import net.pointofviews.notice.repository.NoticeRepository;
 import net.pointofviews.notice.repository.NoticeSendRepository;
 import net.pointofviews.notice.utils.FcmUtil;
+import net.pointofviews.review.repository.ReviewRepository;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ public class NoticeServiceImpl implements NoticeService {
     private final NoticeSendRepository noticeSendRepository;
     private final NoticeReceiveRepository noticeReceiveRepository;
     private final MemberFcmTokenRepository memberFcmTokenRepository;
+    private final ReviewRepository reviewRepository;
     private final CommonCodeService commonCodeService;
     private final FcmUtil fcmUtil;
     private final StringRedisTemplate stringRedisTemplate;
@@ -153,7 +155,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<ReadNoticeResponse> findNotices(UUID memberId) {
-        return noticeReceiveRepository.findByMemberIdOrderByCreatedAtDesc(memberId)
+        return noticeReceiveRepository.findByMemberIdWithReviewAndMovieOrderByCreatedAtDesc(memberId)
                 .stream()
                 .map(receive -> new ReadNoticeResponse(
                         receive.getId(),
@@ -162,7 +164,10 @@ public class NoticeServiceImpl implements NoticeService {
                         receive.getNoticeType(),
                         receive.isRead(),
                         receive.getCreatedAt(),
-                        receive.getReviewId()
+                        receive.getReviewId(),
+                        receive.getReviewId() != null ? reviewRepository.findById(receive.getReviewId())
+                                .map(review -> review.getMovie().getId())
+                                .orElse(null) : null
                 ))
                 .toList();
     }
