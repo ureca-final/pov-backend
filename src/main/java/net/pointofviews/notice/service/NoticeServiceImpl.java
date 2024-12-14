@@ -72,9 +72,24 @@ public class NoticeServiceImpl implements NoticeService {
         String genreName = request.templateVariables().get("genre");
         String genreCode = commonCodeService.convertNameToCommonCode(genreName, CodeGroupEnum.MOVIE_GENRE);
 
+        // 리뷰 작성자 ID 가져오기
+        Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
+        final UUID reviewAuthorId = reviewId != null ?
+                reviewRepository.findById(reviewId)
+                        .map(review -> review.getMember().getId())
+                        .orElse(null)
+                : null;
+
         // Redis에서 선호 장르 사용자 조회
         String genreKey = generateRedisKey(genreCode);
         Set<UUID> targetMembers = getTargetMembers(genreKey);
+
+        // 리뷰 작성자 제외
+        if (reviewAuthorId != null) {
+            targetMembers = targetMembers.stream()
+                    .filter(memberId -> !memberId.equals(reviewAuthorId))
+                    .collect(Collectors.toSet());
+        }
 
         if (targetMembers.isEmpty()) {
             String message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.",
@@ -113,8 +128,6 @@ public class NoticeServiceImpl implements NoticeService {
             for (MemberFcmToken fcmToken : fcmTokens) {
                 try {
                     String noticeContent = request.templateVariables().getOrDefault("notice_content", content);
-
-                    Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
 
                     fcmUtil.sendMessage(
                             fcmToken.getFcmToken(),
