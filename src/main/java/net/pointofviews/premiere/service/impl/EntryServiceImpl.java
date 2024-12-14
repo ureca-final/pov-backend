@@ -8,12 +8,15 @@ import net.pointofviews.premiere.domain.Entry;
 import net.pointofviews.premiere.domain.Premiere;
 import net.pointofviews.premiere.dto.request.CreateEntryRequest;
 import net.pointofviews.premiere.dto.response.CreateEntryResponse;
+import net.pointofviews.premiere.dto.response.ReadEntryResponse;
+import net.pointofviews.premiere.dto.response.ReadMyEntryListResponse;
 import net.pointofviews.premiere.repository.EntryRepository;
 import net.pointofviews.premiere.repository.PremiereRepository;
 import net.pointofviews.premiere.service.EntryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
@@ -22,7 +25,7 @@ import static net.pointofviews.premiere.exception.PremiereException.premiereNotF
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class EntryServiceImpl implements EntryService {
 
     private final EntryRepository entryRepository;
@@ -68,4 +71,13 @@ public class EntryServiceImpl implements EntryService {
         return new CreateEntryResponse(entry.getOrderId());
     }
 
+    @Override
+    public ReadMyEntryListResponse findMyEntryList(Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        List<ReadEntryResponse> entryList = entryRepository.findAllByMemberId(member.getId());
+
+        return new ReadMyEntryListResponse(entryList);
+    }
 }
