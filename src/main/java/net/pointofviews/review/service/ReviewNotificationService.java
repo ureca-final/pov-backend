@@ -36,8 +36,6 @@ public class ReviewNotificationService {
                 ))
                 .collect(Collectors.joining(", "));
 
-        log.info(allGenres);
-
         String noticeContent = String.format("%s 장르의 '%s'에 새로운 리뷰가 작성되었습니다.",
                 allGenres, movie.getTitle());
 

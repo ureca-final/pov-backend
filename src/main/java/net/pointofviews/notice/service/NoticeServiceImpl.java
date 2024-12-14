@@ -74,7 +74,7 @@ public class NoticeServiceImpl implements NoticeService {
         Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
 
         if(reviewId == null){
-            log.error("리뷰({})가 존재하지 않아 알림 전송이 불가능합니다.", reviewId);
+            log.error("리뷰가 존재하지 않아 알림 전송이 불가능합니다.");
             return;
         }
 
