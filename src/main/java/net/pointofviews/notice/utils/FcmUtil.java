@@ -1,14 +1,12 @@
 package net.pointofviews.notice.utils;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.notice.exception.NoticeException;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -20,7 +18,7 @@ public class FcmUtil {
         this.firebaseMessaging = firebaseMessaging;
     }
 
-    public void sendMessage(String token, String title, String body, Long reviewId, String noticeContent) {
+    public void sendMessage(List<String> tokens, String title, String body, Long reviewId, String noticeContent) {
         try {
             // notification 데이터
             Notification notification = Notification.builder()
@@ -36,14 +34,29 @@ public class FcmUtil {
             log.info("Sending FCM message with data: {}", data);
 
             // Message 구성
-            Message message = Message.builder()
-                    .setToken(token)
+            MulticastMessage message = MulticastMessage.builder()
                     .setNotification(notification)
                     .putAllData(data)
+                    .addAllTokens(tokens)
                     .build();
 
-            String response = firebaseMessaging.send(message);
-            log.info("FCM message sent successfully: {}", response);
+            BatchResponse response = firebaseMessaging.sendMulticast(message);
+            log.info("FCM messages sent successfully: {} successful and {} failed",
+                    response.getSuccessCount(), response.getFailureCount());
+
+            if (response.getFailureCount() > 0) {
+                List<SendResponse> responses = response.getResponses();
+                for (int i = 0; i < responses.size(); i++) {
+                    if (!responses.get(i).isSuccessful()) {
+                        log.error("Failed to send message to token {}: {}",
+                                tokens.get(i), responses.get(i).getException());
+                    }
+                }
+                if (response.getSuccessCount() == 0) {
+                    throw new NoticeException.NoticeSendFailedException();
+                }
+            }
+
         } catch (FirebaseMessagingException e) {
             log.error("Failed to send firebase message.", e);
             throw new NoticeException.NoticeSendFailedException();
