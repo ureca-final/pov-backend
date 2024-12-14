@@ -73,14 +73,9 @@ public class NoticeServiceImpl implements NoticeService {
         // 리뷰 작성자 ID 가져오기
         Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
 
-        if(reviewId == null){
-            log.error("리뷰가 존재하지 않아 알림 전송이 불가능합니다.");
-            return;
-        }
-
         // 리뷰의 영화에 있는 모든 장르의 선호 사용자 조회
-        Optional<Review> reviewOptional = reviewRepository.findById(reviewId);
-        Review review = reviewOptional.get();
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(NoticeException.ReviewNotFoundException::new);
         Set<UUID> targetMembers = new HashSet<>();
 
         // 각 장르별 선호 사용자 조회 및 통합 (중복 제거)
