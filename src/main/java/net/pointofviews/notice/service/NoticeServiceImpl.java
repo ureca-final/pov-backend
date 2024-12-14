@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class NoticeServiceImpl implements NoticeService {
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 500;
 
     private final NoticeRepository noticeRepository;
     private final NoticeSendRepository noticeSendRepository;
@@ -125,39 +125,43 @@ public class NoticeServiceImpl implements NoticeService {
             }
 
             List<NoticeReceive> noticeReceives = new ArrayList<>();
+            List<String> tokenList = new ArrayList<>();
+
+
+            // 알림 수신 객체 생성 및 토큰 리스트 생성
             for (MemberFcmToken fcmToken : fcmTokens) {
-                try {
-                    String noticeContent = request.templateVariables().getOrDefault("notice_content", content);
+                NoticeReceive noticeReceive = NoticeReceive.builder()
+                        .member(fcmToken.getMember())
+                        .noticeSendId(noticeSend.getId())
+                        .noticeContent(content)
+                        .noticeTitle(noticeTemplate.getNoticeTitle())
+                        .noticeType(noticeTemplate.getNoticeType())
+                        .reviewId(reviewId)
+                        .build();
 
-                    fcmUtil.sendMessage(
-                            fcmToken.getFcmToken(),
-                            noticeTemplate.getNoticeTitle(),
-                            content,
-                            reviewId,
-                            noticeContent
-                    );
-
-                    NoticeReceive noticeReceive = NoticeReceive.builder()
-                            .member(fcmToken.getMember())
-                            .noticeSendId(noticeSend.getId())
-                            .noticeContent(content)
-                            .noticeTitle(noticeTemplate.getNoticeTitle())
-                            .noticeType(noticeTemplate.getNoticeType())
-                            .reviewId(parseIdOrNull(request.templateVariables().get("review_id")))
-                            .build();
-
-                    noticeReceives.add(noticeReceive);
-                } catch (NoticeException.NoticeSendFailedException e) {
-                    log.error("Failed to send notification to member: {}", fcmToken.getMember().getId(), e);
-                    noticeSend.setSucceed(false);
-                    noticeSendRepository.save(noticeSend);
-                }
+                noticeReceives.add(noticeReceive);
+                tokenList.add(fcmToken.getFcmToken());
             }
 
             try {
+                String noticeContent = request.templateVariables().getOrDefault("notice_content", content);
+
+                fcmUtil.sendMessage(
+                        tokenList,
+                        noticeTemplate.getNoticeTitle(),
+                        content,
+                        reviewId,
+                        noticeContent
+                );
+
                 if (!noticeReceives.isEmpty()) {
                     noticeReceiveRepository.saveAll(noticeReceives);
                 }
+            } catch (NoticeException.NoticeSendFailedException e) {
+                log.error("Failed to send batch notifications");
+                noticeSend.setSucceed(false);
+                noticeSendRepository.save(noticeSend);
+
             } catch (Exception e) {
                 log.error("Failed to save notice receives", e);
                 noticeSend.setSucceed(false);
