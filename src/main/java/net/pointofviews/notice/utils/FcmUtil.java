@@ -5,9 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.notice.exception.NoticeException;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -20,27 +19,22 @@ public class FcmUtil {
 
     public void sendMessage(List<String> tokens, String title, String body, Long reviewId, String noticeContent) {
         try {
-            // notification 데이터
-            Notification notification = Notification.builder()
-                    .setTitle(title)
-                    .setBody(body)
-                    .build();
+            // 메시지 리스트 생성
+            List<Message> messages = tokens.stream()
+                    .map(token -> Message.builder()
+                            .setNotification(Notification.builder()
+                                    .setTitle(title)
+                                    .setBody(body)
+                                    .build())
+                            .putData("notice_content", noticeContent)
+                            .putData("review_id", reviewId != null ? String.valueOf(reviewId) : "")
+                            .setToken(token)
+                            .build())
+                    .collect(Collectors.toList());
 
-            // data payload 구성
-            Map<String, String> data = new HashMap<>();
-            data.put("notice_content", noticeContent);
-            data.put("review_id", reviewId != null ? String.valueOf(reviewId) : "");
+            log.info("Sending FCM messages for {} tokens", messages.size());
 
-            log.info("Sending FCM message with data: {}", data);
-
-            // Message 구성
-            MulticastMessage message = MulticastMessage.builder()
-                    .setNotification(notification)
-                    .putAllData(data)
-                    .addAllTokens(tokens)
-                    .build();
-
-            BatchResponse response = firebaseMessaging.sendMulticast(message);
+            BatchResponse response = firebaseMessaging.sendAll(messages);
             log.info("FCM messages sent successfully: {} successful and {} failed",
                     response.getSuccessCount(), response.getFailureCount());
 
