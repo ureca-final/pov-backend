@@ -1,6 +1,8 @@
 package net.pointofviews.club.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
 import net.pointofviews.club.dto.response.ClubMemberResponse;
 import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
@@ -10,13 +12,19 @@ import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.MemberClubService;
+import net.pointofviews.club.utils.InviteCodeGenerator;
+import net.pointofviews.common.service.impl.StringRedisServiceImpl;
 import net.pointofviews.member.domain.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
+import static net.pointofviews.club.exception.ClubException.*;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,6 +32,11 @@ public class MemberClubServiceImpl implements MemberClubService {
 
     private final MemberClubRepository memberClubRepository;
     private final ClubRepository clubRepository;
+    private final StringRedisServiceImpl redisService;
+    private static final int INVITE_CODE_LENGTH = 8;
+    private static final int DAY_IN_SECONDS = 60 * 60 * 24;
+    private static final String CLUB_TO_INVITE_CODE_KEY_PREFIX = "club:invite:";
+    private static final String INVITE_CODE_TO_CLUB_KEY_PREFIX = "invite:code:";
 
     @Override
     public ReadClubMemberListResponse readMembersByClubId(UUID clubId) {
@@ -39,20 +52,20 @@ public class MemberClubServiceImpl implements MemberClubService {
     @Override
     public ReadClubMemberResponse readClubLeaderByClubId(UUID clubId) {
         return memberClubRepository.findLeaderByClubId(clubId)
-                .orElseThrow(() -> ClubException.clubLeaderNotFound(clubId));
+                .orElseThrow(() -> clubLeaderNotFound(clubId));
     }
 
     @Override
     @Transactional
     public void joinClub(UUID clubId, Member member) {
         // 클럽이 존재하는지 확인
-        var club = clubRepository.findById(clubId)
-                .orElseThrow(() -> ClubException.clubNotFound(clubId));
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> clubNotFound(clubId));
 
         // 이미 가입된 사용자인지 확인
         boolean isAlreadyMember = memberClubRepository.findByClubIdAndMemberId(clubId, member.getId()).isPresent();
         if (isAlreadyMember) {
-            throw ClubException.memberAlreadyInClub();
+            throw memberAlreadyInClub();
         }
 
         // MemberClub 엔티티 생성 및 저장
@@ -63,6 +76,35 @@ public class MemberClubServiceImpl implements MemberClubService {
                 .build();
 
         memberClubRepository.save(memberClub);
+    }
+
+    @Override
+    public String generateInviteCode(UUID clubId, Member loginMember) {
+        MemberClub memberClub = memberClubRepository.findByClubIdAndMemberId(clubId, loginMember.getId())
+                .orElseThrow(() -> clubNotFound(clubId));
+
+        if (!memberClub.isLeader()) {
+            throw notClubLeader();
+        }
+
+        String clubKey = CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId;
+        String baseUrl = "https://point-of-views.com/clubs";
+
+        String existingInviteCode = redisService.getValue(clubKey);
+        if (existingInviteCode != null) {
+            return String.format("%s/code?value=%s", baseUrl, existingInviteCode);
+        }
+
+        String inviteCode;
+        boolean isDuplicate;
+        do {
+            inviteCode = InviteCodeGenerator.generateInviteCode(INVITE_CODE_LENGTH);
+            isDuplicate = !redisService.setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + inviteCode, clubId.toString(), Duration.ofSeconds(DAY_IN_SECONDS));
+        } while (isDuplicate);
+
+        redisService.setValue(clubKey, inviteCode, Duration.ofSeconds(DAY_IN_SECONDS));
+
+        return String.format("%s/code?value=%s", baseUrl, inviteCode);
     }
 
     @Override
