@@ -1,6 +1,7 @@
 package net.pointofviews.club.controller.specification;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,10 +9,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.pointofviews.auth.dto.MemberDetailsDto;
-import net.pointofviews.club.dto.request.*;
+import net.pointofviews.club.dto.request.CreateClubRequest;
+import net.pointofviews.club.dto.request.PutClubLeaderRequest;
+import net.pointofviews.club.dto.request.PutClubRequest;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,10 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Pageable;
 
-
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Club", description = "클럽 관련 API")
@@ -319,5 +320,13 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> joinClub(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember);
+    ResponseEntity<BaseResponse<Void>> joinClub(UUID clubId, Member loginMember);
+
+    @Operation(summary = "클럽 초대 코드 생성", description = "클럽에 가입할 수 있는 api로 연결하는 초대코드를 생성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "초대 코드 생성 성공")
+    })
+    ResponseEntity<BaseResponse<String>> generateInviteCode(
+            @Parameter(description = "클럽 pk", example = "ea27bb14-ec27-458b-ad88-08182b46e9d7") UUID clubId,
+            Member loginMember);
 }
