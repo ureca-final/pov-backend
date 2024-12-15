@@ -2,6 +2,7 @@ package net.pointofviews.club.repository;
 
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
@@ -58,50 +59,62 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
     long countByClub(Club club);
 
     @Query("""
-           SELECT c.id AS clubId,
-                  c.name AS clubName,
-                  c.description AS clubDescription,
-                  c.maxParticipants AS maxParticipant,
-                  COUNT(DISTINCT mc.id) AS participantCount,
-                  COUNT(DISTINCT cm.id) AS movieCount,
-                  GROUP_CONCAT(DISTINCT cfg.genreCode) AS genreCodes
-           FROM MemberClub mc
-           JOIN mc.club c
-           LEFT JOIN c.clubMovies cm
-           LEFT JOIN c.clubFavorGenres cfg
-           WHERE mc.member.id = :memberId
-           GROUP BY c.id
-           """)
+            SELECT c.id AS clubId,
+                   c.name AS clubName,
+                   c.description AS clubDescription,
+                   c.maxParticipants AS maxParticipant,
+                   COUNT(DISTINCT mc.id) AS participantCount,
+                   COUNT(DISTINCT cm.id) AS movieCount,
+                   GROUP_CONCAT(DISTINCT cfg.genreCode) AS genreCodes
+            FROM MemberClub mc
+            JOIN mc.club c
+            LEFT JOIN c.clubMovies cm
+            LEFT JOIN c.clubFavorGenres cfg
+            WHERE mc.member.id = :memberId
+            GROUP BY c.id
+            """)
     List<Object[]> findMyClubsByMemberId(@Param("memberId") UUID memberId);
 
     @Query("""
-       SELECT new net.pointofviews.club.dto.response.ReadClubMemberResponse(
-           m.nickname,
-           m.profileImage,
-           mc.isLeader
-       )
-       FROM MemberClub mc
-       JOIN mc.member m
-       WHERE mc.club.id = :clubId
-       """)
+            SELECT new net.pointofviews.club.dto.response.ReadClubMemberResponse(
+                m.nickname,
+                m.profileImage,
+                mc.isLeader
+            )
+            FROM MemberClub mc
+            JOIN mc.member m
+            WHERE mc.club.id = :clubId
+            """)
     List<ReadClubMemberResponse> findMembersByClubId(@Param("clubId") UUID clubId);
 
     @Query("""
-       SELECT mc
-       FROM MemberClub mc
-       WHERE mc.club.id = :clubId AND mc.member.id = :memberId
-       """)
+            SELECT mc
+            FROM MemberClub mc
+            WHERE mc.club.id = :clubId AND mc.member.id = :memberId
+            """)
     Optional<MemberClub> findByClubIdAndMemberId(@Param("clubId") UUID clubId, @Param("memberId") UUID memberId);
 
     @Query("""
-       SELECT new net.pointofviews.club.dto.response.ReadClubMemberResponse(
-           mc.member.nickname,
-           mc.member.profileImage,
-           mc.isLeader
-       )
-       FROM MemberClub mc
-       WHERE mc.club.id = :clubId AND mc.isLeader = true
-       """)
+            SELECT new net.pointofviews.club.dto.response.ReadClubMemberResponse(
+                mc.member.nickname,
+                mc.member.profileImage,
+                mc.isLeader
+            )
+            FROM MemberClub mc
+            WHERE mc.club.id = :clubId AND mc.isLeader = true
+            """)
     Optional<ReadClubMemberResponse> findLeaderByClubId(@Param("clubId") UUID clubId);
 
+    @Query("""
+            SELECT new net.pointofviews.club.dto.response.ReadAllClubMembersResponse.ClubMemberResponse(
+                m.email,
+                m.nickname,
+                m.profileImage,
+                mc.isLeader
+            )
+            FROM MemberClub mc
+            LEFT JOIN mc.member m
+            WHERE mc.club.id = :clubId
+            """)
+    List<ReadAllClubMembersResponse.ClubMemberResponse> findAllMembersByClubId(@Param("clubId") UUID clubId);
 }

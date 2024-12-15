@@ -8,10 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.pointofviews.auth.dto.MemberDetailsDto;
-import net.pointofviews.club.dto.request.*;
+import net.pointofviews.club.dto.request.CreateClubRequest;
+import net.pointofviews.club.dto.request.PutClubLeaderRequest;
+import net.pointofviews.club.dto.request.PutClubRequest;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,10 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Pageable;
 
-
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Club", description = "클럽 관련 API")
@@ -297,7 +297,7 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadClubMemberListResponse>> readClubMembers(@PathVariable UUID clubId);
+    ResponseEntity<BaseResponse<ReadAllClubMembersResponse>> readClubMembers(@PathVariable UUID clubId);
 
 
     @Operation(summary = "클럽 가입", description = "클럽에 가입합니다.")

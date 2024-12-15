@@ -2,14 +2,15 @@ package net.pointofviews.club.service;
 
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
-import net.pointofviews.club.repository.ClubRepository;
-import net.pointofviews.club.service.impl.ClubServiceImpl;
-import net.pointofviews.member.domain.Member;
+import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.club.exception.ClubException;
+import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.impl.MemberClubServiceImpl;
+import net.pointofviews.member.domain.Member;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +26,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,9 +34,6 @@ class MemberClubServiceImplTest {
 
     @InjectMocks
     private MemberClubServiceImpl memberClubService;
-
-    @Mock
-    private ClubServiceImpl clubService;
 
     @Mock
     private MemberClubRepository memberClubRepository;
@@ -198,4 +198,71 @@ class MemberClubServiceImplTest {
         }
     }
 
+    @Nested
+    class ReadClubMembers {
+
+        @Nested
+        class Success {
+            @Test
+            void 클럽_멤버_목록_조회() {
+                // given
+                UUID clubId = UUID.randomUUID();
+                List<ReadAllClubMembersResponse.ClubMemberResponse> memberList = List.of(
+                        new ReadAllClubMembersResponse.ClubMemberResponse("email1@example.com", "nickname1", "profile1.jpg", true),
+                        new ReadAllClubMembersResponse.ClubMemberResponse("email2@example.com", "nickname2", "profile2.jpg", false)
+                );
+
+                given(clubRepository.existsById(clubId)).willReturn(true);
+                given(memberClubRepository.findAllMembersByClubId(clubId)).willReturn(memberList);
+
+                // when
+                ReadAllClubMembersResponse response = memberClubService.readAllMembersByClubId(clubId);
+
+                // then
+                assertThat(response).isNotNull();
+                assertThat(response.clubMember()).hasSize(2);
+                assertThat(response.clubMember().get(0).email()).isEqualTo("email1@example.com");
+                assertThat(response.clubMember().get(0).isLeader()).isTrue();
+
+                then(clubRepository).should(times(1)).existsById(clubId);
+                then(memberClubRepository).should(times(1)).findAllMembersByClubId(clubId);
+            }
+
+            @Test
+            @DisplayName("클럽 멤버가 없는 경우 빈 목록 반환")
+            void noMembers() {
+                // given
+                UUID clubId = UUID.randomUUID();
+
+                given(clubRepository.existsById(clubId)).willReturn(true);
+                given(memberClubRepository.findAllMembersByClubId(clubId)).willReturn(Collections.emptyList());
+
+                // when
+                ReadAllClubMembersResponse response = memberClubService.readAllMembersByClubId(clubId);
+
+                // then
+                assertThat(response).isNotNull();
+                assertThat(response.clubMember()).isEmpty();
+
+                then(clubRepository).should(times(1)).existsById(clubId);
+                then(memberClubRepository).should(times(1)).findAllMembersByClubId(clubId);
+            }
+        }
+
+        @Nested
+        class Failure {
+
+            @Test
+            void 존재하지_않는_클럽() {
+                // given
+                UUID clubId = UUID.randomUUID();
+
+                given(clubRepository.existsById(clubId)).willReturn(false);
+
+                // when & then
+                assertThatThrownBy(() -> memberClubService.readAllMembersByClubId(clubId))
+                        .isInstanceOf(ClubException.class).hasMessage(ClubException.clubNotFound(clubId).getMessage());
+            }
+        }
+    }
 }
