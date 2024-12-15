@@ -2,7 +2,7 @@ package net.pointofviews.club.repository;
 
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
-import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
+import net.pointofviews.club.dto.response.ClubMemberResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
@@ -106,7 +106,7 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
     Optional<ReadClubMemberResponse> findLeaderByClubId(@Param("clubId") UUID clubId);
 
     @Query("""
-            SELECT new net.pointofviews.club.dto.response.ReadAllClubMembersResponse.ClubMemberResponse(
+            SELECT new net.pointofviews.club.dto.response.ClubMemberResponse(
                 m.email,
                 m.nickname,
                 m.profileImage,
@@ -116,5 +116,5 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
             LEFT JOIN mc.member m
             WHERE mc.club.id = :clubId
             """)
-    List<ReadAllClubMembersResponse.ClubMemberResponse> findAllMembersByClubId(@Param("clubId") UUID clubId);
+    List<ClubMemberResponse> findAllMembersByClubId(@Param("clubId") UUID clubId);
 }

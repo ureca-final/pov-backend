@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.club.dto.response.ClubMemberResponse;
 import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
@@ -113,7 +114,7 @@ public class MemberClubServiceImpl implements MemberClubService {
             throw ClubException.clubNotFound(clubId);
         }
 
-        List<ReadAllClubMembersResponse.ClubMemberResponse> allMembersByClubId = memberClubRepository.findAllMembersByClubId(clubId);
+        List<ClubMemberResponse> allMembersByClubId = memberClubRepository.findAllMembersByClubId(clubId);
         return new ReadAllClubMembersResponse(allMembersByClubId);
     }
 }

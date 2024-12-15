@@ -2,6 +2,7 @@ package net.pointofviews.club.service;
 
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.club.dto.response.ClubMemberResponse;
 import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
@@ -343,9 +344,9 @@ class MemberClubServiceImplTest {
             void 클럽_멤버_목록_조회() {
                 // given
                 UUID clubId = UUID.randomUUID();
-                List<ReadAllClubMembersResponse.ClubMemberResponse> memberList = List.of(
-                        new ReadAllClubMembersResponse.ClubMemberResponse("email1@example.com", "nickname1", "profile1.jpg", true),
-                        new ReadAllClubMembersResponse.ClubMemberResponse("email2@example.com", "nickname2", "profile2.jpg", false)
+                List<ClubMemberResponse> memberList = List.of(
+                        new ClubMemberResponse("email1@example.com", "nickname1", "profile1.jpg", true),
+                        new ClubMemberResponse("email2@example.com", "nickname2", "profile2.jpg", false)
                 );
 
                 given(clubRepository.existsById(clubId)).willReturn(true);
