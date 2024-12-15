@@ -2,8 +2,6 @@ package net.pointofviews.club.service;
 
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
-import net.pointofviews.club.dto.response.ClubMemberResponse;
-import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.club.exception.ClubException;
@@ -13,7 +11,6 @@ import net.pointofviews.club.service.impl.MemberClubServiceImpl;
 import net.pointofviews.club.utils.InviteCodeGenerator;
 import net.pointofviews.common.service.impl.StringRedisServiceImpl;
 import net.pointofviews.member.domain.Member;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +20,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -208,8 +204,8 @@ class MemberClubServiceImplTest {
 
     @Nested
     class GenerateInviteCode {
-        private static final String INVITE_CODE_PREFIX = "invitecode:";
-        private static final String INVITE_CODE_SET_KEY = "invitecode:codes";
+        private static final String CLUB_TO_INVITE_CODE_KEY_PREFIX = "club:invite:";
+        private static final String INVITE_CODE_TO_CLUB_KEY_PREFIX = "invite:code:";
 
         @Nested
         class Success {
@@ -224,15 +220,15 @@ class MemberClubServiceImplTest {
 
                 given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.of(memberClub));
                 given(memberClub.isLeader()).willReturn(true);
-                given(redisService.getValue(INVITE_CODE_PREFIX + clubId)).willReturn(existingInviteCode);
+                given(redisService.getValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId)).willReturn(existingInviteCode);
 
                 // when
                 String result = memberClubService.generateInviteCode(clubId, member);
 
                 // then
-                assertThat(result).isEqualTo("https://point-of-views.com/api/clubs/join?code=" + existingInviteCode);
+                assertThat(result).isEqualTo("https://point-of-views.com/clubs/code?value=" + existingInviteCode);
                 then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
-                then(redisService).should().getValue(INVITE_CODE_PREFIX + clubId);
+                then(redisService).should().getValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId);
             }
 
             @Test
@@ -246,8 +242,8 @@ class MemberClubServiceImplTest {
 
                 given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.of(memberClub));
                 given(memberClub.isLeader()).willReturn(true);
-                given(redisService.getValue(INVITE_CODE_PREFIX + clubId)).willReturn(null);
-                given(redisService.addToSet(INVITE_CODE_SET_KEY, newInviteCode)).willReturn(1L);
+                given(redisService.getValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId)).willReturn(null);
+                given(redisService.setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + newInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds))).willReturn(true);
 
                 try (MockedStatic<InviteCodeGenerator> inviteCodeGeneratorMock = mockStatic(InviteCodeGenerator.class)) {
                     inviteCodeGeneratorMock.when(() -> InviteCodeGenerator.generateInviteCode(8)).thenReturn(newInviteCode);
@@ -256,9 +252,9 @@ class MemberClubServiceImplTest {
                     String result = memberClubService.generateInviteCode(clubId, member);
 
                     // then
-                    assertThat(result).isEqualTo("https://point-of-views.com/api/clubs/join?code=" + newInviteCode);
-                    then(redisService).should().addToSet(INVITE_CODE_SET_KEY, newInviteCode);
-                    then(redisService).should().setValue(INVITE_CODE_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
+                    assertThat(result).isEqualTo("https://point-of-views.com/clubs/code?value=" + newInviteCode);
+                    then(redisService).should().setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + newInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds));
+                    then(redisService).should().setValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
                     then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
                 }
             }
@@ -275,9 +271,9 @@ class MemberClubServiceImplTest {
 
                 given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.of(memberClub));
                 given(memberClub.isLeader()).willReturn(true);
-                given(redisService.getValue(INVITE_CODE_PREFIX + clubId)).willReturn(null);
-                given(redisService.addToSet(INVITE_CODE_SET_KEY, duplicateInviteCode)).willReturn(0L);
-                given(redisService.addToSet(INVITE_CODE_SET_KEY, newInviteCode)).willReturn(1L);
+                given(redisService.getValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId)).willReturn(null);
+                given(redisService.setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + duplicateInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds))).willReturn(false);
+                given(redisService.setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + newInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds))).willReturn(true);
 
                 try (MockedStatic<InviteCodeGenerator> inviteCodeGeneratorMock = mockStatic(InviteCodeGenerator.class)) {
                     inviteCodeGeneratorMock.when(() -> InviteCodeGenerator.generateInviteCode(8))
@@ -288,10 +284,10 @@ class MemberClubServiceImplTest {
                     String result = memberClubService.generateInviteCode(clubId, member);
 
                     // then
-                    assertThat(result).isEqualTo("https://point-of-views.com/api/clubs/join?code=" + newInviteCode);
-                    then(redisService).should().addToSet(INVITE_CODE_SET_KEY, duplicateInviteCode);
-                    then(redisService).should().addToSet(INVITE_CODE_SET_KEY, newInviteCode);
-                    then(redisService).should().setValue(INVITE_CODE_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
+                    assertThat(result).isEqualTo("https://point-of-views.com/clubs/code?value=" + newInviteCode);
+                    then(redisService).should().setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + duplicateInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds));
+                    then(redisService).should().setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + newInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds));
+                    then(redisService).should().setValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
                 }
             }
         }
@@ -331,74 +327,6 @@ class MemberClubServiceImplTest {
                         .hasMessage(ClubException.clubNotFound(clubId).getMessage());
                 then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
                 then(redisService).shouldHaveNoInteractions();
-            }
-        }
-    }
-
-    @Nested
-    class ReadClubMembers {
-
-        @Nested
-        class Success {
-            @Test
-            void 클럽_멤버_목록_조회() {
-                // given
-                UUID clubId = UUID.randomUUID();
-                List<ClubMemberResponse> memberList = List.of(
-                        new ClubMemberResponse("email1@example.com", "nickname1", "profile1.jpg", true),
-                        new ClubMemberResponse("email2@example.com", "nickname2", "profile2.jpg", false)
-                );
-
-                given(clubRepository.existsById(clubId)).willReturn(true);
-                given(memberClubRepository.findAllMembersByClubId(clubId)).willReturn(memberList);
-
-                // when
-                ReadAllClubMembersResponse response = memberClubService.readAllMembersByClubId(clubId);
-
-                // then
-                assertThat(response).isNotNull();
-                assertThat(response.clubMember()).hasSize(2);
-                assertThat(response.clubMember().get(0).email()).isEqualTo("email1@example.com");
-                assertThat(response.clubMember().get(0).isLeader()).isTrue();
-
-                then(clubRepository).should(times(1)).existsById(clubId);
-                then(memberClubRepository).should(times(1)).findAllMembersByClubId(clubId);
-            }
-
-            @Test
-            @DisplayName("클럽 멤버가 없는 경우 빈 목록 반환")
-            void noMembers() {
-                // given
-                UUID clubId = UUID.randomUUID();
-
-                given(clubRepository.existsById(clubId)).willReturn(true);
-                given(memberClubRepository.findAllMembersByClubId(clubId)).willReturn(Collections.emptyList());
-
-                // when
-                ReadAllClubMembersResponse response = memberClubService.readAllMembersByClubId(clubId);
-
-                // then
-                assertThat(response).isNotNull();
-                assertThat(response.clubMember()).isEmpty();
-
-                then(clubRepository).should(times(1)).existsById(clubId);
-                then(memberClubRepository).should(times(1)).findAllMembersByClubId(clubId);
-            }
-        }
-
-        @Nested
-        class Failure {
-
-            @Test
-            void 존재하지_않는_클럽() {
-                // given
-                UUID clubId = UUID.randomUUID();
-
-                given(clubRepository.existsById(clubId)).willReturn(false);
-
-                // when & then
-                assertThatThrownBy(() -> memberClubService.readAllMembersByClubId(clubId))
-                        .isInstanceOf(ClubException.class).hasMessage(ClubException.clubNotFound(clubId).getMessage());
             }
         }
     }
