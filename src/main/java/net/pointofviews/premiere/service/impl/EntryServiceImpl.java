@@ -8,9 +8,11 @@ import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.premiere.domain.Entry;
 import net.pointofviews.premiere.domain.Premiere;
 import net.pointofviews.premiere.dto.request.CreateEntryRequest;
+import net.pointofviews.premiere.dto.request.DeleteEntryRequest;
 import net.pointofviews.premiere.dto.response.CreateEntryResponse;
 import net.pointofviews.premiere.dto.response.ReadEntryResponse;
 import net.pointofviews.premiere.dto.response.ReadMyEntryListResponse;
+import net.pointofviews.premiere.exception.EntryException;
 import net.pointofviews.premiere.repository.EntryRepository;
 import net.pointofviews.premiere.repository.PremiereRepository;
 import net.pointofviews.premiere.service.EntryService;
@@ -81,6 +83,28 @@ public class EntryServiceImpl implements EntryService {
         entryRepository.save(entry);
 
         return new CreateEntryResponse(entry.getOrderId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteEntry(Member loginMember, Long premiereId, DeleteEntryRequest request) {
+
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        if (premiereRepository.findById(premiereId).isEmpty()) {
+            throw premiereNotFound(premiereId);
+        }
+
+        Entry entry = entryRepository.findEntryByOrderId(request.orderId())
+                .orElseThrow(EntryException::entryNotFound);
+
+        if (!entry.getMember().getId().equals(member.getId())) {
+            log.warn("[응모오류] Entry 회원 ID: {}, 삭제 요청한 회원 ID: {}", entry.getMember().getId(), member.getId());
+            throw unauthorizedEntry();
+        }
+
+        entryRepository.delete(entry);
     }
 
     @Override
