@@ -147,4 +147,54 @@ class RedisServiceTest {
             }
         }
     }
+
+    @Nested
+    class SetIfAbsent {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 키가_존재하지_않아_값_설정_성공() {
+                // given
+                given(redisRepository.setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL)).willReturn(true);
+
+                // when
+                Boolean result = redisService.setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL);
+
+                // then
+                assertThat(result).isTrue();
+                then(redisRepository).should().setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL);
+            }
+        }
+
+        @Nested
+        class Failure {
+
+            @Test
+            void 키가_이미_존재하여_값_설정_실패() {
+                // given
+                given(redisRepository.setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL)).willReturn(false);
+
+                // when
+                Boolean result = redisService.setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL);
+
+                // then
+                assertThat(result).isFalse();
+                then(redisRepository).should().setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL);
+            }
+
+            @Test
+            void null_반환_시_RedisException_발생() {
+                // given
+                given(redisRepository.setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL)).willReturn(null);
+
+                // when & then
+                assertThatThrownBy(() -> redisService.setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL))
+                        .isInstanceOf(RedisException.class)
+                        .hasMessage(RedisException.redisServerError(TEST_KEY).getMessage());
+                then(redisRepository).should().setIfAbsent(TEST_KEY, TEST_VALUE, TEST_TTL);
+            }
+        }
+    }
 }
