@@ -7,6 +7,7 @@ import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.controller.specification.EntrySpecification;
 import net.pointofviews.premiere.dto.request.CreateEntryRequest;
 import net.pointofviews.premiere.dto.response.CreateEntryResponse;
+import net.pointofviews.premiere.dto.response.ReadMyEntryListResponse;
 import net.pointofviews.premiere.service.EntryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,5 +30,17 @@ public class EntryController implements EntrySpecification {
         CreateEntryResponse response = entryService.saveEntry(loginMember, premiereId, request);
 
         return BaseResponse.ok("시사회 응모가 성공적으로 완료되었습니다.", response);
+    }
+
+    @Override
+    @GetMapping("/entry/my")
+    public ResponseEntity<BaseResponse<ReadMyEntryListResponse>> readMyEntry(@AuthenticationPrincipal(expression = "member") Member loginMember) {
+        ReadMyEntryListResponse response = entryService.findMyEntryList(loginMember);
+
+        if (response.entry().isEmpty()) {
+            return BaseResponse.noContent();
+        }
+
+        return BaseResponse.ok("내 티켓팅 내역이 성공적으로 조회되었습니다.", response);
     }
 }

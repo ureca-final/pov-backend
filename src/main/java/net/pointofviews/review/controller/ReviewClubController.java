@@ -26,7 +26,7 @@ public class ReviewClubController implements ReviewClubSpecification {
     private final ReviewClubService reviewClubService;
 
     @Override
-    @GetMapping("/reviews")
+    @GetMapping("/reviews/my")
     public ResponseEntity<BaseResponse<ReadMyClubInfoListResponse>> readMyClubsInfo(@AuthenticationPrincipal(expression = "member") Member loginMember) {
         ReadMyClubInfoListResponse response = reviewClubService.findMyClubList(loginMember);
 
