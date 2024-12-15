@@ -3,6 +3,7 @@ package net.pointofviews.member.repository;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.domain.MemberFcmToken;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,4 +19,8 @@ public interface MemberFcmTokenRepository extends JpaRepository<MemberFcmToken, 
 
     @Query("SELECT mt FROM MemberFcmToken mt WHERE mt.member.id IN :memberIds AND mt.isActive = true")
     List<MemberFcmToken> findActiveTokensByMemberIds(@Param("memberIds") List<UUID> memberIds);
+
+    @Modifying
+    @Query("UPDATE MemberFcmToken mt SET mt.isActive = false WHERE mt.fcmToken = :token")
+    void deactivateToken(@Param("token") String token);
 }
