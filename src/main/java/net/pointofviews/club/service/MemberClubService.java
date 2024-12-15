@@ -14,4 +14,6 @@ public interface MemberClubService {
     ReadClubMemberResponse readClubLeaderByClubId(UUID clubId);
 
     void joinClub(UUID clubId, Member member);
+
+    String generateInviteCode(UUID clubId, Member loginMember);
 }
