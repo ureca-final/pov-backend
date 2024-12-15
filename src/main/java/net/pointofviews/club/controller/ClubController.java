@@ -5,19 +5,20 @@ import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.controller.specification.ClubSpecification;
 import net.pointofviews.club.dto.request.CreateClubRequest;
+import net.pointofviews.club.dto.request.PutClubLeaderRequest;
+import net.pointofviews.club.dto.request.PutClubRequest;
 import net.pointofviews.club.dto.response.*;
-import net.pointofviews.club.dto.request.*;
 import net.pointofviews.club.service.ClubSearchService;
 import net.pointofviews.club.service.ClubService;
 import net.pointofviews.club.service.MemberClubService;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public class ClubController implements ClubSpecification {
     @GetMapping("/search")
     @Override
     public ResponseEntity<BaseResponse<SearchClubsListResponse>> searchClubs(@RequestParam String query,
-                                                                              Pageable pageable) {
+                                                                             Pageable pageable) {
         SearchClubsListResponse response = clubSearchService.searchClubs(query, pageable);
         return BaseResponse.ok("공개된 모든 클럽이 성공적으로 검색되었습니다.", response);
     }
@@ -48,7 +49,7 @@ public class ClubController implements ClubSpecification {
     @GetMapping("/{clubId}")
     @Override
     public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember, Pageable pageable) {
-        ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember,pageable);
+        ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember, pageable);
         return BaseResponse.ok("클럽 상세 정보를 성공적으로 조회했습니다.", response);
     }
 
@@ -72,7 +73,7 @@ public class ClubController implements ClubSpecification {
             @RequestPart(value = "file") MultipartFile file,
             @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
     ) {
-        CreateClubImageResponse response = clubService.saveClubImages(file,memberDetailsDto.member());
+        CreateClubImageResponse response = clubService.saveClubImages(file, memberDetailsDto.member());
         return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", response);
     }
 
@@ -99,7 +100,7 @@ public class ClubController implements ClubSpecification {
 
     @DeleteMapping("/{clubId}/leave")
     @Override
-    public ResponseEntity<BaseResponse<Void>> leaveClub(@PathVariable UUID clubId, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto){
+    public ResponseEntity<BaseResponse<Void>> leaveClub(@PathVariable UUID clubId, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
         clubService.leaveClub(clubId, memberDetailsDto.member());
         return BaseResponse.ok("클럽을 성공적으로 탈퇴하였습니다.");
     }
@@ -133,14 +134,14 @@ public class ClubController implements ClubSpecification {
     // 그룹원 목록 조회
     @GetMapping("/{clubId}/member")
     @Override
-    public ResponseEntity<BaseResponse<ReadClubMemberListResponse>> readClubMembers(@PathVariable UUID clubId) {
-        return null;
+    public ResponseEntity<BaseResponse<ReadAllClubMembersResponse>> readClubMembers(@PathVariable UUID clubId) {
+        ReadAllClubMembersResponse response = memberClubService.readAllMembersByClubId(clubId);
+        return BaseResponse.ok("그룹원 목록이 성공적으로 조회되었습니다.", response);
     }
 
     @Override
     @PostMapping("/{clubId}/member")
-    public ResponseEntity<BaseResponse<Void>> joinClub(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember)
-    {
+    public ResponseEntity<BaseResponse<Void>> joinClub(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
         memberClubService.joinClub(clubId, loginMember);
         return BaseResponse.ok("클럽 가입에 성공했습니다");
     }
