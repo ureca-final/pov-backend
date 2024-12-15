@@ -298,7 +298,7 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadClubMemberListResponse>> readClubMembers(@PathVariable UUID clubId);
+    ResponseEntity<BaseResponse<ReadAllClubMembersResponse>> readClubMembers(@PathVariable UUID clubId);
 
 
     @Operation(summary = "클럽 가입", description = "클럽에 가입합니다.")

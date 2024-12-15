@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
+import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.MemberClubService;
@@ -89,7 +91,7 @@ public class MemberClubServiceImpl implements MemberClubService {
 
         String existingInviteCode = redisService.getValue(clubKey);
         if (existingInviteCode != null) {
-            return String.format("%s/%s/join?code=%s", baseUrl, clubId, existingInviteCode);
+            return String.format("%s/join?code=%s", baseUrl, existingInviteCode);
         }
 
         String inviteCode;
@@ -102,6 +104,16 @@ public class MemberClubServiceImpl implements MemberClubService {
 
         redisService.setValue(clubKey, inviteCode, Duration.ofSeconds(DAY_IN_SECONDS));
 
-        return String.format("%s/%s/join?code=%s", baseUrl, clubId, inviteCode);
+        return String.format("%s/join?code=%s", baseUrl, inviteCode);
+    }
+
+    @Override
+    public ReadAllClubMembersResponse readAllMembersByClubId(UUID clubId) {
+        if (!clubRepository.existsById(clubId)) {
+            throw ClubException.clubNotFound(clubId);
+        }
+
+        List<ReadAllClubMembersResponse.ClubMemberResponse> allMembersByClubId = memberClubRepository.findAllMembersByClubId(clubId);
+        return new ReadAllClubMembersResponse(allMembersByClubId);
     }
 }

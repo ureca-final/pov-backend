@@ -1,5 +1,6 @@
 package net.pointofviews.club.service;
 
+import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.member.domain.Member;
@@ -16,4 +17,6 @@ public interface MemberClubService {
     void joinClub(UUID clubId, Member member);
 
     String generateInviteCode(UUID clubId, Member loginMember);
+
+    ReadAllClubMembersResponse readAllMembersByClubId(UUID clubId);
 }

@@ -134,8 +134,9 @@ public class ClubController implements ClubSpecification {
     // 그룹원 목록 조회
     @GetMapping("/{clubId}/member")
     @Override
-    public ResponseEntity<BaseResponse<ReadClubMemberListResponse>> readClubMembers(@PathVariable UUID clubId) {
-        return null;
+    public ResponseEntity<BaseResponse<ReadAllClubMembersResponse>> readClubMembers(@PathVariable UUID clubId) {
+        ReadAllClubMembersResponse response = memberClubService.readAllMembersByClubId(clubId);
+        return BaseResponse.ok("그룹원 목록이 성공적으로 조회되었습니다.", response);
     }
 
     @Override
