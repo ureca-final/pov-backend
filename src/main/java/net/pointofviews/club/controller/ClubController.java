@@ -145,4 +145,14 @@ public class ClubController implements ClubSpecification {
         memberClubService.joinClub(clubId, loginMember);
         return BaseResponse.ok("클럽 가입에 성공했습니다");
     }
+
+    @Override
+    @PostMapping("/{clubId}/invite-code")
+    public ResponseEntity<BaseResponse<String>> generateInviteCode(
+            @PathVariable UUID clubId,
+            @AuthenticationPrincipal(expression = "member")
+            Member loginMember) {
+        String code = memberClubService.generateInviteCode(clubId, loginMember);
+        return BaseResponse.ok("초대코드 생성에 성공했습니다.", code);
+    }
 }
