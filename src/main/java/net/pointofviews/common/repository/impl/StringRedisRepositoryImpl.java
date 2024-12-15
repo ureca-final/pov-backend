@@ -29,4 +29,9 @@ public class StringRedisRepositoryImpl implements RedisRepository {
     public Long addToSet(String key, String value) {
         return redisTemplate.opsForSet().add(key, value);
     }
+
+    @Override
+    public Boolean setIfAbsent(String key, String value, Duration ttl) {
+        return redisTemplate.opsForValue().setIfAbsent(key, value, ttl);
+    }
 }

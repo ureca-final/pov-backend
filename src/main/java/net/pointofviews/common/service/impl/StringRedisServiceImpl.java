@@ -51,4 +51,14 @@ public class StringRedisServiceImpl implements RedisService {
             throw RedisException.redisServerError(key);
         }
     }
+
+    @Override
+    public Boolean setIfAbsent(String key, String value, Duration ttl) {
+        Boolean result = redisRepository.setIfAbsent(key, value, ttl);
+        if (result == null) {
+            log.warn("Redis setIfAbsent: null 반환, key={}, value={}", key, value);
+            throw RedisException.redisServerError(key);
+        }
+        return result;
+    }
 }

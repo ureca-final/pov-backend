@@ -8,4 +8,6 @@ public interface RedisRepository {
     void setValueWithTTL(String key, String value, Duration ttl);
 
     Long addToSet(String key, String value);
+
+    Boolean setIfAbsent(String key, String value, Duration ttl);
 }
