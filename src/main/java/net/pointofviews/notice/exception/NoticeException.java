@@ -26,16 +26,14 @@ public class NoticeException extends BusinessException {
             super(HttpStatus.NOT_FOUND, "알림 템플릿을 찾을 수 없습니다.");
         }
     }
-
+    public static class ReviewNotFoundException extends NoticeException {
+        public ReviewNotFoundException() {
+            super(HttpStatus.NOT_FOUND, "리뷰가 존재하지 않아 알림 전송이 불가능합니다.");
+        }
+    }
     public static class InactiveNoticeTemplateException extends NoticeException {
         public InactiveNoticeTemplateException() {
             super(HttpStatus.BAD_REQUEST, "비활성화된 알림 템플릿입니다.");
-        }
-    }
-
-    public static class NoTargetMembersFoundException extends NoticeException {
-        public NoTargetMembersFoundException(String genre, String code) {
-            super(HttpStatus.NOT_FOUND, String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.", genre, code));
         }
     }
 

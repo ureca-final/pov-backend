@@ -6,6 +6,7 @@ import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.MemberFcmToken;
 import net.pointofviews.member.repository.MemberFcmTokenRepository;
+import net.pointofviews.movie.domain.MovieGenre;
 import net.pointofviews.notice.domain.Notice;
 import net.pointofviews.notice.domain.NoticeReceive;
 import net.pointofviews.notice.domain.NoticeSend;
@@ -18,6 +19,8 @@ import net.pointofviews.notice.repository.NoticeReceiveRepository;
 import net.pointofviews.notice.repository.NoticeRepository;
 import net.pointofviews.notice.repository.NoticeSendRepository;
 import net.pointofviews.notice.utils.FcmUtil;
+import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.repository.ReviewRepository;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +33,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class NoticeServiceImpl implements NoticeService {
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 500;
 
     private final NoticeRepository noticeRepository;
     private final NoticeSendRepository noticeSendRepository;
     private final NoticeReceiveRepository noticeReceiveRepository;
     private final MemberFcmTokenRepository memberFcmTokenRepository;
+    private final ReviewRepository reviewRepository;
     private final CommonCodeService commonCodeService;
     private final FcmUtil fcmUtil;
     private final StringRedisTemplate stringRedisTemplate;
@@ -66,18 +70,46 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     @Transactional
     public void sendNotice(SendNoticeRequest request) {
-        // 장르명을 코드로 변환
-        String genreName = request.templateVariables().get("genre");
-        String genreCode = commonCodeService.convertNameToCommonCode(genreName, CodeGroupEnum.MOVIE_GENRE);
+        // 리뷰 작성자 ID 가져오기
+        Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
 
-        // Redis에서 선호 장르 사용자 조회
-        String genreKey = generateRedisKey(genreCode);
-        Set<UUID> targetMembers = getTargetMembers(genreKey);
+        // 리뷰의 영화에 있는 모든 장르의 선호 사용자 조회
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(NoticeException.ReviewNotFoundException::new);
+        Set<UUID> targetMembers = new HashSet<>();
+
+        // 각 장르별 선호 사용자 조회 및 통합 (중복 제거)
+        for (MovieGenre movieGenre : review.getMovie().getGenres()) {
+            String genreName = commonCodeService.convertCommonCodeToName(
+                    movieGenre.getGenreCode(),
+                    CodeGroupEnum.MOVIE_GENRE
+            );
+            String genreKey = generateRedisKey(movieGenre.getGenreCode());
+            Set<UUID> genreTargetMembers = getTargetMembers(genreKey);
+
+            String message;
+            if (genreTargetMembers.isEmpty()) {
+                message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.",
+                        genreName, movieGenre.getGenreCode());
+            } else {
+                message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림 대상자 수: %d",
+                        genreName, movieGenre.getGenreCode(), genreTargetMembers.size());
+            }
+            log.info(message);
+
+            targetMembers.addAll(genreTargetMembers);
+        }
+
+        // 리뷰 작성자 제외
+        final UUID reviewAuthorId = review.getMember().getId();
+        if (reviewAuthorId != null) {
+            targetMembers = targetMembers.stream()
+                    .filter(memberId -> !memberId.equals(reviewAuthorId))
+                    .collect(Collectors.toSet());
+        }
 
         if (targetMembers.isEmpty()) {
-            String message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.",
-                    genreName, genreCode);
-            log.info(message);
+            log.info("모든 장르에 대해 알림을 받을 대상자가 없습니다.");
             return;
         }
 
@@ -108,41 +140,43 @@ public class NoticeServiceImpl implements NoticeService {
             }
 
             List<NoticeReceive> noticeReceives = new ArrayList<>();
+            List<String> tokenList = new ArrayList<>();
+
+
+            // 알림 수신 객체 생성 및 토큰 리스트 생성
             for (MemberFcmToken fcmToken : fcmTokens) {
-                try {
-                    String noticeContent = request.templateVariables().getOrDefault("notice_content", content);
+                NoticeReceive noticeReceive = NoticeReceive.builder()
+                        .member(fcmToken.getMember())
+                        .noticeSendId(noticeSend.getId())
+                        .noticeContent(content)
+                        .noticeTitle(noticeTemplate.getNoticeTitle())
+                        .noticeType(noticeTemplate.getNoticeType())
+                        .reviewId(reviewId)
+                        .build();
 
-                    Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
-
-                    fcmUtil.sendMessage(
-                            fcmToken.getFcmToken(),
-                            noticeTemplate.getNoticeTitle(),
-                            content,
-                            reviewId,
-                            noticeContent
-                    );
-
-                    NoticeReceive noticeReceive = NoticeReceive.builder()
-                            .member(fcmToken.getMember())
-                            .noticeSendId(noticeSend.getId())
-                            .noticeContent(content)
-                            .noticeTitle(noticeTemplate.getNoticeTitle())
-                            .noticeType(noticeTemplate.getNoticeType())
-                            .reviewId(parseIdOrNull(request.templateVariables().get("review_id")))
-                            .build();
-
-                    noticeReceives.add(noticeReceive);
-                } catch (NoticeException.NoticeSendFailedException e) {
-                    log.error("Failed to send notification to member: {}", fcmToken.getMember().getId(), e);
-                    noticeSend.setSucceed(false);
-                    noticeSendRepository.save(noticeSend);
-                }
+                noticeReceives.add(noticeReceive);
+                tokenList.add(fcmToken.getFcmToken());
             }
 
             try {
+                String noticeContent = request.templateVariables().getOrDefault("notice_content", content);
+
+                fcmUtil.sendMessage(
+                        tokenList,
+                        noticeTemplate.getNoticeTitle(),
+                        content,
+                        reviewId,
+                        noticeContent
+                );
+
                 if (!noticeReceives.isEmpty()) {
                     noticeReceiveRepository.saveAll(noticeReceives);
                 }
+            } catch (NoticeException.NoticeSendFailedException e) {
+                log.error("Failed to send batch notifications");
+                noticeSend.setSucceed(false);
+                noticeSendRepository.save(noticeSend);
+
             } catch (Exception e) {
                 log.error("Failed to save notice receives", e);
                 noticeSend.setSucceed(false);
@@ -153,7 +187,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<ReadNoticeResponse> findNotices(UUID memberId) {
-        return noticeReceiveRepository.findByMemberIdOrderByCreatedAtDesc(memberId)
+        return noticeReceiveRepository.findByMemberIdWithReviewAndMovieOrderByCreatedAtDesc(memberId)
                 .stream()
                 .map(receive -> new ReadNoticeResponse(
                         receive.getId(),
@@ -162,7 +196,10 @@ public class NoticeServiceImpl implements NoticeService {
                         receive.getNoticeType(),
                         receive.isRead(),
                         receive.getCreatedAt(),
-                        receive.getReviewId()
+                        receive.getReviewId(),
+                        receive.getReviewId() != null ? reviewRepository.findById(receive.getReviewId())
+                                .map(review -> review.getMovie().getId())
+                                .orElse(null) : null
                 ))
                 .toList();
     }
@@ -220,17 +257,6 @@ public class NoticeServiceImpl implements NoticeService {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    private void saveNoticeReceive(UUID memberId, NoticeSend noticeSend, String content) {
-        NoticeReceive noticeReceive = NoticeReceive.builder()
-                .noticeSendId(noticeSend.getId())
-                .noticeContent(content)
-                .noticeTitle(noticeSend.getNotice().getNoticeTitle())
-                .noticeType(noticeSend.getNotice().getNoticeType())
-                .build();
-
-        noticeReceiveRepository.save(noticeReceive);
     }
 
     private String generateRedisKey(String genreCode) {

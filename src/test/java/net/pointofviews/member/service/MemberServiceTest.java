@@ -1,30 +1,8 @@
 package net.pointofviews.member.service;
 
-import static org.assertj.core.api.SoftAssertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import net.pointofviews.auth.dto.response.CheckLoginResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SetOperations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-
 import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
+import net.pointofviews.auth.dto.response.CheckLoginResponse;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.common.exception.CommonCodeException;
 import net.pointofviews.common.service.CommonCodeService;
@@ -41,7 +19,29 @@ import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberFavorGenreRepository;
 import net.pointofviews.member.repository.MemberRepository;
+import net.pointofviews.member.service.impl.MemberRedisServiceImpl;
 import net.pointofviews.member.service.impl.MemberServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -68,7 +68,7 @@ class MemberServiceTest {
     private SetOperations<String, Object> setOperations;
 
     @Mock
-    private MemberRedisService memberRedisService;
+    private MemberRedisServiceImpl memberRedisServiceImpl;
 
     @BeforeEach
     void setUp() {
@@ -131,7 +131,7 @@ class MemberServiceTest {
                 given(commonCodeService.convertNameToCommonCode(any(), any()))
                         .willReturn("14", "04", "01");
 
-                doNothing().when(memberRedisService).saveGenresToRedis(any(UUID.class), anyList());
+                doNothing().when(memberRedisServiceImpl).saveGenresToRedis(any(UUID.class), anyList());
 
                 // when
                 CreateMemberResponse response = memberService.signup(request);
@@ -360,7 +360,7 @@ class MemberServiceTest {
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "04", "05");
 
-                doNothing().when(memberRedisService).updateGenresInRedis(any(UUID.class), anyList(), anyList());
+                doNothing().when(memberRedisServiceImpl).updateGenresInRedis(any(UUID.class), anyList(), anyList());
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -392,7 +392,7 @@ class MemberServiceTest {
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("04", "05", "06");
 
-                doNothing().when(memberRedisService).updateGenresInRedis(any(UUID.class), anyList(), anyList());
+                doNothing().when(memberRedisServiceImpl).updateGenresInRedis(any(UUID.class), anyList(), anyList());
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
@@ -425,7 +425,7 @@ class MemberServiceTest {
 
                 given(memberFavorGenreRepository.findGenreCodeByGenreName(any(), any())).willReturn("01", "02", "03");
 
-                doNothing().when(memberRedisService).updateGenresInRedis(any(UUID.class), anyList(), anyList());
+                doNothing().when(memberRedisServiceImpl).updateGenresInRedis(any(UUID.class), anyList(), anyList());
 
                 // when -- 테스트하고자 하는 행동
                 PutMemberGenreListResponse result = memberService.updateGenre(member, request);
