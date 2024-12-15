@@ -155,4 +155,24 @@ public class ClubController implements ClubSpecification {
         String code = memberClubService.generateInviteCode(clubId, loginMember);
         return BaseResponse.ok("초대코드 생성에 성공했습니다.", code);
     }
+
+    @Override
+    @GetMapping("/code")
+    public ResponseEntity<BaseResponse<ReadPrivateClubDetailsResponse>> readPrivateClubDetails(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @RequestParam String value
+    ) {
+        ReadPrivateClubDetailsResponse response = clubService.readPrivateClubDetails(loginMember, value);
+        return BaseResponse.ok("비공개 클럽 가입 페이지", response);
+    }
+
+    @Override
+    @PostMapping("/join")
+    public ResponseEntity<BaseResponse<Void>> joinPrivateClub(
+            @RequestParam String code,
+            @AuthenticationPrincipal(expression = "member") Member loginMember
+    ) {
+        memberClubService.joinPrivateClub(loginMember, code);
+        return BaseResponse.ok("비공개 클럽에 가입되었습니다.");
+    }
 }
