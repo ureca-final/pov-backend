@@ -35,8 +35,8 @@ public class MemberClubServiceImpl implements MemberClubService {
     private final StringRedisServiceImpl redisService;
     private static final int INVITE_CODE_LENGTH = 8;
     private static final int DAY_IN_SECONDS = 60 * 60 * 24;
-    private static final String INVITE_CODE_PREFIX = "invitecode:";
-    private static final String INVITE_CODE_SET_KEY = "invitecode:codes";
+    private static final String CLUB_TO_INVITE_CODE_KEY_PREFIX = "club:invite:";
+    private static final String INVITE_CODE_TO_CLUB_KEY_PREFIX = "invite:code:";
 
     @Override
     public ReadClubMemberListResponse readMembersByClubId(UUID clubId) {
@@ -87,25 +87,24 @@ public class MemberClubServiceImpl implements MemberClubService {
             throw notClubLeader();
         }
 
-        String clubKey = INVITE_CODE_PREFIX + clubId;
-        String baseUrl = "https://point-of-views.com/api/clubs";
+        String clubKey = CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId;
+        String baseUrl = "https://point-of-views.com/clubs";
 
         String existingInviteCode = redisService.getValue(clubKey);
         if (existingInviteCode != null) {
-            return String.format("%s/join?code=%s", baseUrl, existingInviteCode);
+            return String.format("%s/code?value=%s", baseUrl, existingInviteCode);
         }
 
         String inviteCode;
         boolean isDuplicate;
         do {
             inviteCode = InviteCodeGenerator.generateInviteCode(INVITE_CODE_LENGTH);
-            Long result = redisService.addToSet(INVITE_CODE_SET_KEY, inviteCode);
-            isDuplicate = result == 0;
+            isDuplicate = !redisService.setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + inviteCode, clubId.toString(), Duration.ofSeconds(DAY_IN_SECONDS));
         } while (isDuplicate);
 
         redisService.setValue(clubKey, inviteCode, Duration.ofSeconds(DAY_IN_SECONDS));
 
-        return String.format("%s/join?code=%s", baseUrl, inviteCode);
+        return String.format("%s/code?value=%s", baseUrl, inviteCode);
     }
 
     @Override
