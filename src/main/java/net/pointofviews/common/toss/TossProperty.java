@@ -11,7 +11,8 @@ public record TossProperty(
         String secretKey
 ) {
     public String base64SecretKey() {
-        String base64SecretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(UTF_8));
+        String secretKeyForAuth = secretKey + ":";
+        String base64SecretKey = Base64.getEncoder().encodeToString(secretKeyForAuth.getBytes(UTF_8));
 
         return "Basic " + base64SecretKey;
     }
