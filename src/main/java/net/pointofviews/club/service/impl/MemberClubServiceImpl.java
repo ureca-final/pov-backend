@@ -10,9 +10,8 @@ import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.MemberClubService;
 import net.pointofviews.club.utils.InviteCodeGenerator;
-import net.pointofviews.common.exception.RedisException;
+import net.pointofviews.common.service.impl.StringRedisServiceImpl;
 import net.pointofviews.member.domain.Member;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +29,11 @@ public class MemberClubServiceImpl implements MemberClubService {
 
     private final MemberClubRepository memberClubRepository;
     private final ClubRepository clubRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final StringRedisServiceImpl redisService;
     private static final int INVITE_CODE_LENGTH = 8;
     private static final int DAY_IN_SECONDS = 60 * 60 * 24;
     private static final String INVITE_CODE_PREFIX = "invitecode:";
+    private static final String INVITE_CODE_SET_KEY = "invitecode:codes";
 
     @Override
     public ReadClubMemberListResponse readMembersByClubId(UUID clubId) {
@@ -84,23 +84,24 @@ public class MemberClubServiceImpl implements MemberClubService {
             throw notClubLeader();
         }
 
-        String key = INVITE_CODE_PREFIX + clubId;
+        String clubKey = INVITE_CODE_PREFIX + clubId;
         String baseUrl = "https://point-of-views.com/api/clubs";
 
-        try {
-            String existingInviteCode = redisTemplate.opsForValue().get(key);
-            if (existingInviteCode != null) {
-                return String.format("%s/%s/join?code=%s", baseUrl, clubId, existingInviteCode);
-            }
-
-            String inviteCode = InviteCodeGenerator.generateInviteCode(INVITE_CODE_LENGTH);
-
-            redisTemplate.opsForValue().set(key, inviteCode, Duration.ofSeconds(DAY_IN_SECONDS));
-
-            return String.format("%s/%s/join?code=%s", baseUrl, clubId, inviteCode);
-        } catch (Exception e) {
-            log.error("초대 코드 생성에 실패했습니다.", e);
-            throw RedisException.redisServerError();
+        String existingInviteCode = redisService.getValue(clubKey);
+        if (existingInviteCode != null) {
+            return String.format("%s/%s/join?code=%s", baseUrl, clubId, existingInviteCode);
         }
+
+        String inviteCode;
+        boolean isDuplicate;
+        do {
+            inviteCode = InviteCodeGenerator.generateInviteCode(INVITE_CODE_LENGTH);
+            Long result = redisService.addToSet(INVITE_CODE_SET_KEY, inviteCode);
+            isDuplicate = result == 0;
+        } while (isDuplicate);
+
+        redisService.setValue(clubKey, inviteCode, Duration.ofSeconds(DAY_IN_SECONDS));
+
+        return String.format("%s/%s/join?code=%s", baseUrl, clubId, inviteCode);
     }
 }
