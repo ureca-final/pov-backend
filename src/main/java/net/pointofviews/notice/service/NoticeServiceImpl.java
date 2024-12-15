@@ -7,6 +7,7 @@ import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.MemberFcmToken;
 import net.pointofviews.member.repository.MemberFcmTokenRepository;
 import net.pointofviews.movie.domain.MovieGenre;
+import net.pointofviews.notice.domain.FcmResult;
 import net.pointofviews.notice.domain.Notice;
 import net.pointofviews.notice.domain.NoticeReceive;
 import net.pointofviews.notice.domain.NoticeSend;
@@ -70,38 +71,16 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     @Transactional
     public void sendNotice(SendNoticeRequest request) {
-        // 리뷰 작성자 ID 가져오기
+        // 리뷰 조회
         Long reviewId = parseIdOrNull(request.templateVariables().get("review_id"));
-
-        // 리뷰의 영화에 있는 모든 장르의 선호 사용자 조회
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(NoticeException.ReviewNotFoundException::new);
-        Set<UUID> targetMembers = new HashSet<>();
 
-        // 각 장르별 선호 사용자 조회 및 통합 (중복 제거)
-        for (MovieGenre movieGenre : review.getMovie().getGenres()) {
-            String genreName = commonCodeService.convertCommonCodeToName(
-                    movieGenre.getGenreCode(),
-                    CodeGroupEnum.MOVIE_GENRE
-            );
-            String genreKey = generateRedisKey(movieGenre.getGenreCode());
-            Set<UUID> genreTargetMembers = getTargetMembers(genreKey);
-
-            String message;
-            if (genreTargetMembers.isEmpty()) {
-                message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림을 받을 대상자가 없습니다.",
-                        genreName, movieGenre.getGenreCode());
-            } else {
-                message = String.format("영화장르(장르명: %s, 장르코드: %s)에 대한 알림 대상자 수: %d",
-                        genreName, movieGenre.getGenreCode(), genreTargetMembers.size());
-            }
-            log.info(message);
-
-            targetMembers.addAll(genreTargetMembers);
-        }
+        // 알림 대상자 조회
+        Set<UUID> targetMembers = getTargetMembers(review);
+        final UUID reviewAuthorId = review.getMember().getId();
 
         // 리뷰 작성자 제외
-        final UUID reviewAuthorId = review.getMember().getId();
         if (reviewAuthorId != null) {
             targetMembers = targetMembers.stream()
                     .filter(memberId -> !memberId.equals(reviewAuthorId))
@@ -113,75 +92,91 @@ public class NoticeServiceImpl implements NoticeService {
             return;
         }
 
+        // 알림 템플릿 및 내용 생성
         Notice noticeTemplate = noticeRepository.findByIdAndIsActiveTrue(request.noticeTemplateId())
                 .orElseThrow(NoticeException.NoticeTemplateNotFoundException::new);
 
         String content = replaceTemplateVariables(noticeTemplate.getNoticeContent(), request.templateVariables());
 
+        // NoticeSend 생성 (알림 발송 이력 기록)
         NoticeSend noticeSend = NoticeSend.builder()
                 .notice(noticeTemplate)
                 .noticeContentDetail(content)
                 .isSucceed(true)
                 .build();
-
         noticeSendRepository.save(noticeSend);
 
         // 배치 처리
         List<UUID> memberList = new ArrayList<>(targetMembers);
+        Map<String, MemberFcmToken> tokenMap = new HashMap<>();  // token과 MemberFcmToken 매핑 저장
+        int totalSentCount = 0;
+
         for (int i = 0; i < memberList.size(); i += BATCH_SIZE) {
             int end = Math.min(memberList.size(), i + BATCH_SIZE);
             List<UUID> batchMembers = memberList.subList(i, end);
 
-            // FCM 토큰 일괄 조회
+            // 활성 상태인 fcm 토큰 조회
             List<MemberFcmToken> fcmTokens = memberFcmTokenRepository.findActiveTokensByMemberIds(batchMembers);
-
             if (fcmTokens.isEmpty()) {
                 continue;
             }
 
-            List<NoticeReceive> noticeReceives = new ArrayList<>();
+            // 토큰 매핑 및 알림 수신 객체 생성
             List<String> tokenList = new ArrayList<>();
-
-
-            // 알림 수신 객체 생성 및 토큰 리스트 생성
             for (MemberFcmToken fcmToken : fcmTokens) {
-                NoticeReceive noticeReceive = NoticeReceive.builder()
-                        .member(fcmToken.getMember())
-                        .noticeSendId(noticeSend.getId())
-                        .noticeContent(content)
-                        .noticeTitle(noticeTemplate.getNoticeTitle())
-                        .noticeType(noticeTemplate.getNoticeType())
-                        .reviewId(reviewId)
-                        .build();
-
-                noticeReceives.add(noticeReceive);
+                tokenMap.put(fcmToken.getFcmToken(), fcmToken);
                 tokenList.add(fcmToken.getFcmToken());
             }
 
             try {
+                // fcm 메세지 발송
                 String noticeContent = request.templateVariables().getOrDefault("notice_content", content);
-
-                fcmUtil.sendMessage(
+                List<FcmResult> fcmResults = fcmUtil.sendMessage(
                         tokenList,
                         noticeTemplate.getNoticeTitle(),
                         content,
                         reviewId,
-                        noticeContent
+                        noticeContent,
+                        noticeSend
                 );
 
-                if (!noticeReceives.isEmpty()) {
-                    noticeReceiveRepository.saveAll(noticeReceives);
+                // 발송 결과 처리
+                List<NoticeReceive> successNoticeReceives = new ArrayList<>();
+                for (FcmResult result : fcmResults) {
+                    if (result.isSuccess()) {
+                        MemberFcmToken fcmToken = tokenMap.get(result.getToken());
+                        if (fcmToken != null) {
+                            NoticeReceive noticeReceive = NoticeReceive.builder()
+                                    .member(fcmToken.getMember())
+                                    .noticeSendId(noticeSend.getId())
+                                    .noticeContent(content)
+                                    .noticeTitle(noticeTemplate.getNoticeTitle())
+                                    .noticeType(noticeTemplate.getNoticeType())
+                                    .reviewId(reviewId)
+                                    .build();
+                            successNoticeReceives.add(noticeReceive);
+                            totalSentCount++;
+                        }
+                    } else if (result.isInvalidToken()) {
+                        memberFcmTokenRepository.deactivateToken(result.getToken());
+                    }
                 }
-            } catch (NoticeException.NoticeSendFailedException e) {
-                log.error("Failed to send batch notifications");
+
+                if (!successNoticeReceives.isEmpty()) {
+                    noticeReceiveRepository.saveAll(successNoticeReceives);
+                }
+            } catch (Exception e) {
+                log.error("Failed to process notices", e);
                 noticeSend.setSucceed(false);
                 noticeSendRepository.save(noticeSend);
-
-            } catch (Exception e) {
-                log.error("Failed to save notice receives", e);
-                noticeSend.setSucceed(false);
                 throw new NoticeException.NoticeReceiveSaveFailedException();
             }
+        }
+
+        // 전체 발송 결과 업데이트
+        if (totalSentCount == 0 && !memberList.isEmpty()) {
+            noticeSend.setSucceed(false);
+            noticeSendRepository.save(noticeSend);
         }
     }
 
@@ -227,6 +222,33 @@ public class NoticeServiceImpl implements NoticeService {
         return result;
     }
 
+    // 알림 대상자 수집 로직 분리
+    private Set<UUID> getTargetMembers(Review review) {
+        Set<UUID> targetMembers = new HashSet<>();
+
+        for (MovieGenre movieGenre : review.getMovie().getGenres()) {
+            String genreName = commonCodeService.convertCommonCodeToName(
+                    movieGenre.getGenreCode(),
+                    CodeGroupEnum.MOVIE_GENRE
+            );
+            String genreKey = generateRedisKey(movieGenre.getGenreCode());
+            Set<UUID> genreTargetMembers = getTargetMembers(genreKey);
+
+            if (genreTargetMembers.isEmpty()) {
+                log.info("영화장르(장르명: {}, 장르코드: {})에 대한 알림을 받을 대상자가 없습니다.",
+                        genreName, movieGenre.getGenreCode());
+            } else {
+                log.info("영화장르(장르명: {}, 장르코드: {})에 대한 알림 대상자 수: {}",
+                        genreName, movieGenre.getGenreCode(), genreTargetMembers.size());
+            }
+
+            targetMembers.addAll(genreTargetMembers);
+        }
+
+        return targetMembers;
+    }
+
+    // redis에서 실제 대상자 uuid 조회
     private Set<UUID> getTargetMembers(String genreKey) {
         try {
             Set<String> members = stringRedisTemplate.opsForSet().members(genreKey);
