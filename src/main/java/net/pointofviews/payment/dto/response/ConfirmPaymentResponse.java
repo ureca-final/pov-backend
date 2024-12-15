@@ -2,7 +2,7 @@ package net.pointofviews.payment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ConfirmPaymentResponse(
@@ -10,7 +10,7 @@ public record ConfirmPaymentResponse(
         String orderId,
         int totalAmount,
         String status,
-        LocalDateTime requestedAt,
-        LocalDateTime approvedAt
+        OffsetDateTime requestedAt,
+        OffsetDateTime approvedAt
 ) {
 }
