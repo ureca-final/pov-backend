@@ -35,7 +35,7 @@ public class TempPaymentServiceImpl implements TempPaymentService {
         Entry entry = entryRepository.findEntryByOrderId(request.orderId())
                 .orElseThrow(EntryException::entryNotFound);
 
-        if (entry.getMember().getId().equals(member.getId())) {
+        if (!entry.getMember().getId().equals(member.getId())) {
             throw paymentMismatch();
         }
 

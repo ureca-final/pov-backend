@@ -11,6 +11,7 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.dto.request.CreateEntryRequest;
 import net.pointofviews.premiere.dto.response.CreateEntryResponse;
+import net.pointofviews.premiere.dto.response.ReadMyEntryListResponse;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Entry", description = "시사회 응모 관련 API")
@@ -77,4 +78,20 @@ public interface EntrySpecification {
             @Parameter(description = "응모할 시사회 ID", example = "123") Long premiereId,
             CreateEntryRequest request
     ) throws IllegalAccessException, InterruptedException;
+
+    @Operation(
+            summary = "내 티켓팅 내역 조회",
+            description = "사용자가 응모한 모든 시사회 결제 내역을 최신 순으로 조회하는 API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "내 티켓팅 내역 조회 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "아직 응모한 시사회 없음"
+            )
+    })
+    ResponseEntity<BaseResponse<ReadMyEntryListResponse>> readMyEntry(Member loginMember);
 }
