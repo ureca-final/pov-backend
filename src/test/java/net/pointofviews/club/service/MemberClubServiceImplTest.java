@@ -9,8 +9,7 @@ import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.impl.MemberClubServiceImpl;
 import net.pointofviews.club.utils.InviteCodeGenerator;
-import net.pointofviews.common.config.RedisConfig;
-import net.pointofviews.common.exception.RedisException;
+import net.pointofviews.common.service.impl.StringRedisServiceImpl;
 import net.pointofviews.member.domain.Member;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,9 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.Duration;
 import java.util.List;
@@ -33,17 +29,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@Import(RedisConfig.class)
 class MemberClubServiceImplTest {
 
     @InjectMocks
     private MemberClubServiceImpl memberClubService;
 
     @Mock
-    private StringRedisTemplate redisTemplate;
-
-    @Mock
-    private ValueOperations<String, String> valueOperations;
+    private StringRedisServiceImpl redisService;
 
     @Mock
     private MemberClubRepository memberClubRepository;
@@ -210,6 +202,8 @@ class MemberClubServiceImplTest {
 
     @Nested
     class GenerateInviteCode {
+        private static final String INVITE_CODE_PREFIX = "invitecode:";
+        private static final String INVITE_CODE_SET_KEY = "invitecode:codes";
 
         @Nested
         class Success {
@@ -224,8 +218,7 @@ class MemberClubServiceImplTest {
 
                 given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.of(memberClub));
                 given(memberClub.isLeader()).willReturn(true);
-                given(redisTemplate.opsForValue()).willReturn(valueOperations);
-                given(valueOperations.get("invitecode:" + clubId)).willReturn(existingInviteCode);
+                given(redisService.getValue(INVITE_CODE_PREFIX + clubId)).willReturn(existingInviteCode);
 
                 // when
                 String result = memberClubService.generateInviteCode(clubId, member);
@@ -233,7 +226,7 @@ class MemberClubServiceImplTest {
                 // then
                 assertThat(result).isEqualTo("https://point-of-views.com/api/clubs/" + clubId + "/join?code=" + existingInviteCode);
                 then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
-                then(redisTemplate.opsForValue()).should().get("invitecode:" + clubId);
+                then(redisService).should().getValue(INVITE_CODE_PREFIX + clubId);
             }
 
             @Test
@@ -247,8 +240,8 @@ class MemberClubServiceImplTest {
 
                 given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.of(memberClub));
                 given(memberClub.isLeader()).willReturn(true);
-                given(redisTemplate.opsForValue()).willReturn(valueOperations);
-                given(valueOperations.get("invitecode:" + clubId)).willReturn(null);
+                given(redisService.getValue(INVITE_CODE_PREFIX + clubId)).willReturn(null);
+                given(redisService.addToSet(INVITE_CODE_SET_KEY, newInviteCode)).willReturn(1L);
 
                 try (MockedStatic<InviteCodeGenerator> inviteCodeGeneratorMock = mockStatic(InviteCodeGenerator.class)) {
                     inviteCodeGeneratorMock.when(() -> InviteCodeGenerator.generateInviteCode(8)).thenReturn(newInviteCode);
@@ -258,8 +251,41 @@ class MemberClubServiceImplTest {
 
                     // then
                     assertThat(result).isEqualTo("https://point-of-views.com/api/clubs/" + clubId + "/join?code=" + newInviteCode);
-                    then(valueOperations).should().set("invitecode:" + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
+                    then(redisService).should().addToSet(INVITE_CODE_SET_KEY, newInviteCode);
+                    then(redisService).should().setValue(INVITE_CODE_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
                     then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
+                }
+            }
+
+            @Test
+            void 초대_코드_중복_발생_시_새로운_코드_생성() {
+                // given
+                UUID clubId = UUID.randomUUID();
+                Member member = mock(Member.class);
+                MemberClub memberClub = mock(MemberClub.class);
+                String duplicateInviteCode = "duplicateCode";
+                String newInviteCode = "uniqueCode";
+                int dayInSeconds = 60 * 60 * 24;
+
+                given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.of(memberClub));
+                given(memberClub.isLeader()).willReturn(true);
+                given(redisService.getValue(INVITE_CODE_PREFIX + clubId)).willReturn(null);
+                given(redisService.addToSet(INVITE_CODE_SET_KEY, duplicateInviteCode)).willReturn(0L);
+                given(redisService.addToSet(INVITE_CODE_SET_KEY, newInviteCode)).willReturn(1L);
+
+                try (MockedStatic<InviteCodeGenerator> inviteCodeGeneratorMock = mockStatic(InviteCodeGenerator.class)) {
+                    inviteCodeGeneratorMock.when(() -> InviteCodeGenerator.generateInviteCode(8))
+                            .thenReturn(duplicateInviteCode)
+                            .thenReturn(newInviteCode);
+
+                    // when
+                    String result = memberClubService.generateInviteCode(clubId, member);
+
+                    // then
+                    assertThat(result).isEqualTo("https://point-of-views.com/api/clubs/" + clubId + "/join?code=" + newInviteCode);
+                    then(redisService).should().addToSet(INVITE_CODE_SET_KEY, duplicateInviteCode);
+                    then(redisService).should().addToSet(INVITE_CODE_SET_KEY, newInviteCode);
+                    then(redisService).should().setValue(INVITE_CODE_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
                 }
             }
         }
@@ -282,7 +308,7 @@ class MemberClubServiceImplTest {
                         .isInstanceOf(ClubException.class)
                         .hasMessage(ClubException.notClubLeader().getMessage());
                 then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
-                then(redisTemplate).shouldHaveNoInteractions();
+                then(redisService).shouldHaveNoInteractions();
             }
 
             @Test
@@ -298,28 +324,8 @@ class MemberClubServiceImplTest {
                         .isInstanceOf(ClubException.class)
                         .hasMessage(ClubException.clubNotFound(clubId).getMessage());
                 then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
-                then(redisTemplate).shouldHaveNoInteractions();
-            }
-
-            @Test
-            void 초대_코드_생성_실패_Redis_에러() {
-                // given
-                UUID clubId = UUID.randomUUID();
-                Member member = mock(Member.class);
-                MemberClub memberClub = mock(MemberClub.class);
-
-                given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.of(memberClub));
-                given(memberClub.isLeader()).willReturn(true);
-                given(redisTemplate.opsForValue()).willReturn(valueOperations);
-                willThrow(RedisException.class).given(valueOperations).set(anyString(), anyString(), any(Duration.class));
-
-                // when & then
-                assertThatThrownBy(() -> memberClubService.generateInviteCode(clubId, member))
-                        .isInstanceOf(RedisException.class)
-                        .hasMessage(RedisException.redisServerError().getMessage());
-                then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
+                then(redisService).shouldHaveNoInteractions();
             }
         }
     }
-
 }
