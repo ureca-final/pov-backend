@@ -1,5 +1,6 @@
 package net.pointofviews.club.service;
 
+import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.member.domain.Member;
@@ -14,4 +15,6 @@ public interface MemberClubService {
     ReadClubMemberResponse readClubLeaderByClubId(UUID clubId);
 
     void joinClub(UUID clubId, Member member);
+
+    ReadAllClubMembersResponse readAllMembersByClubId(UUID clubId);
 }

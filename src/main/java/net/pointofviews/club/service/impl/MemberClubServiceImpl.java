@@ -2,6 +2,7 @@ package net.pointofviews.club.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.club.domain.MemberClub;
+import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
 import net.pointofviews.club.exception.ClubException;
@@ -61,5 +62,15 @@ public class MemberClubServiceImpl implements MemberClubService {
                 .build();
 
         memberClubRepository.save(memberClub);
+    }
+
+    @Override
+    public ReadAllClubMembersResponse readAllMembersByClubId(UUID clubId) {
+        if (!clubRepository.existsById(clubId)) {
+            throw ClubException.clubNotFound(clubId);
+        }
+
+        List<ReadAllClubMembersResponse.ClubMemberResponse> allMembersByClubId = memberClubRepository.findAllMembersByClubId(clubId);
+        return new ReadAllClubMembersResponse(allMembersByClubId);
     }
 }
