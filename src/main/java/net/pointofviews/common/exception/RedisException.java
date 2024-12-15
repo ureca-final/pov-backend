@@ -7,7 +7,7 @@ public class RedisException extends BusinessException {
         super(status, message);
     }
 
-    public static RedisException redisServerError() {
-        return new RedisException(HttpStatus.INTERNAL_SERVER_ERROR, "레디스 서버 오류");
+    public static RedisException redisServerError(String key) {
+        return new RedisException(HttpStatus.INTERNAL_SERVER_ERROR, String.format("레디스 작업에 실패했습니다. key: {%s}", key));
     }
 }
