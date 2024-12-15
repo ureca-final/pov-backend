@@ -26,13 +26,11 @@ import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.review.dto.response.ReadMyClubReviewListResponse;
 import net.pointofviews.review.service.ReviewClubService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.data.domain.Pageable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -293,7 +291,7 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public ReadAllClubsListResponse readAllPublicClubs() {
-            List<Object[]> clubData = clubRepository.findAllPublicClubs();
+        List<Object[]> clubData = clubRepository.findAllPublicClubs();
 
         List<ReadAllClubsResponse> clubResponses = clubData.stream()
                 .map(data -> {
@@ -395,6 +393,11 @@ public class ClubServiceImpl implements ClubService {
                 isMember
         );
 
+    }
+
+    @Override
+    public ReadPrivateClubDetailsResponse readPrivateClubDetails(Member loginMember, String value) {
+        return null;
     }
 
     private Integer validateMaxParticipants(Integer maxParticipants) {
