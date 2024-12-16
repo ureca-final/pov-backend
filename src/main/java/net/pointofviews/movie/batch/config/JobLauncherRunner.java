@@ -29,6 +29,11 @@ public class JobLauncherRunner implements ApplicationRunner {
         String startDate = calculateStartDate();
         String endDate = calculateEndDate();
 
+        if(startDate.equals(endDate)) {
+            log.info("금일 실행 된 JobInstance가 존재합니다. Job을 실행하지 않습니다.");
+            return;
+        }
+
         JobParameters parameters = new JobParametersBuilder()
                 .addString("startDate", startDate)
                 .addString("endDate", endDate)
