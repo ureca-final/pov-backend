@@ -7,6 +7,8 @@ import net.pointofviews.common.service.RedisService;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -60,5 +62,19 @@ public class StringRedisServiceImpl implements RedisService {
             throw RedisException.redisServerError(key);
         }
         return result;
+    }
+
+    @Override
+    public Set<String> getKeys(String pattern) {
+        try {
+            Set<String> keys = redisRepository.getKeysByPattern(pattern);
+            if (keys == null) {
+                return Collections.emptySet();
+            }
+            return keys;
+        } catch (Exception e) {
+            log.error("패턴으로 키를 조회하는데 실패했습니다.: {}", pattern, e);
+            throw RedisException.redisServerError(pattern);
+        }
     }
 }

@@ -339,6 +339,40 @@ public interface ReviewMemberSpecification {
     ResponseEntity<BaseResponse<Void>> putReviewLike(Long movieId, Long reviewId, MemberDetailsDto memberDetailsDto);
 
     @Operation(
+            summary = "리뷰 좋아요 취소",
+            description = "특정 영화의 리뷰의 `좋아요`를 취소 하는 API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "리뷰 좋아요 취소 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                        "message": "리뷰 좋아요 취소가 성공적으로 완료되었습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "리뷰 좋아요취소 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                    	"message": "리뷰(Id: 1)는 존재하지 않습니다."
+                                    }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<Void>> putReviewDisLike(Long movieId, Long reviewId, MemberDetailsDto memberDetailsDto);
+
+
+    @Operation(
             summary = "리뷰 이미지 업로드",
             description = "리뷰 작성 시 이미지를 업로드하는 API."
     )
