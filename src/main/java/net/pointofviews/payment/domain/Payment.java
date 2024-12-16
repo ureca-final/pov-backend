@@ -18,9 +18,6 @@ public class Payment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
-
     private String paymentKey;
 
     private String orderId;
@@ -36,7 +33,6 @@ public class Payment extends BaseEntity {
 
     @Builder
     public Payment(
-            Member member,
             String paymentKey,
             String orderId,
             String vendor,
@@ -46,7 +42,6 @@ public class Payment extends BaseEntity {
     ) {
         Assert.notNull(paymentKey, "Payment key must not be null");
 
-        this.member = member;
         this.paymentKey = paymentKey;
         this.orderId = orderId;
         this.vendor = vendor;

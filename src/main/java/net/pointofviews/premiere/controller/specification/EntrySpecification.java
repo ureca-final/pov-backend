@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.dto.request.CreateEntryRequest;
+import net.pointofviews.premiere.dto.request.DeleteEntryRequest;
 import net.pointofviews.premiere.dto.response.CreateEntryResponse;
 import net.pointofviews.premiere.dto.response.ReadMyEntryListResponse;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +79,39 @@ public interface EntrySpecification {
             @Parameter(description = "응모할 시사회 ID", example = "123") Long premiereId,
             CreateEntryRequest request
     ) throws IllegalAccessException, InterruptedException;
+
+    @Operation(
+            summary = "시사회 응모 취소",
+            description = "응모한 시사회를 취소할 수 있는 api"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "시사회 응모 취소 성공"),
+            @ApiResponse(responseCode = "404", description = "시사회 응모 취소 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "응모 내역이 존재하지 않습니다."
+                                    }
+                                    """)
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "시사회 응모 취소 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "응모한 사용자가 아닙니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<Void>> cancelEntry(
+            Member loginMember,
+            @Parameter(description = "응모한 시사회 ID", example = "123") Long premiereId,
+            DeleteEntryRequest request
+    );
 
     @Operation(
             summary = "내 티켓팅 내역 조회",

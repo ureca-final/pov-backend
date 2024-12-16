@@ -25,4 +25,8 @@ public class EntryException extends BusinessException {
         return new EntryException(HttpStatus.CONFLICT, "이미 응모한 시사회입니다.");
     }
 
+    public static EntryException unauthorizedEntry() {
+        return new EntryException(HttpStatus.FORBIDDEN, "응모한 사용자가 아닙니다.");
+    }
+
 }
