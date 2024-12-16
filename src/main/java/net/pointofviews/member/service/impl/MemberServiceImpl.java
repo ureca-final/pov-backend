@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import net.pointofviews.member.repository.MemberFcmTokenRepository;
 import net.pointofviews.member.service.MemberRedisService;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -139,6 +138,11 @@ public class MemberServiceImpl implements MemberService {
         );
 
         return new CheckLoginResponse(true, memberInfo);
+    }
+
+    @Override
+    @Transactional
+    public void logout(Member loginMember) {
     }
 
     @Override
