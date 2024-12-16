@@ -159,6 +159,23 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
     }
 
     @Override
+    public SearchMovieImageApiResponse searchImageMovie(String movieId) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .path("/images")
+                        .queryParam("include_image_language", "ko,null")
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchMovieImageApiResponse.class);
+    }
+
+    @Override
     public SearchMovieTrendingApiResponse searchTrendingMovie(String timeWindow, int page) {
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
