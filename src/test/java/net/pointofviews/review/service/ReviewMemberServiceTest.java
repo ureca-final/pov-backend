@@ -556,8 +556,10 @@ class ReviewMemberServiceTest {
                 // given -- 테스트의 상태 설정
                 Member member = mock(Member.class);
                 Review review = mock(Review.class);
+                Movie movie = mock(Movie.class);
 
                 given(review.getMember()).willReturn(member);
+                given(review.getMovie()).willReturn(movie);
 
                 given(reviewRepository.findReviewDetailById(any())).willReturn(Optional.of(review));
                 given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(Optional.of(true));

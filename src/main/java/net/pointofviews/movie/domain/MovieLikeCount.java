@@ -29,4 +29,8 @@ public class MovieLikeCount {
         this.movie = movie;
         this.likeCount = (likeCount != null) ? likeCount : 0L;
     }
+
+    public void updateCount(Long count) {
+        this.likeCount = count;
+    }
 }
