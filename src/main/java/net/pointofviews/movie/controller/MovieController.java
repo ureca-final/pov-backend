@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.service.ClubMovieService;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieSpecification;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
+import net.pointofviews.movie.service.MovieLikeRedisService;
 import net.pointofviews.movie.service.MovieMemberService;
 import net.pointofviews.movie.service.MovieSearchService;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +23,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MovieController implements MovieSpecification {
 
+    private final MovieLikeRedisService movieLikeRedisService;
     private final MovieSearchService movieSearchService;
-    private final MovieMemberService movieMemberService;
     private final ClubMovieService clubMovieService;
 
     @Override
@@ -42,19 +44,25 @@ public class MovieController implements MovieSpecification {
     }
 
     @Override
-    @PutMapping("/{movieId}/likes")
-    public ResponseEntity<BaseResponse<Void>> putMovieLike(
-            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto, @PathVariable Long movieId) {
-
-        movieMemberService.updateMovieLike(movieId, memberDetailsDto.member());
-        return BaseResponse.ok("좋아요가 성공적으로 ");
-    }
-
-
-    @Override
     @PostMapping("/{movieId}/bookmark/{clubId}")
     public ResponseEntity<BaseResponse<Void>> saveMovieToMyClub(@PathVariable Long movieId, @PathVariable UUID clubId) {
         clubMovieService.saveMovieToMyClub(movieId, clubId);
-        return BaseResponse.ok("내 클럽에 영화 북마크를 성공했습니다");
+        return BaseResponse.ok("내 클럽에 영화 북마크를 성공했습니다.");
     }
+
+    @Override
+    @PostMapping("/{movieId}/like")
+    public ResponseEntity<BaseResponse<Void>> putMovieLike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
+        movieLikeRedisService.saveLikedToRedis(movieId, loginMember);
+        return BaseResponse.ok("좋아요 등록이 완료되었습니다.");
+    }
+
+    @Override
+    @PostMapping("/{movieId}/dislike")
+    public ResponseEntity<BaseResponse<Void>> putMovieDislike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
+        movieLikeRedisService.saveDisLikedToRedis(movieId, loginMember);
+        return BaseResponse.ok("좋아요 취소가 완료되었습니다.");
+    }
+
+
 }
