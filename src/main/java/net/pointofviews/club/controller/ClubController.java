@@ -16,6 +16,7 @@ import net.pointofviews.member.domain.Member;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 @RestController
+@PreAuthorize("hasRole('ROLE_USER')")
 @RequestMapping("/api/clubs")
 @RequiredArgsConstructor
 public class ClubController implements ClubSpecification {
@@ -31,6 +33,7 @@ public class ClubController implements ClubSpecification {
     private final ClubSearchService clubSearchService;
     private final MemberClubService memberClubService;
 
+    @PreAuthorize("permitAll()")
     @GetMapping
     @Override
     public ResponseEntity<BaseResponse<ReadAllClubsListResponse>> readAllClubs() {
@@ -38,6 +41,7 @@ public class ClubController implements ClubSpecification {
         return BaseResponse.ok("공개된 모든 클럽이 성공적으로 조회되었습니다.", response);
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/search")
     @Override
     public ResponseEntity<BaseResponse<SearchClubsListResponse>> searchClubs(@RequestParam String query,
@@ -46,6 +50,7 @@ public class ClubController implements ClubSpecification {
         return BaseResponse.ok("공개된 모든 클럽이 성공적으로 검색되었습니다.", response);
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/{clubId}")
     @Override
     public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember, Pageable pageable) {
@@ -132,6 +137,7 @@ public class ClubController implements ClubSpecification {
     }
 
     // 그룹원 목록 조회
+    @PreAuthorize("permitAll()")
     @GetMapping("/{clubId}/member")
     @Override
     public ResponseEntity<BaseResponse<ReadAllClubMembersResponse>> readClubMembers(@PathVariable UUID clubId) {

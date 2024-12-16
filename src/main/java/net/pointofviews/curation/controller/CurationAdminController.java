@@ -13,13 +13,15 @@ import net.pointofviews.curation.dto.response.ReadCurationResponse;
 import net.pointofviews.curation.service.CurationAdminService;
 import net.pointofviews.member.domain.Member;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/movies/curations")
 @RequiredArgsConstructor
-public class CurationAdminController implements CurationAdminSpecification{
+@PreAuthorize("hasRole('ROLE_ADMIN')")
+@RequestMapping("/api/movies/curations")
+public class CurationAdminController implements CurationAdminSpecification {
 
     private final CurationAdminService curationAdminService;
 
