@@ -3,6 +3,7 @@ package net.pointofviews.review.service;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.exception.S3Exception;
 import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.common.service.RedisService;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.fixture.ReviewFixture;
 import net.pointofviews.member.domain.Member;
@@ -41,6 +42,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -83,6 +85,9 @@ class ReviewMemberServiceTest {
 
     @Mock
     private ReviewNotificationService reviewNotificationService;
+
+    @Mock
+    private RedisService redisService;
 
     @Nested
     class SaveReview {
@@ -761,6 +766,205 @@ class ReviewMemberServiceTest {
 
                 // then
                 assertThat(allReview.reviews()).hasSize(3);
+            }
+        }
+    }
+
+    @Nested
+    class UpdateReviewLike {
+        @Nested
+        class Success {
+            @Test
+            void 리뷰_좋아요_성공() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+                UUID memberId = UUID.randomUUID();
+
+                given(movieRepository.existsById(movieId)).willReturn(true);
+                given(reviewRepository.existsById(reviewId)).willReturn(true);
+                given(loginMember.getId()).willReturn(memberId);
+                given(redisService.getValue("ReviewLiked:" + reviewId + ":" + memberId))
+                        .willReturn(null); // 아직 좋아요를 누르지 않은 상태
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatCode(() ->
+                            reviewService.updateReviewLike(movieId, reviewId, loginMember)
+                    ).doesNotThrowAnyException();
+
+                    verify(redisService).setValue(
+                            eq("ReviewLiked:" + reviewId + ":" + memberId),
+                            eq("true"),
+                            any(Duration.class)
+                    );
+                    verify(redisService).setValue(
+                            eq("ReviewLikedCount:" + reviewId),
+                            any(),
+                            any(Duration.class)
+                    );
+                });
+            }
+        }
+
+        @Nested
+        class Failure {
+            @Test
+            void 존재하지_않는_영화_MovieNotFoundException_예외발생() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+
+                given(movieRepository.existsById(movieId)).willReturn(false);
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(() ->
+                            reviewService.updateReviewLike(movieId, reviewId, loginMember)
+                    ).isInstanceOf(MovieException.class);
+                });
+            }
+
+            @Test
+            void 존재하지_않는_리뷰_ReviewNotFoundException_예외발생() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+
+                given(movieRepository.existsById(movieId)).willReturn(true);
+                given(reviewRepository.existsById(reviewId)).willReturn(false);
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(() ->
+                            reviewService.updateReviewLike(movieId, reviewId, loginMember)
+                    ).isInstanceOf(ReviewException.class);
+                });
+            }
+
+            @Test
+            void 이미_좋아요한_리뷰_ReviewException_예외발생() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+                UUID memberId = UUID.randomUUID();
+
+                given(movieRepository.existsById(movieId)).willReturn(true);
+                given(reviewRepository.existsById(reviewId)).willReturn(true);
+                given(loginMember.getId()).willReturn(memberId);
+                given(redisService.getValue("ReviewLiked:" + reviewId + ":" + memberId))
+                        .willReturn("true"); // 이미 좋아요를 누른 상태
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(() ->
+                            reviewService.updateReviewLike(movieId, reviewId, loginMember)
+                    ).isInstanceOf(ReviewException.class);
+                });
+            }
+        }
+    }
+
+
+    @Nested
+    class UpdateReviewDislike {
+        @Nested
+        class Success {
+            @Test
+            void 리뷰_좋아요_취소_성공() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+                UUID memberId = UUID.randomUUID();
+
+                given(movieRepository.existsById(movieId)).willReturn(true);
+                given(reviewRepository.existsById(reviewId)).willReturn(true);
+                given(loginMember.getId()).willReturn(memberId);
+                given(redisService.getValue("ReviewLiked:" + reviewId + ":" + memberId))
+                        .willReturn("true"); // 이미 좋아요를 누른 상태
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatCode(() ->
+                            reviewService.updateReviewDisLike(movieId, reviewId, loginMember)
+                    ).doesNotThrowAnyException();
+
+                    verify(redisService).setValue(
+                            eq("ReviewLiked:" + reviewId + ":" + memberId),
+                            eq("false"),
+                            any(Duration.class)
+                    );
+                    verify(redisService).setValue(
+                            eq("ReviewLikedCount:" + reviewId),
+                            any(),
+                            any(Duration.class)
+                    );
+                });
+            }
+        }
+
+        @Nested
+        class Failure {
+            @Test
+            void 존재하지_않는_영화_MovieNotFoundException_예외발생() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+
+                given(movieRepository.existsById(movieId)).willReturn(false);
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(() ->
+                            reviewService.updateReviewDisLike(movieId, reviewId, loginMember)
+                    ).isInstanceOf(MovieException.class);
+                });
+            }
+
+            @Test
+            void 존재하지_않는_리뷰_ReviewNotFoundException_예외발생() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+
+                given(movieRepository.existsById(movieId)).willReturn(true);
+                given(reviewRepository.existsById(reviewId)).willReturn(false);
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(() ->
+                            reviewService.updateReviewDisLike(movieId, reviewId, loginMember)
+                    ).isInstanceOf(ReviewException.class);
+                });
+            }
+
+            @Test
+            void 좋아요하지_않은_리뷰_ReviewException_예외발생() {
+                // given
+                Long movieId = 1L;
+                Long reviewId = 1L;
+                Member loginMember = mock(Member.class);
+                UUID memberId = UUID.randomUUID();
+
+                given(movieRepository.existsById(movieId)).willReturn(true);
+                given(reviewRepository.existsById(reviewId)).willReturn(true);
+                given(loginMember.getId()).willReturn(memberId);
+                given(redisService.getValue("ReviewLiked:" + reviewId + ":" + memberId))
+                        .willReturn("false"); // 좋아요를 누르지 않은 상태
+
+                // when & then
+                assertSoftly(softly -> {
+                    softly.assertThatThrownBy(() ->
+                            reviewService.updateReviewDisLike(movieId, reviewId, loginMember)
+                    ).isInstanceOf(ReviewException.class);
+                });
             }
         }
     }
