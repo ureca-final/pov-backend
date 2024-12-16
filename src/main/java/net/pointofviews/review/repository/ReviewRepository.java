@@ -134,6 +134,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             LEFT JOIN movie mv ON mv.id = r.movie_id
             LEFT JOIN review_like_count rlc ON rlc.review_id = r.id
             WHERE MATCH(mv.title) AGAINST(:query IN NATURAL LANGUAGE MODE)
+            ORDER BY r.created_at DESC
             """,
             nativeQuery = true)
     Page<Object[]> searchReviewByMovieTitle(@Param("query") String query, Pageable pageable);
