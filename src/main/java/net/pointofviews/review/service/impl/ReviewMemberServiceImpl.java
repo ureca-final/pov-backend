@@ -209,7 +209,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
                 review.getContents(),
                 review.getMember().getNickname(),
                 review.getMember().getProfileImage(),
-                review.getThumbnail(),
+                review.getMovie().getBackdrop(),
                 review.getCreatedAt(),
                 likeAmount,
                 isLiked,
