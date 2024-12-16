@@ -15,4 +15,9 @@ public class SecurityException extends BusinessException {
     public static SecurityException invalidToken() {
         return new SecurityException(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
     }
+
+    public static SecurityException invalidOAuto2Provider(String provider) {
+        return new SecurityException(HttpStatus.INTERNAL_SERVER_ERROR,
+                String.format("유효하지 않은 제공자입니다. value: %S", provider));
+    }
 }
