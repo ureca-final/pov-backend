@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
+import java.util.Set;
 
 @Repository
 public class StringRedisRepositoryImpl implements RedisRepository {
@@ -33,5 +34,10 @@ public class StringRedisRepositoryImpl implements RedisRepository {
     @Override
     public Boolean setIfAbsent(String key, String value, Duration ttl) {
         return redisTemplate.opsForValue().setIfAbsent(key, value, ttl);
+    }
+
+    @Override
+    public Set<String> getKeysByPattern(String pattern) {
+        return redisTemplate.keys(pattern);
     }
 }

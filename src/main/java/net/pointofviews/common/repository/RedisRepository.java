@@ -1,6 +1,7 @@
 package net.pointofviews.common.repository;
 
 import java.time.Duration;
+import java.util.Set;
 
 public interface RedisRepository {
     String getValue(String key);
@@ -10,4 +11,6 @@ public interface RedisRepository {
     Long addToSet(String key, String value);
 
     Boolean setIfAbsent(String key, String value, Duration ttl);
+
+    Set<String> getKeysByPattern(String pattern);
 }
