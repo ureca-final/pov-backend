@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ROLE_USER')")
 @RequestMapping("/api/movies")
 public class ReviewMemberController implements ReviewMemberSpecification {
 
@@ -65,6 +67,7 @@ public class ReviewMemberController implements ReviewMemberSpecification {
         return BaseResponse.ok("리뷰가 성공적으로 삭제되었습니다.");
     }
 
+    @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/{movieId}/reviews")
     public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(@PathVariable Long movieId, @PageableDefault Pageable pageable) {
@@ -73,6 +76,7 @@ public class ReviewMemberController implements ReviewMemberSpecification {
         return BaseResponse.ok("영화별 리뷰가 성공적으로 조회되었습니다.", response);
     }
 
+    @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/reviews")
     public ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(@PageableDefault Pageable pageable) {
@@ -81,6 +85,7 @@ public class ReviewMemberController implements ReviewMemberSpecification {
         return BaseResponse.ok("모든 리뷰가 성공적으로 조회되었습니다.", response);
     }
 
+    @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/{movieId}/reviews/{reviewId}")
     public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@PathVariable Long movieId, @PathVariable Long reviewId) {

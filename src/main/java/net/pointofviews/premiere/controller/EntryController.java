@@ -11,11 +11,13 @@ import net.pointofviews.premiere.dto.response.CreateEntryResponse;
 import net.pointofviews.premiere.dto.response.ReadMyEntryListResponse;
 import net.pointofviews.premiere.service.EntryService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ROLE_USER')")
 @RequestMapping("/api/premieres")
 public class EntryController implements EntrySpecification {
 
