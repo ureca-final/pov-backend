@@ -6,8 +6,8 @@ import net.pointofviews.club.dto.request.PutClubLeaderRequest;
 import net.pointofviews.club.dto.request.PutClubRequest;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.member.domain.Member;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -32,4 +32,5 @@ public interface ClubService {
 
     ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember, Pageable pageable);
 
+    ReadPrivateClubDetailsResponse readPrivateClubDetails(Member loginMember, String value);
 }

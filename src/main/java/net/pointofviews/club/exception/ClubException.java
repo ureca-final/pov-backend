@@ -34,4 +34,8 @@ public class ClubException extends BusinessException {
     public static ClubException memberAlreadyInClub() {
         return new ClubException(HttpStatus.CONFLICT, "이미 클럽에 가입된 회원입니다.");
     }
+
+    public static ClubException inviteCodeNotFound(String code){
+        return new ClubException(HttpStatus.NOT_FOUND, String.format("유효하지 않은 초대코드 입니다. code: %s", code));
+    }
 }

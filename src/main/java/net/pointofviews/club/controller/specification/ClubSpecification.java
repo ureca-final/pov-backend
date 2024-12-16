@@ -329,4 +329,49 @@ public interface ClubSpecification {
     ResponseEntity<BaseResponse<String>> generateInviteCode(
             @Parameter(description = "클럽 pk", example = "ea27bb14-ec27-458b-ad88-08182b46e9d7") UUID clubId,
             Member loginMember);
+
+    @Operation(summary = "비공개 클럽 상세 조회", description = "특정 비공개 클럽의 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "조회 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "존재하지 않는 클럽입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<ReadPrivateClubDetailsResponse>> readPrivateClubDetails(Member loginMember, String value);
+
+    @Operation(summary = "비공개 클럽 가입", description = "초대코드를 이용해 클럽에 가입하는 api.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "가입 성공",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "클럽 가입이 완료되었습니다."
+                                    }""")
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "로그인이 필요한 서비스입니다."
+                                    }""")
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<Void>> joinPrivateClub(
+            String code,
+            Member loginMember
+    );
 }
