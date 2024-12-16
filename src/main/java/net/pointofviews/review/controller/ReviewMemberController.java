@@ -105,10 +105,17 @@ public class ReviewMemberController implements ReviewMemberSpecification {
     }
 
     @Override
-    @PutMapping("/{movieId}/reviews/{reviewId}/likes")
+    @PutMapping("/{movieId}/reviews/{reviewId}/like")
     public ResponseEntity<BaseResponse<Void>> putReviewLike(@PathVariable Long movieId, @PathVariable Long reviewId, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
         reviewMemberService.updateReviewLike(movieId, reviewId, memberDetailsDto.member());
         return BaseResponse.ok("리뷰 좋아요가 성공적으로 완료되었습니다.");
+    }
+
+    @Override
+    @PutMapping("/{movieId}/reviews/{reviewId}/dislike")
+    public ResponseEntity<BaseResponse<Void>> putReviewDisLike(@PathVariable Long movieId, @PathVariable Long reviewId, @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
+        reviewMemberService.updateReviewDisLike(movieId, reviewId, memberDetailsDto.member());
+        return BaseResponse.ok("리뷰 좋아요 취소가 성공적으로 완료되었습니다.");
     }
 
     @Override

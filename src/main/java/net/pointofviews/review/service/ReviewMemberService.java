@@ -33,6 +33,8 @@ public interface ReviewMemberService {
 
 	void updateReviewLike(Long movieId, Long reviewId, Member loginMember);
 
+	void updateReviewDisLike(Long movieId, Long reviewId, Member loginMember);
+
 	CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files, Long movieId, Member loginMember);
 
 	void deleteReviewImagesFolder(Long movieId, Member loginMember);
