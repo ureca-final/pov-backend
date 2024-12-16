@@ -4,6 +4,7 @@ import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto;
 import net.pointofviews.review.dto.ReviewPreferenceCountDto;
 import net.pointofviews.review.dto.response.ReadReviewResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -115,4 +116,26 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             """)
     List<ReviewDetailsWithLikeCountDto> findTop3ByMovieIdOrderByReviewLikeCountDesc(@Param("movieId") Long movieId, Pageable pageable);
 
+    @Query(value = """
+            SELECT
+                r.id,
+                mv.id,
+                mv.title,
+                r.title,
+                r.contents,
+                m.nickname,
+                m.profile_image,
+                mv.poster,
+                r.created_at,
+                COALESCE(rlc.review_like_count, 0),
+                r.is_spoiler
+            FROM review r
+            LEFT JOIN member m ON r.member_id = m.id
+            LEFT JOIN movie mv ON mv.id = r.movie_id
+            LEFT JOIN review_like_count rlc ON rlc.review_id = r.id
+            WHERE MATCH(mv.title) AGAINST(:query IN NATURAL LANGUAGE MODE)
+            ORDER BY r.created_at DESC
+            """,
+            nativeQuery = true)
+    Page<Object[]> searchReviewByMovieTitle(@Param("query") String query, Pageable pageable);
 }

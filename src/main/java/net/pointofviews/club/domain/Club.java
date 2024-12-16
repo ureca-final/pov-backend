@@ -1,18 +1,17 @@
 package net.pointofviews.club.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import net.pointofviews.common.domain.BaseEntity;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.pointofviews.common.domain.BaseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -34,13 +33,13 @@ public class Club extends BaseEntity {
     private boolean isPublic;
 
     @OneToMany(mappedBy = "club")
-    private List<MemberClub> memberClubs = new ArrayList<>();
+    private final List<MemberClub> memberClubs = new ArrayList<>();
 
     @OneToMany(mappedBy = "club")
-    private List<ClubMovie> clubMovies = new ArrayList<>();
+    private final List<ClubMovie> clubMovies = new ArrayList<>();
 
     @OneToMany(mappedBy = "club")
-    private List<ClubFavorGenre> clubFavorGenres = new ArrayList<>();
+    private final List<ClubFavorGenre> clubFavorGenres = new ArrayList<>();
 
     @Builder
     private Club(String description, boolean isPublic, Integer maxParticipants, String name, String clubImage) {
@@ -67,5 +66,13 @@ public class Club extends BaseEntity {
         this.description = description;
         this.maxParticipants = integer;
         this.isPublic = Public;
+    }
+
+    private Club(UUID id) {
+        this.id = id;
+    }
+
+    public static Club generateProxy(UUID uuid) {
+        return new Club(uuid);
     }
 }

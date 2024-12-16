@@ -43,12 +43,12 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(PaymentException::tempPaymentNotFound);
 
         if (!tempPayment.getMember().getId().equals(member.getId())) {
-            log.warn("[결제오류] TempPayment 회원 ID: {}, 현재 회원 ID: {}", tempPayment.getMember().getId(), member.getId());
+            log.warn("[결제오류] 결제자 불일치 - TempPayment 회원 ID: {}, 현재 회원 ID: {}", tempPayment.getMember().getId(), member.getId());
             throw paymentMismatch();
         }
 
         if (!tempPayment.getAmount().equals(request.amount())) {
-            log.warn("[결제오류] 임시결제자 ID: {}, 결제자 ID: {}", tempPayment.getMember().getId(), member.getId());
+            log.warn("[결제오류] 금액 불일치 - 임시결제자 ID: {}, 결제자 ID: {}", tempPayment.getMember().getId(), member.getId());
             throw amountMismatch();
         }
 

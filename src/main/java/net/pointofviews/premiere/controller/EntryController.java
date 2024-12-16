@@ -33,6 +33,7 @@ public class EntryController implements EntrySpecification {
         return BaseResponse.ok("시사회 응모가 성공적으로 완료되었습니다.", response);
     }
 
+    @Override
     @DeleteMapping("/{premiereId}/entry/cancel")
     public ResponseEntity<BaseResponse<Void>> cancelEntry(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
