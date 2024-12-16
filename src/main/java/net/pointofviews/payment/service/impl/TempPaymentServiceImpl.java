@@ -38,8 +38,13 @@ public class TempPaymentServiceImpl implements TempPaymentService {
                 .orElseThrow(EntryException::entryNotFound);
 
         if (!entry.getMember().getId().equals(member.getId())) {
-            log.warn("[임시결제오류] Entry 회원 Id: {}, 현재 회원 Id: {}", entry.getOrderId(), member.getId());
+            log.warn("[임시결제오류] 응모자 불일치 - Entry 회원 ID: {}, 현재 회원 ID: {}", entry.getOrderId(), member.getId());
             throw paymentMismatch();
+        }
+
+        if (tempPaymentRepository.existsByMemberIdAndOrderId(member.getId(), request.orderId())) {
+            log.warn("[임시결제오류] 임시 결제 중복 - 회원 ID: {}, Order ID: {}", member.getId(), request.orderId());
+            tempPaymentRepository.deleteByOrderId(request.orderId());
         }
 
         TempPayment tempPayment = TempPayment.builder()
