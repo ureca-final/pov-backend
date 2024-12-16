@@ -1,6 +1,7 @@
 package net.pointofviews.payment.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.payment.domain.TempPayment;
@@ -17,6 +18,7 @@ import static net.pointofviews.member.exception.MemberException.memberNotFound;
 import static net.pointofviews.payment.domain.OrderType.NORMAL;
 import static net.pointofviews.payment.exception.PaymentException.paymentMismatch;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TempPaymentServiceImpl implements TempPaymentService {
@@ -36,6 +38,7 @@ public class TempPaymentServiceImpl implements TempPaymentService {
                 .orElseThrow(EntryException::entryNotFound);
 
         if (!entry.getMember().getId().equals(member.getId())) {
+            log.warn("[임시결제오류] Entry 회원 Id: {}, 현재 회원 Id: {}", entry.getOrderId(), member.getId());
             throw paymentMismatch();
         }
 

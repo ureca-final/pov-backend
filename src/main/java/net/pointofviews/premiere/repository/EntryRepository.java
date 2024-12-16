@@ -29,7 +29,7 @@ public interface EntryRepository extends JpaRepository<Entry, Long> {
                     FROM Entry e
                     lEFT JOIN e.member m
                     lEFT JOIN e.premiere p
-                    LEFT JOIN Payment py ON py.member.id = m.id
+                    LEFT JOIN Payment py ON py.orderId = e.orderId
                     WHERE m.id = :memberId AND py.approvedAt IS NOT NULL
                     ORDER BY py.approvedAt DESC
             """)

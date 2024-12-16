@@ -26,7 +26,6 @@ class PaymentTest {
 
                 // when
                 Payment payment = Payment.builder()
-                        .member(member)
                         .paymentKey(paymentKey)
                         .vendor(vendor)
                         .amount(amount)
@@ -35,7 +34,6 @@ class PaymentTest {
                 // then
                 SoftAssertions.assertSoftly(softly -> {
                     softly.assertThat(payment).isNotNull();
-                    softly.assertThat(payment.getMember()).isEqualTo(member);
                     softly.assertThat(payment.getPaymentKey()).isEqualTo(paymentKey);
                     softly.assertThat(payment.getVendor()).isEqualTo(vendor);
                     softly.assertThat(payment.getAmount()).isEqualTo(amount);
@@ -48,13 +46,11 @@ class PaymentTest {
             @Test
             void 결제키_없음_IllegalArgumentException_예외발생() {
                 // given
-                Member member = Mockito.mock(Member.class);
                 String vendor = "TOSS";
                 Integer amount = 10000;
 
                 // when & then
                 assertThatThrownBy(() -> Payment.builder()
-                        .member(member)
                         .vendor(vendor)
                         .amount(amount)
                         .build())

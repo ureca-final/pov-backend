@@ -1,5 +1,7 @@
 package net.pointofviews.member.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.MemberDetailsDto;
@@ -20,6 +22,26 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class MemberController implements MemberSpecification {
     private final MemberService memberService;
+
+    @Override
+    @PostMapping("/logout")
+    public ResponseEntity<BaseResponse<Void>> logout(
+            @AuthenticationPrincipal MemberDetailsDto memberDetails,
+            HttpServletResponse response
+    ) {
+        memberService.logout(memberDetails.member());
+
+        // Refresh Token 쿠키 제거
+        Cookie refreshTokenCookie = new Cookie("refresh-token", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setAttribute("SameSite", "None");
+        refreshTokenCookie.setMaxAge(0);
+        response.addCookie(refreshTokenCookie);
+
+        return BaseResponse.ok("로그아웃이 완료되었습니다.");
+    }
 
     @Override
     @DeleteMapping("")

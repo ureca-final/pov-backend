@@ -1,15 +1,18 @@
 package net.pointofviews.premiere.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.common.lock.DistributeLock;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
 import net.pointofviews.premiere.domain.Entry;
 import net.pointofviews.premiere.domain.Premiere;
 import net.pointofviews.premiere.dto.request.CreateEntryRequest;
+import net.pointofviews.premiere.dto.request.DeleteEntryRequest;
 import net.pointofviews.premiere.dto.response.CreateEntryResponse;
 import net.pointofviews.premiere.dto.response.ReadEntryResponse;
 import net.pointofviews.premiere.dto.response.ReadMyEntryListResponse;
+import net.pointofviews.premiere.exception.EntryException;
 import net.pointofviews.premiere.repository.EntryRepository;
 import net.pointofviews.premiere.repository.PremiereRepository;
 import net.pointofviews.premiere.service.EntryService;
@@ -23,6 +26,7 @@ import static net.pointofviews.member.exception.MemberException.memberNotFound;
 import static net.pointofviews.premiere.exception.EntryException.*;
 import static net.pointofviews.premiere.exception.PremiereException.premiereNotFound;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,6 +40,7 @@ public class EntryServiceImpl implements EntryService {
     @Transactional
     @DistributeLock(key = "#premiereId")
     public CreateEntryResponse saveEntry(Member loginMember, Long premiereId, CreateEntryRequest request) {
+
         Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
@@ -43,16 +48,25 @@ public class EntryServiceImpl implements EntryService {
                 .orElseThrow(() -> premiereNotFound(premiereId));
 
         if (entryRepository.existsEntryByMemberIdAndPremiereId(member.getId(), premiereId)) {
+            log.warn("[응모오류] 회원 ID: {}, 응모한 시사회 ID: {}", member.getId(), premiereId);
             throw duplicateEntry();
         }
 
-        if (request.amount() != premiere.getAmount()) {
+        int requestTotalAmount = request.quantity() * request.amount();
+        int premiereTotalAmount = request.quantity() * premiere.getAmount();
+
+        if (requestTotalAmount != premiereTotalAmount) {
+            log.warn("[응모오류] 요청한 수량의 총 금액: {}, 실제 총 금액: {}", requestTotalAmount, premiereTotalAmount);
             throw entryBadRequest();
         }
 
         Long currQuantity = entryRepository.countEntriesByPremiereId(premiereId);
 
         if (currQuantity + request.quantity() > premiere.getMaxQuantity()) {
+            log.warn("[응모오류] 시사회 수량: {}, 초과된 시사회 수량: {}",
+                    premiere.getMaxQuantity(),
+                    currQuantity + request.quantity() - premiere.getMaxQuantity());
+
             throw quantityExceeded();
         }
 
@@ -63,7 +77,7 @@ public class EntryServiceImpl implements EntryService {
                 .premiere(premiere)
                 .orderId(orderId)
                 .quantity(request.quantity())
-                .amount(request.amount())
+                .amount(requestTotalAmount)
                 .build();
 
         entryRepository.save(entry);
@@ -72,7 +86,30 @@ public class EntryServiceImpl implements EntryService {
     }
 
     @Override
+    @Transactional
+    public void deleteEntry(Member loginMember, Long premiereId, DeleteEntryRequest request) {
+
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> memberNotFound(loginMember.getId()));
+
+        if (premiereRepository.findById(premiereId).isEmpty()) {
+            throw premiereNotFound(premiereId);
+        }
+
+        Entry entry = entryRepository.findEntryByOrderId(request.orderId())
+                .orElseThrow(EntryException::entryNotFound);
+
+        if (!entry.getMember().getId().equals(member.getId())) {
+            log.warn("[응모오류] Entry 회원 ID: {}, 삭제 요청한 회원 ID: {}", entry.getMember().getId(), member.getId());
+            throw unauthorizedEntry();
+        }
+
+        entryRepository.delete(entry);
+    }
+
+    @Override
     public ReadMyEntryListResponse findMyEntryList(Member loginMember) {
+
         Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> memberNotFound(loginMember.getId()));
 
