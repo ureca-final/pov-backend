@@ -27,6 +27,6 @@ public class MovieLikeCount {
     @Builder
     private MovieLikeCount(Movie movie, Long likeCount) {
         this.movie = movie;
-        this.likeCount = likeCount;
+        this.likeCount = (likeCount != null) ? likeCount : 0L;
     }
 }
