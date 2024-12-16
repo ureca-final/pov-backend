@@ -15,6 +15,8 @@ public interface MemberService {
 
     CheckLoginResponse login(LoginMemberRequest request);
 
+    void logout(Member member);
+
     void deleteMember(Member loginMember);
 
     PutMemberGenreListResponse updateGenre(Member loginMember, PutMemberGenreListRequest request);
