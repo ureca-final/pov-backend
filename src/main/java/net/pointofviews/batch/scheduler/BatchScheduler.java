@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Configuration
@@ -43,7 +44,7 @@ public class BatchScheduler {
         }
     }
 
-    @Scheduled(cron = "*/1 * * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     public void reviewLikeSync() {
         LocalDateTime start = LocalDateTime.now();
         log.info("리뷰 좋아요 동기화 배치 시작: {}", start);
