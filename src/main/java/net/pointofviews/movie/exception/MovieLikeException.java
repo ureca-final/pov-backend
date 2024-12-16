@@ -11,11 +11,11 @@ public class MovieLikeException extends BusinessException {
         super(status, message);
     }
 
-    public static MovieLikeException alreadyLiked(Long movieId, UUID memberId) {
-        return new MovieLikeException(HttpStatus.BAD_REQUEST, "이미 좋아요 처리가 완료 되었습니다. " + movieId + ":" + memberId);
+    public static MovieLikeException alreadyLikedMovie(Long movieId) {
+        return new MovieLikeException(HttpStatus.BAD_REQUEST, String.format("이미 좋아요를 누른 영화(Id: %d)입니다.", movieId));
     }
 
-    public static MovieLikeException alreadyDisliked(Long movieId, UUID memberId) {
-        return new MovieLikeException(HttpStatus.BAD_REQUEST, "이미 좋아요 취소가 완료 되었습니다. " + movieId + ":" + memberId);
+    public static MovieLikeException alreadyDislikedMovie(Long movieId) {
+        return new MovieLikeException(HttpStatus.BAD_REQUEST, String.format("이미 좋아요를 취소한 영화(Id: %d)입니다.", movieId));
     }
 }

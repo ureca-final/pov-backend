@@ -285,7 +285,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         s3Service.deleteFolder(folderPath);
     }
 
-    @DistributeLock(key = "'ReviewLike:' + #reviewId + ':' + #loginMember.id")
+    @DistributeLock(key = "'ReviewLiked:' + #reviewId + ':' + #loginMember.id")
     @Override
     @Transactional
     public void updateReviewLike(Long movieId, Long reviewId, Member loginMember) {
@@ -303,7 +303,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
 
-    @DistributeLock(key = "'ReviewLike:' + #reviewId + ':' + #loginMember.id")
+    @DistributeLock(key = "'ReviewLiked:' + #reviewId + ':' + #loginMember.id")
     @Override
     @Transactional
     public void updateReviewDisLike(Long movieId, Long reviewId, Member loginMember) {
