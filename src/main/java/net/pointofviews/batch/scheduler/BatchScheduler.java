@@ -42,4 +42,27 @@ public class BatchScheduler {
             log.info("관리자 좋아요 관리 배치 스케쥴링 종료: {}", end.toString());
         }
     }
+
+    @Scheduled(cron = "0 */15 * * * *") // 15분마다 실행
+    public void reviewLikeSync() {
+        LocalDateTime start = LocalDateTime.now();
+        log.info("리뷰 좋아요 동기화 배치 시작: {}", start);
+
+        try {
+            Job job = jobRegistry.getJob("reviewLikeJob");
+
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("runDateTime", start.toString())
+                    .toJobParameters();
+
+            jobLauncher.run(job, jobParameters);
+
+            log.info("리뷰 좋아요 동기화 배치 성공");
+        } catch (Exception ex) {
+            log.error("리뷰 좋아요 동기화 배치 실패: {}", ex.getMessage());
+        } finally {
+            LocalDateTime end = LocalDateTime.now();
+            log.info("리뷰 좋아요 동기화 배치 종료: {}", end);
+        }
+    }
 }
