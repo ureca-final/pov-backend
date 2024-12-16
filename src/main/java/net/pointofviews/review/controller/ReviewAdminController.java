@@ -5,6 +5,7 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.controller.specification.ReviewAdminSpecification;
 import net.pointofviews.review.dto.response.SearchReviewListResponse;
+import net.pointofviews.review.dto.response.SearchReviewResponse;
 import net.pointofviews.review.service.ReviewAdminService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,6 +34,7 @@ public class ReviewAdminController implements ReviewAdminSpecification {
         return BaseResponse.ok("리뷰가 성공적으로 숨김 처리 되었습니다.");
     }
 
+    @Override
     @GetMapping("/reviews/search")
     public ResponseEntity<BaseResponse<SearchReviewListResponse>> searchReviews(
             @AuthenticationPrincipal(expression = "member") Member loginMember,
@@ -46,5 +48,16 @@ public class ReviewAdminController implements ReviewAdminSpecification {
         }
 
         return BaseResponse.ok("검색한 영화와 관련된 모든 리뷰가 성공적으로 조회되었습니다.", response);
+    }
+
+    @Override
+    @GetMapping("/reviews/{reviewId}")
+    public ResponseEntity<BaseResponse<SearchReviewResponse>> searchReviewDetail(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @PathVariable Long reviewId
+    ) {
+        SearchReviewResponse response = reviewAdminService.findReviewDetail(loginMember, reviewId);
+
+        return BaseResponse.ok("리뷰 상세 조회가 성공적으로 완료되었습니다.", response);
     }
 }

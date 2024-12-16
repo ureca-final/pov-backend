@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.dto.response.SearchReviewListResponse;
+import net.pointofviews.review.dto.response.SearchReviewResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -82,4 +83,27 @@ public interface ReviewAdminSpecification {
             @Parameter(description = "검색할 영화명", example = "인셉션") String query,
             Pageable pageable
     );
+
+
+    @Operation(
+            summary = "리뷰 상세 조회",
+            description = "검색한 영화와 관련된 특정 리뷰를 상세 조회하는 API."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "리뷰 상세 조회 성공"),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "리뷰 수정 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                    	"message": "리뷰(Id: 1)는 존재하지 않습니다."
+                                    }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<SearchReviewResponse>> searchReviewDetail(Member loginMember, Long reviewId);
 }

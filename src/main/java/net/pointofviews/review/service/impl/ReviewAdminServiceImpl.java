@@ -7,6 +7,7 @@ import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.review.domain.Review;
 import net.pointofviews.review.dto.response.SearchReviewListResponse;
 import net.pointofviews.review.dto.response.SearchReviewResponse;
+import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewRepository;
 import net.pointofviews.review.service.ReviewAdminService;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ public class ReviewAdminServiceImpl implements ReviewAdminService {
     private final ReviewRepository reviewRepository;
     private final MovieRepository movieRepository;
     private final MemberRepository memberRepository;
+    private final ReviewLikeCountRepository reviewLikeCountRepository;
 
     @Override
     @Transactional
@@ -69,5 +71,33 @@ public class ReviewAdminServiceImpl implements ReviewAdminService {
         return new SearchReviewListResponse(responses);
     }
 
+    @Override
+    public SearchReviewResponse findReviewDetail(Member loginMember, Long reviewId) {
+
+        if (memberRepository.findById(loginMember.getId()).isEmpty()) {
+            throw adminNotFound(loginMember.getId());
+        }
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> reviewNotFound(reviewId));
+
+        Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId).orElse(0L);
+
+        SearchReviewResponse response = new SearchReviewResponse(
+                reviewId,
+                review.getMovie().getId(),
+                review.getMovie().getTitle(),
+                review.getTitle(),
+                review.getContents(),
+                review.getMember().getNickname(),
+                review.getMember().getProfileImage(),
+                review.getMovie().getPoster(),
+                review.getCreatedAt(),
+                likeAmount,
+                review.isSpoiler()
+        );
+
+        return response;
+    }
 }
 
