@@ -21,8 +21,12 @@ public class ReviewLikeCount {
     private Long reviewLikeCount;
 
     @Builder
-    private ReviewLikeCount(Review review) {
+    private ReviewLikeCount(Review review, Long reviewLikeCount) {
         this.review = review;
-        this.reviewLikeCount = 0L; // 초기값 = 0
+        this.reviewLikeCount = (reviewLikeCount != null) ? reviewLikeCount : 0L;
+    }
+
+    public void updateCount(Long count) {
+        this.reviewLikeCount = count;
     }
 }

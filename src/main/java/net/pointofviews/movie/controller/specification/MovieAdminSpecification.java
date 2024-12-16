@@ -361,4 +361,28 @@ public interface MovieAdminSpecification {
             @RequestParam String query, Pageable pageable
     );
 
+    @Operation(
+            summary = "관리자 trending api 영화 검색",
+            description = "trending API를 조회하기 위한 api."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "검색 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<SearchMovieTrendingApiResponse>> adminSearchTrendingMovies(
+            @Parameter(description = "페이지", example = "1") int page);
 }

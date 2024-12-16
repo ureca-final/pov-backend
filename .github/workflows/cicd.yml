@@ -76,6 +76,8 @@ jobs:
           export REDIS_HOST="${{ secrets.REDIS_HOST }}"
           export FIREBASE_CONFIG='${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           export TOSS_SECRET_KEY='${{ secrets.TOSS_SECRET_KEY }}'
+          export NAVER_CLIENT_ID='${{ secrets.NAVER_CLIENT_ID }}'
+          export NAVER_CLIENT_SECRET='${{ secrets.NAVER_CLIENT_SECRET }}'
   
           cd /home/ubuntu/pov-backend
           
@@ -95,6 +97,8 @@ jobs:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
 
       # 두 번째 인스턴스 배포
       - name: Deploy to EC2 Instance 2
@@ -111,6 +115,8 @@ jobs:
           export REDIS_HOST="${{ secrets.REDIS_HOST }}"
           export FIREBASE_CONFIG='${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           export TOSS_SECRET_KEY='${{ secrets.TOSS_SECRET_KEY }}'
+          export NAVER_CLIENT_ID='${{ secrets.NAVER_CLIENT_ID }}'
+          export NAVER_CLIENT_SECRET='${{ secrets.NAVER_CLIENT_SECRET }}'
           
           cd /home/ubuntu/pov-backend
           
@@ -130,3 +136,5 @@ jobs:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}

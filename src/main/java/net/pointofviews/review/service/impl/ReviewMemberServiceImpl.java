@@ -3,7 +3,9 @@ package net.pointofviews.review.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.lock.DistributeLock;
 import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.common.service.RedisService;
 import net.pointofviews.common.service.S3Service;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
@@ -15,6 +17,7 @@ import net.pointofviews.review.dto.request.CreateReviewRequest;
 import net.pointofviews.review.dto.request.ProofreadReviewRequest;
 import net.pointofviews.review.dto.request.PutReviewRequest;
 import net.pointofviews.review.dto.response.*;
+import net.pointofviews.review.exception.ReviewException;
 import net.pointofviews.review.repository.ReviewKeywordLinkRepository;
 import net.pointofviews.review.repository.ReviewLikeCountRepository;
 import net.pointofviews.review.repository.ReviewLikeRepository;
@@ -27,14 +30,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSize;
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
 import static net.pointofviews.movie.exception.MovieException.movieNotFound;
-import static net.pointofviews.review.exception.ReviewException.reviewNotFound;
-import static net.pointofviews.review.exception.ReviewException.unauthorizedReview;
+import static net.pointofviews.review.exception.ReviewException.*;
 
 @Service
 @Slf4j
@@ -50,6 +53,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     private final ReviewKeywordLinkRepository reviewKeywordLinkRepository;
     private final CommonCodeService commonCodeService;
     private final ReviewNotificationService reviewNotificationService;
+    private final RedisService redisService;
     private final S3Service s3Service;
 
     @Override
@@ -232,21 +236,6 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    @Transactional
-    public void updateReviewLike(Long movieId, Long reviewId, Member loginMember) {
-        // 영화, 리뷰 존재 확인
-        if (!movieRepository.existsById(movieId)) {
-            throw movieNotFound(movieId);
-        }
-
-        if (!reviewRepository.existsById(reviewId)) {
-            throw reviewNotFound(reviewId);
-        }
-
-        // redis에 좋아요 저장
-    }
-
-    @Override
     public CreateReviewImageListResponse saveReviewImages(List<MultipartFile> files, Long movieId, Member loginMember) {
         Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> memberNotFound(loginMember.getId()));
@@ -294,5 +283,73 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
                 movieId);
 
         s3Service.deleteFolder(folderPath);
+    }
+
+    @DistributeLock(key = "'ReviewLike:' + #reviewId + ':' + #loginMember.id")
+    @Override
+    @Transactional
+    public void updateReviewLike(Long movieId, Long reviewId, Member loginMember) {
+        validateMovieAndReview(movieId, reviewId);
+
+        String likeKey = generateLikeKey(reviewId, loginMember.getId());
+        String countKey = generateCountKey(reviewId);
+
+        if (isLiked(likeKey)) {
+            throw ReviewException.alreadyLikedReview(reviewId);
+        }
+
+        redisService.setValue(likeKey, "true", Duration.ofDays(7));
+        updateLikeCount(countKey, true);
+    }
+
+
+    @DistributeLock(key = "'ReviewLike:' + #reviewId + ':' + #loginMember.id")
+    @Override
+    @Transactional
+    public void updateReviewDisLike(Long movieId, Long reviewId, Member loginMember) {
+        validateMovieAndReview(movieId, reviewId);
+
+        String likeKey = generateLikeKey(reviewId, loginMember.getId());
+        String countKey = generateCountKey(reviewId);
+
+        if (!isLiked(likeKey)) {
+            throw ReviewException.alreadyDislikedReview(reviewId);
+        }
+
+        redisService.setValue(likeKey, "false", Duration.ofDays(7));
+        updateLikeCount(countKey, false);
+    }
+
+    // 공통 검증 메서드
+    private void validateMovieAndReview(Long movieId, Long reviewId) {
+        if (!movieRepository.existsById(movieId)) {
+            throw movieNotFound(movieId);
+        }
+        if (!reviewRepository.existsById(reviewId)) {
+            throw reviewNotFound(reviewId);
+        }
+    }
+
+    // 키 생성 메서드
+    private String generateLikeKey(Long reviewId, UUID memberId) {
+        return "ReviewLiked:" + reviewId + ":" + memberId;
+    }
+
+    private String generateCountKey(Long reviewId) {
+        return "ReviewLikedCount:" + reviewId;
+    }
+
+    // 좋아요 상태 조회
+    private boolean isLiked(String likeKey) {
+        String currentLikeStatus = redisService.getValue(likeKey);
+        return "true".equals(currentLikeStatus);
+    }
+
+    // 좋아요 수 업데이트
+    private void updateLikeCount(String countKey, boolean increment) {
+        String currentCount = redisService.getValue(countKey);
+        long count = currentCount == null ? 0L : Long.parseLong(currentCount);
+        long newCount = increment ? count + 1L : count - 1L;
+        redisService.setValue(countKey, String.valueOf(newCount), Duration.ofDays(7));
     }
 }

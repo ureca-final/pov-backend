@@ -3,13 +3,11 @@ package net.pointofviews.movie.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.common.utils.ValidationUtils;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieAdminSpecification;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.response.*;
-import net.pointofviews.movie.exception.MovieContentException;
 import net.pointofviews.movie.service.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -59,8 +57,8 @@ public class MovieAdminController implements MovieAdminSpecification {
             @PathVariable Long movieId,
             @RequestParam("files") List<MultipartFile> files) {
 
-            List<String> imageUrls = movieContentService.saveMovieContentImages(movieId, files);
-            return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", imageUrls);
+        List<String> imageUrls = movieContentService.saveMovieContentImages(movieId, files);
+        return BaseResponse.ok("이미지가 성공적으로 업로드되었습니다.", imageUrls);
     }
 
     @Override
@@ -77,8 +75,8 @@ public class MovieAdminController implements MovieAdminSpecification {
             @PathVariable Long movieId,
             @RequestBody List<Long> ids) {
 
-            movieContentService.deleteMovieContentImages(ids);
-            return BaseResponse.ok("선택한 이미지가 성공적으로 삭제되었습니다.");
+        movieContentService.deleteMovieContentImages(ids);
+        return BaseResponse.ok("선택한 이미지가 성공적으로 삭제되었습니다.");
     }
 
     @Override
@@ -87,8 +85,8 @@ public class MovieAdminController implements MovieAdminSpecification {
             @PathVariable Long movieId,
             @RequestBody List<Long> ids) {
 
-            movieContentService.deleteMovieContentVideos(ids);
-            return BaseResponse.ok("선택한 영상이 성공적으로 삭제되었습니다.");
+        movieContentService.deleteMovieContentVideos(ids);
+        return BaseResponse.ok("선택한 영상이 성공적으로 삭제되었습니다.");
     }
 
     @Override
@@ -140,6 +138,15 @@ public class MovieAdminController implements MovieAdminSpecification {
             @RequestParam String query, Pageable pageable) {
         AdminSearchMovieListResponse response = movieSearchService.adminSearchMovies(query, pageable);
         return BaseResponse.ok("영화 검색 결과 조회 성공", response);
+    }
+
+    @Override
+    @GetMapping("/tmdb-search/trending")
+    public ResponseEntity<BaseResponse<SearchMovieTrendingApiResponse>> adminSearchTrendingMovies(
+            @RequestParam int page
+    ) {
+        SearchMovieTrendingApiResponse day = movieApiSearchService.searchTrendingMovie("day", page);
+        return BaseResponse.ok("OK", day);
     }
 
 }
