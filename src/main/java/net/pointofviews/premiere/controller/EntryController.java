@@ -41,7 +41,7 @@ public class EntryController implements EntrySpecification {
     ) {
         entryService.deleteEntry(loginMember, premiereId, request);
 
-        return BaseResponse.ok("응모한 시사회가 성공적으로 취소되었습니다.");
+        return BaseResponse.ok("시사회 응모가 성공적으로 취소되었습니다.");
     }
 
     @Override
