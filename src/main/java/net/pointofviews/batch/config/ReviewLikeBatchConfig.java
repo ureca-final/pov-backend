@@ -116,21 +116,20 @@ public class ReviewLikeBatchConfig {
                 String countValue = redisService.getValue(countKey);
                 if (countValue != null) {
                     // 기존 DB의 카운트 값을 가져와서 Redis 값을 더함
-                    Long currentCount = reviewLikeCountRepository
+                    ReviewLikeCount likeCount = reviewLikeCountRepository
                             .findById(reviewId)
-                            .map(ReviewLikeCount::getReviewLikeCount)
-                            .orElse(0L);
+                            .orElseGet(() -> ReviewLikeCount.builder()
+                                    .review(review)
+                                    .reviewLikeCount(0L)
+                                    .build());
 
-                    Long newCount = currentCount + Long.parseLong(countValue);
-
-                    ReviewLikeCount likeCount = ReviewLikeCount.builder()
-                            .review(review)
-                            .reviewLikeCount(newCount)  // 누적된 값 저장
-                            .build();
+                    // redis값을 db값으로 대체
+                    long newCount = Long.parseLong(countValue);
+                    likeCount.updateCount(newCount);
                     reviewLikeCountRepository.save(likeCount);
 
-                    // Redis 카운트 초기화
-                    redisService.setValue(countKey, "0", Duration.ofDays(7));
+                    // redis와 db값 동기화
+                    redisService.setValue(countKey, String.valueOf(newCount), Duration.ofDays(7));
                 }
 
                 // 기존 좋아요 기록이 있는지 확인
