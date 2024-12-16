@@ -8,12 +8,12 @@ import net.pointofviews.club.dto.response.ClubMemberResponse;
 import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
-import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.MemberClubService;
 import net.pointofviews.club.utils.InviteCodeGenerator;
 import net.pointofviews.common.service.impl.StringRedisServiceImpl;
+import net.pointofviews.common.utils.UuidUtils;
 import net.pointofviews.member.domain.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,10 +110,37 @@ public class MemberClubServiceImpl implements MemberClubService {
     @Override
     public ReadAllClubMembersResponse readAllMembersByClubId(UUID clubId) {
         if (!clubRepository.existsById(clubId)) {
-            throw ClubException.clubNotFound(clubId);
+            throw clubNotFound(clubId);
         }
 
         List<ClubMemberResponse> allMembersByClubId = memberClubRepository.findAllMembersByClubId(clubId);
         return new ReadAllClubMembersResponse(allMembersByClubId);
+    }
+
+    @Override
+    @Transactional
+    public void joinPrivateClub(Member loginMember, String value) {
+        String inviteCode = INVITE_CODE_TO_CLUB_KEY_PREFIX + value;
+        String stringClubId = redisService.getValue(inviteCode);
+
+        if (stringClubId == null) {
+            throw inviteCodeNotFound(value);
+        }
+
+        UUID clubId = UuidUtils.fromString(stringClubId);
+
+        if (memberClubRepository.existsByClubIdAndMember(clubId, loginMember)) {
+            throw memberAlreadyInClub();
+        }
+
+        Club proxyClub = Club.generateProxy(clubId);
+
+        MemberClub newbie = MemberClub.builder()
+                .club(proxyClub)
+                .member(loginMember)
+                .isLeader(false)
+                .build();
+
+        memberClubRepository.save(newbie);
     }
 }

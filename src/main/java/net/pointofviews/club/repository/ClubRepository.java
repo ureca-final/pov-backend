@@ -13,8 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ClubRepository extends JpaRepository<Club, UUID> {
-    Optional<Club> findById(UUID clubId);
-
     @Query("""
                 SELECT c
                 FROM Club c
@@ -87,4 +85,11 @@ public interface ClubRepository extends JpaRepository<Club, UUID> {
             """,
             nativeQuery = true)
     Slice<Object[]> searchClubsByTitleOrNickname(@Param("query") String query, Pageable pageable);
+
+    @Query("""
+            SELECT c FROM Club c
+            LEFT JOIN FETCH c.clubFavorGenres fg
+            WHERE c.id = :clubId
+            """)
+    Optional<Club> findByIdWithFavorGenres(UUID clubId);
 }
