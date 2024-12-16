@@ -1,14 +1,12 @@
 package net.pointofviews.movie.controller;
 
 import lombok.RequiredArgsConstructor;
-import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.service.ClubMovieService;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieSpecification;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
-import net.pointofviews.movie.service.MovieLikeRedisService;
 import net.pointofviews.movie.service.MovieMemberService;
 import net.pointofviews.movie.service.MovieSearchService;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MovieController implements MovieSpecification {
 
-    private final MovieLikeRedisService movieLikeRedisService;
+    private final MovieMemberService movieMemberService;
     private final MovieSearchService movieSearchService;
     private final ClubMovieService clubMovieService;
 
@@ -53,15 +51,15 @@ public class MovieController implements MovieSpecification {
     @Override
     @PostMapping("/{movieId}/like")
     public ResponseEntity<BaseResponse<Void>> putMovieLike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
-        movieLikeRedisService.saveLikedToRedis(movieId, loginMember);
-        return BaseResponse.ok("좋아요 등록이 완료되었습니다.");
+        movieMemberService.updateMovieLike(movieId, loginMember);
+        return BaseResponse.ok("영화 좋아요 등록이 성공적으로 완료되었습니다.");
     }
 
     @Override
     @PostMapping("/{movieId}/dislike")
     public ResponseEntity<BaseResponse<Void>> putMovieDislike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
-        movieLikeRedisService.saveDisLikedToRedis(movieId, loginMember);
-        return BaseResponse.ok("좋아요 취소가 완료되었습니다.");
+        movieMemberService.updateMovieDisLike(movieId, loginMember);
+        return BaseResponse.ok("영화 좋아요 취소가 성공적으로 완료되었습니다.");
     }
 
 

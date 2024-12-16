@@ -103,18 +103,6 @@ public interface MovieSpecification {
                     )
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "좋아요 요청 실패 - 없는 영화 또는 사용자",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                    {
-                                      "message": "영화 또는 사용자를 찾을 수 없습니다."
-                                    }
-                                    """)
-                    )
-            ),
-            @ApiResponse(
                     responseCode = "400",
                     description = "좋아요 요청 실패",
                     content = @Content(
@@ -144,18 +132,6 @@ public interface MovieSpecification {
                             examples = @ExampleObject(value = """
                                     {
                                       "message": "좋아요 요청이 성공적으로 등록되었습니다."
-                                    }
-                                    """)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "좋아요 취소 실패 - 없는 영화 또는 사용자",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(value = """
-                                    {
-                                      "message": "영화 또는 사용자를 찾을 수 없습니다."
                                     }
                                     """)
                     )
