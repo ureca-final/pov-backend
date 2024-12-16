@@ -25,4 +25,8 @@ public class ReviewLikeCount {
         this.review = review;
         this.reviewLikeCount = (reviewLikeCount != null) ? reviewLikeCount : 0L;
     }
+
+    public void updateCount(Long count) {
+        this.reviewLikeCount = count;
+    }
 }

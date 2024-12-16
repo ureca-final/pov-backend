@@ -43,7 +43,7 @@ public class BatchScheduler {
         }
     }
 
-    @Scheduled(cron = "0 */15 * * * *") // 15분마다 실행
+    @Scheduled(cron = "*/1 * * * * *")
     public void reviewLikeSync() {
         LocalDateTime start = LocalDateTime.now();
         log.info("리뷰 좋아요 동기화 배치 시작: {}", start);

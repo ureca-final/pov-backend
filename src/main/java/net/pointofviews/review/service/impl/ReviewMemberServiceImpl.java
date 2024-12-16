@@ -3,6 +3,7 @@ package net.pointofviews.review.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.lock.DistributeLock;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.RedisService;
 import net.pointofviews.common.service.S3Service;
@@ -284,6 +285,7 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         s3Service.deleteFolder(folderPath);
     }
 
+    @DistributeLock(key = "'ReviewLike:' + #reviewId + ':' + #loginMember.id")
     @Override
     @Transactional
     public void updateReviewLike(Long movieId, Long reviewId, Member loginMember) {
@@ -300,6 +302,8 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
         updateLikeCount(countKey, true);
     }
 
+
+    @DistributeLock(key = "'ReviewLike:' + #reviewId + ':' + #loginMember.id")
     @Override
     @Transactional
     public void updateReviewDisLike(Long movieId, Long reviewId, Member loginMember) {
