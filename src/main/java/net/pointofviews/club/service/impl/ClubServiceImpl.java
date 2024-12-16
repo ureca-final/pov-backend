@@ -11,6 +11,7 @@ import net.pointofviews.club.dto.request.PutClubRequest;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubFavorGenreRepository;
+import net.pointofviews.club.repository.ClubMoviesRepository;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.ClubFavorGenreService;
@@ -19,7 +20,9 @@ import net.pointofviews.club.service.ClubService;
 import net.pointofviews.club.service.MemberClubService;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.common.service.RedisService;
 import net.pointofviews.common.service.S3Service;
+import net.pointofviews.common.utils.UuidUtils;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.exception.MemberException;
 import net.pointofviews.member.repository.MemberRepository;
@@ -35,6 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.pointofviews.club.exception.ClubException.clubNotFound;
+import static net.pointofviews.club.exception.ClubException.inviteCodeNotFound;
 import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSize;
 
 @Service
@@ -46,6 +50,7 @@ public class ClubServiceImpl implements ClubService {
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
 
+    private final ClubMoviesRepository clubMoviesRepository;
     private final ClubRepository clubRepository;
     private final MemberClubRepository memberClubRepository;
     private final ClubFavorGenreRepository clubFavorGenreRepository;
@@ -55,6 +60,7 @@ public class ClubServiceImpl implements ClubService {
     private final ClubMovieService clubMovieService;
     private final ClubFavorGenreService clubFavorGenreService;
     private final ReviewClubService reviewClubService;
+    private final RedisService redisService;
 
     private final S3Service s3Service;
 
@@ -187,7 +193,7 @@ public class ClubServiceImpl implements ClubService {
         validateClubLeader(club, currentLeader);
 
         Member newLeader = memberRepository.findByEmail(request.newLeaderEmail())
-                .orElseThrow(() -> MemberException.memberNotFound());
+                .orElseThrow(MemberException::memberNotFound);
 
         // 새 클럽장이 클럽원인지 확인 & 현재 클럽장 권한 변경
         club.getMemberClubs().forEach(mc -> {
@@ -397,7 +403,42 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public ReadPrivateClubDetailsResponse readPrivateClubDetails(Member loginMember, String value) {
-        return null;
+        String inviteCode = "invite:code:" + value;
+        String stringClubId = redisService.getValue(inviteCode);
+
+        if (stringClubId == null) {
+            throw inviteCodeNotFound(value);
+        }
+
+        UUID clubId = UuidUtils.fromString(stringClubId);
+
+        if (memberClubRepository.existsByClubIdAndMember(clubId, loginMember)) {
+            return ReadPrivateClubDetailsResponse.joinedMember(stringClubId);
+        }
+
+        Club privateClub = clubRepository.findByIdWithFavorGenres(clubId)
+                .orElseThrow(() -> ClubException.clubNotFound(clubId));
+
+        List<ClubFavorGenre> favorGenres = privateClub.getClubFavorGenres();
+        List<String> stringGenres = favorGenres.stream()
+                .map(genre -> commonCodeService.convertCommonCodeToName(genre.getGenreCode(), CodeGroupEnum.MOVIE_GENRE))
+                .toList();
+
+        Long currentMemberCount = memberClubRepository.countByClub(privateClub);
+        Long bookmarkCount = clubMoviesRepository.countByClub(privateClub);
+
+        return new ReadPrivateClubDetailsResponse(
+                clubId.toString(),
+                privateClub.getName(),
+                privateClub.getDescription(),
+                privateClub.getClubImage(),
+                stringGenres,
+                currentMemberCount,
+                privateClub.getMaxParticipants(),
+                privateClub.isPublic(),
+                bookmarkCount,
+                false
+        );
     }
 
     private Integer validateMaxParticipants(Integer maxParticipants) {
