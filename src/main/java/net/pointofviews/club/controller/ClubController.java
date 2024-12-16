@@ -163,6 +163,10 @@ public class ClubController implements ClubSpecification {
             @RequestParam String value
     ) {
         ReadPrivateClubDetailsResponse response = clubService.readPrivateClubDetails(loginMember, value);
+
+        if (response.isMember()) {
+            return BaseResponse.redirection("https://www.point-of-views.com/club/" + response.clubId() + "/detail");
+        }
         return BaseResponse.ok("비공개 클럽 가입 페이지", response);
     }
 
