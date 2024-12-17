@@ -97,24 +97,37 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("""
                 SELECT new net.pointofviews.review.dto.ReviewPreferenceCountDto(
-                    COALESCE(SUM(CASE WHEN r.preference = 'GOOD' THEN 1 ELSE 0 END), 0),
-                    COALESCE(SUM(CASE WHEN r.preference = 'BAD' THEN 1 ELSE 0 END), 0)
+                    CAST(COALESCE(SUM(CASE WHEN r.preference = 'GOOD' THEN 1 ELSE 0 END), 0) AS long),
+                    CAST(COALESCE(SUM(CASE WHEN r.preference = 'BAD' THEN 1 ELSE 0 END), 0) AS long)
                 )
                 FROM Review r
                 WHERE r.movie.id = :movieId
             """)
-    List<ReviewPreferenceCountDto> countReviewPreferenceByMovieId(Long movieId);
+    List<ReviewPreferenceCountDto> countReviewPreferenceByMovieId(@Param("movieId") Long movieId);
+
 
     @Query("""
                 SELECT new net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto(
-                    r,
-                    rlc.reviewLikeCount
+                    r.id,
+                    r.title,
+                    r.contents,
+                    r.thumbnail,
+                    r.preference,
+                    r.isSpoiler,
+                    r.disabled,
+                    r.modifiedAt,
+                    COALESCE(CAST(rlc.reviewLikeCount AS long), 0L),
+                    m.profileImage,
+                    m.nickname
                 )
                 FROM Review r
-                LEFT JOIN ReviewLikeCount rlc on r.id = rlc.review.id
+                LEFT JOIN r.member m
+                LEFT JOIN ReviewLikeCount rlc ON r.id = rlc.review.id
                 WHERE r.movie.id = :movieId
+                ORDER BY COALESCE(rlc.reviewLikeCount, 0) DESC
             """)
     List<ReviewDetailsWithLikeCountDto> findTop3ByMovieIdOrderByReviewLikeCountDesc(@Param("movieId") Long movieId, Pageable pageable);
+
 
     @Query(value = """
             SELECT
