@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Date;
 
-@Schema(description = "영화 검색 응답 DTO")
-public record SearchMovieResponse(
+@Schema(description = "영화 응답 DTO")
+public record MovieResponse(
         @Schema(description = "영화 식별자", example = "1")
         Long id,
 
@@ -26,7 +26,5 @@ public record SearchMovieResponse(
 
         @Schema(description = "영화 리뷰 수", example = "15")
         Long movieReviewCount
-
-
 ) {
 }

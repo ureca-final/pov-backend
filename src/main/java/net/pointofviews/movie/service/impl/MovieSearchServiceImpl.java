@@ -3,6 +3,7 @@ package net.pointofviews.movie.service.impl;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.exception.MovieException;
@@ -33,16 +34,17 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     private final MovieLikeCountRepository movieLikeCountRepository;
 
     @Override
-    public SearchMovieListResponse searchMovies(String query, Pageable pageable) {
+    public SearchMovieListResponse searchMovies(String query, Member loginMember, Pageable pageable) {
 
-        Slice<SearchMovieResponse> responses = movieRepository.searchMoviesByTitleOrPeople(query, pageable)
+        Slice<SearchMovieResponse> responses = movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(), pageable)
                 .map(row -> new SearchMovieResponse(
-                        ((Number) row[0]).longValue(),  // id
-                        (String) row[1],               // title
-                        (String) row[2],               // poster
-                        (Date) row[3],               // released
-                        row[4] != null ? ((Number) row[4]).intValue() : 0,  // likeCount (null이면 0)
-                        row[5] != null ? ((Number) row[5]).intValue() : 0   // reviewCount (null이면 0)
+                        ((Number) row[0]).longValue(),    // id
+                        (String) row[1],                 // title
+                        (String) row[2],                 // poster
+                        (Date) row[3],                   // released
+                        row[4] instanceof Number ? ((Number) row[4]).intValue() == 1 : (Boolean) row[4], // isLiked
+                        row[5] != null ? ((Number) row[5]).longValue() : 0L,  // movieLikeCount
+                        row[6] != null ? ((Number) row[6]).longValue() : 0L   // movieReviewCount
                 ));
 
         return new SearchMovieListResponse(responses);

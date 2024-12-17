@@ -2,6 +2,9 @@ package net.pointofviews.movie.repository;
 
 import net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse;
 import net.pointofviews.movie.domain.Movie;
+import net.pointofviews.movie.dto.response.MovieListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -20,30 +23,43 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
      * 검색
      */
     @Query(value = """
-            
-            SELECT DISTINCT m.id, m.title, m.poster, m.released AS released,
-            COALESCE(mlc.like_count, 0) AS likeCount,
-                            (SELECT COUNT(*) FROM review r WHERE r.movie_id = m.id) AS reviewCount
-            FROM movie m
-            LEFT JOIN movie_like_count mlc ON mlc.movie_id = m.id
-            WHERE MATCH(m.title) AGAINST(:query IN NATURAL LANGUAGE MODE)
-            OR EXISTS (
-                    SELECT 1
-                            FROM people p
-                            JOIN movie_cast mc ON mc.people_id = p.id
-                            WHERE MATCH(p.name) AGAINST(:query IN NATURAL LANGUAGE MODE)
-                            AND mc.movie_id = m.id
-            )
-            OR EXISTS (
-                    SELECT 1
-                            FROM people p
-                            JOIN movie_crew mcr ON mcr.people_id = p.id
-                            WHERE MATCH(p.name) AGAINST(:query IN NATURAL LANGUAGE MODE)
-                            AND mcr.movie_id = m.id
-            )
-            """,
+    SELECT m.id AS id,
+           m.title AS title,
+           m.poster AS poster,
+           m.released AS released,
+           CASE WHEN EXISTS (
+               SELECT 1 FROM movie_like ml 
+               WHERE ml.movie_id = m.id 
+                 AND ml.member_id = :memberId 
+                 AND ml.is_liked = true
+           ) THEN true ELSE false END AS isLiked,
+           COALESCE((
+               SELECT mlc.like_count 
+               FROM movie_like_count mlc 
+               WHERE mlc.movie_id = m.id
+           ), 0) AS movieLikeCount,
+           (SELECT COUNT(*) 
+            FROM review r 
+            WHERE r.movie_id = m.id) AS movieReviewCount
+    FROM movie m
+    WHERE MATCH(m.title) AGAINST(:query IN NATURAL LANGUAGE MODE)
+       OR EXISTS (
+           SELECT 1 
+           FROM people p 
+           JOIN movie_cast mc ON mc.people_id = p.id 
+           WHERE MATCH(p.name) AGAINST(:query IN NATURAL LANGUAGE MODE)
+             AND mc.movie_id = m.id
+       )
+       OR EXISTS (
+           SELECT 1 
+           FROM people p 
+           JOIN movie_crew mcr ON mcr.people_id = p.id 
+           WHERE MATCH(p.name) AGAINST(:query IN NATURAL LANGUAGE MODE)
+             AND mcr.movie_id = m.id
+       )
+    """,
             nativeQuery = true)
-    Slice<Object[]> searchMoviesByTitleOrPeople(@Param("query") String query, Pageable pageable);
+    Slice<Object[]> searchMoviesByTitleOrPeople(@Param("query") String query, @Param("memberId") UUID memberId, Pageable pageable);
 
     boolean existsByTmdbId(Integer id);
 

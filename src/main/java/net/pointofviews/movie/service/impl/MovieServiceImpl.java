@@ -8,9 +8,12 @@ import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
+import net.pointofviews.movie.dto.response.MovieListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.MovieService;
 import net.pointofviews.people.domain.People;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +108,10 @@ public class MovieServiceImpl implements MovieService {
         movie.updateMovie(request, casts, crews, countries, genres);
     }
 
+    @Override
+    public MovieListResponse readMovies(Member loginMember, Pageable pageable) {
+        return null;
+    }
 
     private List<MovieGenre> convertStringsToMovieGenre(List<String> stringGenres) {
         return stringGenres.stream()

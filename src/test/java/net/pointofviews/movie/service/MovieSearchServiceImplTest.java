@@ -3,6 +3,7 @@ package net.pointofviews.movie.service;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.country.domain.Country;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.repository.MovieContentRepository;
@@ -32,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -70,19 +72,23 @@ class MovieSearchServiceImplTest {
             void 영화_검색_결과_성공() {
                 // given
                 String query = "Inception";
+                UUID memberId = UUID.randomUUID(); // UUID 생성
+                Member loginMember = mock(Member.class);
+
+                given(loginMember.getId()).willReturn(memberId);
                 PageRequest pageable = PageRequest.of(0, 10);
 
                 // Mocking 데이터 생성
                 List<Object[]> mockResults = new ArrayList<>();
-                mockResults.add(new Object[]{1L, "Inception", "https://example.com/poster.jpg", Date.valueOf("2010-07-16"), 123, 10});
+                mockResults.add(new Object[]{1L, "Inception", "https://example.com/poster.jpg", Date.valueOf("2010-07-16"), true, 123, 10});
 
 
                 // Mocking된 Slice 객체 생성
                 Slice<Object[]> mockSlice = new PageImpl<>(mockResults, pageable, mockResults.size());
-                given(movieRepository.searchMoviesByTitleOrPeople(query, pageable)).willReturn(mockSlice);
+                given(movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(), pageable)).willReturn(mockSlice);
 
                 // when
-                SearchMovieListResponse response = movieSearchService.searchMovies(query, pageable);
+                SearchMovieListResponse response = movieSearchService.searchMovies(query, loginMember, pageable);
 
                 // then
                 assertThat(response.movies().getContent()).hasSize(1); // 결과가 1개 있어야 함
@@ -93,21 +99,25 @@ class MovieSearchServiceImplTest {
                 assertThat(movie.title()).isEqualTo("Inception");
                 assertThat(movie.poster()).isEqualTo("https://example.com/poster.jpg");
                 assertThat(movie.movieLikeCount()).isEqualTo(123);
-                assertThat(movie.reviewCount()).isEqualTo(10);
+                assertThat(movie.movieReviewCount()).isEqualTo(10);
             }
 
             @Test
             void 영화_검색_결과없음() {
                 // given
                 String query = "NonExistentMovie";
+                UUID memberId = UUID.randomUUID(); // UUID 생성
+                Member loginMember = mock(Member.class);
+
+                given(loginMember.getId()).willReturn(memberId);
                 PageRequest pageable = PageRequest.of(0, 10);
 
                 // 빈 결과를 반환하는 Slice 객체 Mocking
                 Slice<Object[]> mockSlice = new PageImpl<>(List.of(), pageable, 0);
-                given(movieRepository.searchMoviesByTitleOrPeople(query, pageable)).willReturn(mockSlice);
+                given(movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(), pageable)).willReturn(mockSlice);
 
                 // when
-                SearchMovieListResponse response = movieSearchService.searchMovies(query, pageable);
+                SearchMovieListResponse response = movieSearchService.searchMovies(query, loginMember, pageable);
 
                 // then
                 assertThat(response.movies().getContent()).isEmpty(); // 결과가 없어야 함
@@ -121,13 +131,17 @@ class MovieSearchServiceImplTest {
             void 영화_검색_시_쿼리가_없으면_실패() {
                 // given
                 String query = null; // 잘못된 입력값
+                UUID memberId = UUID.randomUUID(); // UUID 생성
+                Member loginMember = mock(Member.class);
+
+                given(loginMember.getId()).willReturn(memberId);
                 PageRequest pageable = PageRequest.of(0, 10);
 
                 // when
                 Slice<Object[]> mockSlice = new PageImpl<>(List.of(), pageable, 0);
-                given(movieRepository.searchMoviesByTitleOrPeople(query, pageable)).willReturn(mockSlice);
+                given(movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(),  pageable)).willReturn(mockSlice);
 
-                SearchMovieListResponse response = movieSearchService.searchMovies(query, pageable);
+                SearchMovieListResponse response = movieSearchService.searchMovies(query, loginMember, pageable);
 
                 // then
                 assertThat(response.movies().getContent()).isEmpty(); // 비어 있는 결과
@@ -137,15 +151,19 @@ class MovieSearchServiceImplTest {
             void 영화_검색_시_DB_에러_발생() {
                 // given
                 String query = "Inception";
+                UUID memberId = UUID.randomUUID(); // UUID 생성
+                Member loginMember = mock(Member.class);
+
+                given(loginMember.getId()).willReturn(memberId);
                 PageRequest pageable = PageRequest.of(0, 10);
 
                 // Mocking: DB 에러 발생
-                given(movieRepository.searchMoviesByTitleOrPeople(query, pageable))
+                given(movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(), pageable))
                         .willThrow(new RuntimeException("Database Error"));
 
                 // when & then
                 org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
-                    movieSearchService.searchMovies(query, pageable);
+                    movieSearchService.searchMovies(query, loginMember, pageable);
                 });
             }
         }
