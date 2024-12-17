@@ -8,13 +8,21 @@ import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
+import net.pointofviews.movie.dto.response.MovieListResponse;
+import net.pointofviews.movie.dto.response.MovieResponse;
+import net.pointofviews.movie.dto.response.SearchMovieListResponse;
+import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.MovieService;
 import net.pointofviews.people.domain.People;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -105,6 +113,19 @@ public class MovieServiceImpl implements MovieService {
         movie.updateMovie(request, casts, crews, countries, genres);
     }
 
+    @Override
+    public MovieListResponse readMovies(Member loginMember, Pageable pageable) {
+        Slice<MovieResponse> responses = movieRepository.findAllMovies(loginMember.getId(), pageable)
+                .map(row -> new MovieResponse(
+                        (String) row[0],                 // title
+                        (String) row[1],                 // poster
+                        (LocalDate) row[2],                   // released
+                        row[3] instanceof Number ? ((Number) row[3]).intValue() == 1 : (Boolean) row[3], // isLiked
+                        row[4] != null ? ((Number) row[4]).longValue() : 0L,  // movieLikeCount
+                        row[5] != null ? ((Number) row[5]).longValue() : 0L   // movieReviewCount
+                ));
+        return new MovieListResponse(responses);
+    }
 
     private List<MovieGenre> convertStringsToMovieGenre(List<String> stringGenres) {
         return stringGenres.stream()

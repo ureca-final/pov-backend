@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
+import net.pointofviews.movie.dto.response.MovieListResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +22,18 @@ import java.util.UUID;
 
 @Tag(name = "Movie", description = "공통 영화 관련 API")
 public interface MovieSpecification {
+
+    @Operation(summary = "영화 상세 조회", description = "영화 단건 상세 조회 API.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공"
+            )
+    })
+    ResponseEntity<BaseResponse<MovieListResponse>> MovieList(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            Pageable pageable
+    );
 
     @Operation(summary = "영화 목록 검색", description = "검색 조건에 따라 영화 목록을 조회하는 API.")
     @ApiResponses({
@@ -43,6 +55,7 @@ public interface MovieSpecification {
             )
     })
     ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
             @RequestParam String query,
             Pageable pageable
     );
