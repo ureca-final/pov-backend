@@ -17,17 +17,17 @@ public interface ClubMoviesRepository extends JpaRepository<ClubMovie, Long> {
                 m.title,
                 m.poster,
                 m.released,
-                COALESCE(mlc.likeCount, 0) AS movieLikeCount,
-                COUNT(r.id) AS movieReviewCount
+                CASE WHEN EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
+                COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
+                COUNT(r.id)
             )
             FROM ClubMovie cm
             JOIN cm.movie m
             LEFT JOIN m.reviews r
-            LEFT JOIN MovieLikeCount mlc ON mlc.movie.id = m.id
             WHERE cm.club.id = :clubId
-            GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
+            GROUP BY m.id, m.title, m.poster, m.released
             """)
-    Slice<ReadClubMovieResponse> findMovieDetailsByClubId(@Param("clubId") UUID clubId, Pageable pageable);
+    Slice<ReadClubMovieResponse> findMovieDetailsByClubId(@Param("clubId") UUID clubId, @Param("memberId") UUID memberId, Pageable pageable);
 
     boolean existsByMovieIdAndClubId(Long movieId, UUID clubId);
 

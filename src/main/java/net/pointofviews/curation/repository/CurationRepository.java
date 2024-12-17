@@ -5,13 +5,9 @@ import net.pointofviews.curation.domain.CurationCategory;
 import net.pointofviews.curation.dto.response.ReadAdminAllCurationResponse;
 import net.pointofviews.curation.dto.response.ReadAdminCurationMovieResponse;
 import net.pointofviews.curation.dto.response.ReadAdminCurationResponse;
-import net.pointofviews.curation.dto.response.ReadUserCurationResponse;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,4 +69,7 @@ public interface CurationRepository extends JpaRepository<Curation, Long> {
        WHERE c.startTime >= :startTime AND c.startTime < :endTime
        """)
     List<Curation> findByStartTimeBetween(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT c.title FROM Curation c WHERE c.id = :id")
+    String findTitleById(@Param("id") Long id);
 }
