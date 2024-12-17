@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
@@ -71,16 +72,16 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 m.title,
                 m.poster,
                 m.released,
-                mlc.likeCount,
+                CASE WHEN EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
+                COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
                 COUNT(r.id)
             )
             FROM Movie m
             LEFT JOIN m.reviews r
-            LEFT JOIN MovieLikeCount mlc ON mlc.movie.id = m.id
             WHERE m.id IN :movieIds
-            GROUP BY m.id, m.title, m.poster, m.released, mlc.likeCount
+            GROUP BY m.id, m.title, m.poster, m.released
             """)
-    List<ReadUserCurationMovieResponse> findUserCurationMoviesByIds(@Param("movieIds") Set<Long> movieIds);
+    List<ReadUserCurationMovieResponse> findUserCurationMoviesByIds(@Param("movieIds") Set<Long> movieIds, @Param("memberId") UUID memberId);
 
     @EntityGraph(attributePaths = {"genres", "countries.country", "crews.people", "casts.people"})
     @Query("SELECT DISTINCT m FROM Movie m WHERE m.id = :movieId")

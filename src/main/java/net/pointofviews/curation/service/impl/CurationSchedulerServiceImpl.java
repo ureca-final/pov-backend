@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class CurationSchedulerServiceImpl implements CurationSchedulerService {
 
     private final CurationRepository curationRepository;
-    private final MovieRepository movieRepository;
     private final CurationRedisService curationRedisService;
 
 //    @Scheduled(cron = "0 * * * * *")
@@ -41,25 +40,6 @@ public class CurationSchedulerServiceImpl implements CurationSchedulerService {
         todaysCurations.forEach(curation -> {
             // 오늘 날짜 큐레이션 ID 저장
             curationRedisService.saveTodayCurationId(curation.getId());
-
-            // Redis에서 영화 ID 가져오기
-            Set<Long> movieIds = curationRedisService.readMoviesForCuration(curation.getId());
-
-            // 영화 정보를 DB에서 조회
-            List<ReadUserCurationMovieResponse> movieDetails = movieRepository.findUserCurationMoviesByIds(movieIds)
-                    .stream()
-                    .map(movie -> new ReadUserCurationMovieResponse(
-                            movie.title(),
-                            movie.poster(),
-                            movie.released(),
-                            movie.movieLikeCount(),
-                            movie.movieReviewCount()
-                    ))
-                    .collect(Collectors.toList());
-
-            // Redis에 큐레이션 상세 정보 저장
-            curationRedisService.saveTodayCurationDetail(curation.getId(),
-                    new SaveTodayCurationRequest(curation.getTitle(), movieDetails));
         });
     }
 }

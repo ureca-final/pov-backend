@@ -55,7 +55,6 @@ public class ClubMovieServiceImpl implements ClubMovieService {
         ClubMovie clubMovie = ClubMovie.builder()
                 .movie(movie)
                 .club(club)
-
                 .build();
 
         clubMoviesRepository.save(clubMovie);

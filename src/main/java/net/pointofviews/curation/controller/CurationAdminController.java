@@ -63,7 +63,6 @@ public class CurationAdminController implements CurationAdminSpecification {
         return BaseResponse.ok("큐레이션이 성공적으로 삭제되었습니다.");
     }
 
-
     @GetMapping
     @Override
     public ResponseEntity<BaseResponse<ReadAdminAllCurationListResponse>> readAllCurations() {
