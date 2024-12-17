@@ -66,4 +66,4 @@ toss:
   secret-key: ${TOSS_SECRET_KEY}
 
 oauth:
-  baseurl: https://www.point-of-views.com
+  baseurl: http://localhost:5173
