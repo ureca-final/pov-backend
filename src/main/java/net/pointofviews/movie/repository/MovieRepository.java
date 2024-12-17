@@ -3,6 +3,7 @@ package net.pointofviews.movie.repository;
 import net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.dto.response.MovieListResponse;
+import net.pointofviews.movie.dto.response.MovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,24 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
+
+
+    @Query("""
+            SELECT new net.pointofviews.movie.dto.response(
+                m.title,
+                m.poster,
+                m.released,
+                CASE WHEN EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
+                COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
+                COUNT(r.id)
+            )
+            FROM Movie m
+            LEFT JOIN m.reviews r
+            GROUP BY m.id, m.title, m.poster, m.released
+            ORDER BY m.released DESC
+            """)
+    Slice<MovieResponse> findAllMovies(@Param("memberId") UUID memberId, Pageable pageable);
+
 
     /**
      * 검색

@@ -6,9 +6,6 @@ import java.util.Date;
 
 @Schema(description = "영화 응답 DTO")
 public record MovieResponse(
-        @Schema(description = "영화 식별자", example = "1")
-        Long id,
-
         @Schema(description = "영화 제목", example = "Inception")
         String title,
 
