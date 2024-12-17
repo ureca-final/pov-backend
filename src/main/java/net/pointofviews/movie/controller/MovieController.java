@@ -1,9 +1,9 @@
 package net.pointofviews.movie.controller;
 
 import lombok.RequiredArgsConstructor;
-import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.service.ClubMovieService;
 import net.pointofviews.common.dto.BaseResponse;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieSpecification;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
@@ -11,20 +11,23 @@ import net.pointofviews.movie.service.MovieMemberService;
 import net.pointofviews.movie.service.MovieSearchService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/movies")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ROLE_USER')")
+@RequestMapping("/api/movies")
 public class MovieController implements MovieSpecification {
 
+    private final MovieMemberService memberService;
     private final MovieSearchService movieSearchService;
-    private final MovieMemberService movieMemberService;
     private final ClubMovieService clubMovieService;
 
+    @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/search")
     public ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(@RequestParam String query,
@@ -42,19 +45,25 @@ public class MovieController implements MovieSpecification {
     }
 
     @Override
-    @PutMapping("/{movieId}/likes")
-    public ResponseEntity<BaseResponse<Void>> putMovieLike(
-            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto, @PathVariable Long movieId) {
-
-        movieMemberService.updateMovieLike(movieId, memberDetailsDto.member());
-        return BaseResponse.ok("좋아요가 성공적으로 ");
-    }
-
-
-    @Override
     @PostMapping("/{movieId}/bookmark/{clubId}")
     public ResponseEntity<BaseResponse<Void>> saveMovieToMyClub(@PathVariable Long movieId, @PathVariable UUID clubId) {
         clubMovieService.saveMovieToMyClub(movieId, clubId);
-        return BaseResponse.ok("내 클럽에 영화 북마크를 성공했습니다");
+        return BaseResponse.ok("내 클럽에 영화 북마크를 성공했습니다.");
     }
+
+    @Override
+    @PostMapping("/{movieId}/like")
+    public ResponseEntity<BaseResponse<Void>> putMovieLike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
+        memberService.updateMovieLike(movieId, loginMember);
+        return BaseResponse.ok("좋아요 등록이 완료되었습니다.");
+    }
+
+    @Override
+    @PostMapping("/{movieId}/dislike")
+    public ResponseEntity<BaseResponse<Void>> putMovieDislike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
+        memberService.updateMovieDisLike(movieId, loginMember);
+        return BaseResponse.ok("좋아요 취소가 완료되었습니다.");
+    }
+
+
 }

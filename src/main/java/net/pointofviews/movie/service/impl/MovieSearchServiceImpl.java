@@ -108,6 +108,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 crewResponses,
                 castResponses,
                 movieDetails.getPoster(),
+                movieDetails.getBackdrop(),
                 countries,
                 images,
                 videos,

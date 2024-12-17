@@ -156,7 +156,41 @@ public class MovieTMDbSearchService implements MovieApiSearchService {
                         HttpStatusCode::is4xxClientError,
                         this::handleClientError)
                 .body(SearchMovieDiscoverApiResponse.class);
+    }
 
+    @Override
+    public SearchMovieImageApiResponse searchImageMovie(String movieId) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/")
+                        .path(movieId)
+                        .path("/images")
+                        .queryParam("include_image_language", "ko,null")
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchMovieImageApiResponse.class);
+    }
+
+    @Override
+    public SearchMovieTrendingApiResponse searchTrendingMovie(String timeWindow, int page) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/trending")
+                        .path("/movie")
+                        .path("/" + timeWindow)
+                        .queryParam("language", LocaleUtils.KOREAN_LANGUAGE_CODE)
+                        .queryParam("page", page)
+                        .build())
+                .header("Authorization", "Bearer " + TMDbApiKey)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError)
+                .body(SearchMovieTrendingApiResponse.class);
     }
 
     private SearchReleaseApiResponse searchApiReleaseDate(String movieId) {

@@ -117,4 +117,6 @@ public interface MemberClubRepository extends JpaRepository<MemberClub, Long> {
             WHERE mc.club.id = :clubId
             """)
     List<ClubMemberResponse> findAllMembersByClubId(@Param("clubId") UUID clubId);
+
+    boolean existsByClubIdAndMember(UUID club, Member member);
 }

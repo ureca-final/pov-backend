@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import net.pointofviews.auth.dto.MemberDetailsDto;
@@ -21,6 +22,25 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberSpecification {
+	// 로그아웃
+	@Tag(name = "Member", description = "회원 로그아웃 관련 API")
+	@Operation(summary = "로그아웃", description = "💡회원의 토큰을 삭제하고 로그아웃합니다.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "⭕ SUCCESS"),
+			@ApiResponse(responseCode = "401", description = "❌ FAIL",
+					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+							examples = @ExampleObject(value = """
+                {
+                  "message": "로그인이 필요한 서비스입니다."
+                }""")
+					)
+			)
+	})
+	ResponseEntity<BaseResponse<Void>> logout(
+			@AuthenticationPrincipal MemberDetailsDto memberDetails,
+			HttpServletResponse response
+	);
+
 	// 회원 탈퇴
 	@Tag(name = "Member", description = "회원 탈퇴 관련 API")
 	@Operation(summary = "회원 탈퇴", description = "💡회원 정보를 삭제합니다.")

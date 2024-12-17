@@ -14,4 +14,8 @@ public interface MovieApiSearchService {
     SearchReleaseApiResponse searchReleaseDate(String movieId);
 
     SearchMovieDiscoverApiResponse searchDiscoverMovie(LocalDate start, LocalDate end, int page);
+
+    SearchMovieTrendingApiResponse searchTrendingMovie(String timeWindow, int page);
+
+    SearchMovieImageApiResponse searchImageMovie(String movieId);
 }

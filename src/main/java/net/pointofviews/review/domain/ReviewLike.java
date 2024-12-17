@@ -36,4 +36,8 @@ public class ReviewLike extends BaseEntity {
         this.review = review;
         this.isLiked = isLiked;
     }
+
+    public void updateLikeStatus(boolean isLiked) {
+        this.isLiked = isLiked;
+    }
 }

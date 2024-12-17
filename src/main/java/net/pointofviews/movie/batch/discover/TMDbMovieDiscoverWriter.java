@@ -5,7 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.domain.MovieGenre;
 import net.pointofviews.movie.dto.response.BatchDiscoverMovieResponse;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.scope.context.StepSynchronizationManager;
 import org.springframework.batch.item.Chunk;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
+@StepScope
 @Component
 @RequiredArgsConstructor
 public class TMDbMovieDiscoverWriter implements ItemWriter<List<BatchDiscoverMovieResponse>> {
@@ -38,6 +43,10 @@ public class TMDbMovieDiscoverWriter implements ItemWriter<List<BatchDiscoverMov
         }
 
         List<Long> movieIds = batchInsertMovies(movies);
+
+        if (!movieIds.isEmpty()) {
+            savePkRangeToExecutionContext(movieIds.get(0), movieIds.get(movieIds.size() - 1));
+        }
 
         int index = 0;
         for (List<BatchDiscoverMovieResponse> responses : chunk) {
@@ -91,10 +100,20 @@ public class TMDbMovieDiscoverWriter implements ItemWriter<List<BatchDiscoverMov
         }
     }
 
-
     private void batchInsertGenres(List<Object[]> genres) {
         String sql = "INSERT INTO movie_genre (movie_id, genre_code) VALUES (?, ?)";
 
         jdbcTemplate.batchUpdate(sql, genres);
     }
+
+    private void savePkRangeToExecutionContext(Long firstPk, Long lastPk) {
+        StepExecution stepExecution = StepSynchronizationManager.getContext().getStepExecution();
+        ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
+
+        jobExecutionContext.put("firstMoviePk", firstPk);
+        jobExecutionContext.put("lastMoviePk", lastPk);
+
+        log.info("스텝 처리 완료: 첫 번째 영화 PK: {}, 마지막 영화 PK: {}", firstPk, lastPk);
+    }
+
 }

@@ -36,4 +36,8 @@ public class MovieLike extends BaseEntity {
         this.movie = movie;
         this.isLiked = isLiked;
     }
+
+    public void updateLikeStatus(boolean isLiked) {
+        this.isLiked = isLiked;
+    }
 }
