@@ -54,7 +54,7 @@ public class ReviewLikeBatchConfig {
 
     @Bean
     public Job reviewLikeJob(JobRepository jobRepository) {
-        log.info("ReviewLikeJob 초기화 중");
+        log.trace("ReviewLikeJob 초기화 중");
 
         return new JobBuilder("reviewLikeJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -65,7 +65,7 @@ public class ReviewLikeBatchConfig {
     @Bean
     @JobScope
     public Step reviewLikeStep(JobRepository jobRepository) {
-        log.info("ReviewLikeStep 초기화 중");
+        log.trace("ReviewLikeStep 초기화 중");
 
         return new StepBuilder("reviewLikeStep", jobRepository)
                 .<String, ReviewLike>chunk(CHUNK_SIZE, transactionManager)

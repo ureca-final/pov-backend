@@ -54,7 +54,7 @@ public class MovieLikeBatchConfig {
 
     @Bean
     public Job movieLikeJob(JobRepository jobRepository) {
-        log.info("MovieLikeJob 초기화 중");
+        log.trace("MovieLikeJob 초기화 중");
 
         return new JobBuilder("movieLikeJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -65,7 +65,7 @@ public class MovieLikeBatchConfig {
     @Bean
     @JobScope
     public Step movieLikeStep(JobRepository jobRepository) {
-        log.info("MovieLikeStep 초기화 중");
+        log.trace("MovieLikeStep 초기화 중");
 
         return new StepBuilder("movieLikeStep", jobRepository)
                 .<String, MovieLike>chunk(CHUNK_SIZE, transactionManager)
