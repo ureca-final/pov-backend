@@ -50,6 +50,9 @@ public record ReadDetailMovieResponse(
         @Schema(description = "비디오 목록", example = "[\"https://example.com/video1.mp4\", \"https://example.com/video2.mp4\"]")
         List<String> videos,
 
+        @Schema(description = "좋아요 여부", example = "false")
+        Boolean isLiked,
+
         @Schema(description = "리뷰 상세 정보 목록")
         List<ReviewDetailsWithLikeCountDto> reviews
 ) {

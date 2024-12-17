@@ -1,6 +1,7 @@
 package net.pointofviews.movie.controller;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.service.ClubMovieService;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
@@ -51,11 +52,12 @@ public class MovieController implements MovieSpecification {
         return BaseResponse.ok("영화가 성공적으로 검색되었습니다.", response);
     }
 
-    @PreAuthorize("permitAll()")
     @Override
+    @PreAuthorize("permitAll()")
     @GetMapping("/{movieId}")
-    public ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(@PathVariable Long movieId) {
-        ReadDetailMovieResponse readDetailMovieResponse = movieSearchService.readDetailMovie(movieId);
+    public ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(@PathVariable Long movieId,
+                                                                                  @AuthenticationPrincipal MemberDetailsDto memberDetails) {
+        ReadDetailMovieResponse readDetailMovieResponse = movieSearchService.readDetailMovie(movieId, memberDetails);
 
         return BaseResponse.ok("OK", readDetailMovieResponse);
     }

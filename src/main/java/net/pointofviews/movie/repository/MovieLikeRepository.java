@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface MovieLikeRepository extends JpaRepository<MovieLike, Long> {
 
@@ -18,4 +19,6 @@ public interface MovieLikeRepository extends JpaRepository<MovieLike, Long> {
            AND ml.member = :member
     """)
     Optional<MovieLike> findByMovieAndMember(@Param("movie") Movie movie, @Param("member") Member member);
+
+    boolean existsByMovieIdAndMemberId(Long movieId, UUID memberId);
 }

@@ -80,7 +80,7 @@ public interface MovieSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(Long movieId);
+    ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(Long movieId, MemberDetailsDto memberDetails);
 
     @Operation(summary = "내 클럽 영화 북마크", description = "내 클럽에 영화 북마크 가입합니다.")
     @ApiResponses(value = {

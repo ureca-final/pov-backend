@@ -230,6 +230,7 @@ public class NoticeServiceImpl implements NoticeService {
                     CodeGroupEnum.MOVIE_GENRE
             );
             String genreKey = generateRedisKey(movieGenre.getGenreCode());
+
             Set<UUID> genreTargetMembers = getTargetMembers(genreKey);
 
             if (genreTargetMembers.isEmpty()) {
@@ -249,7 +250,7 @@ public class NoticeServiceImpl implements NoticeService {
     // redis에서 실제 대상자 uuid 조회
     private Set<UUID> getTargetMembers(String genreKey) {
         try {
-            Set<String> members = stringRedisService.getKeys(genreKey);
+            Set<String> members = stringRedisService.getSetMembers(genreKey);
             if (members == null) {
                 return new HashSet<>();
             }

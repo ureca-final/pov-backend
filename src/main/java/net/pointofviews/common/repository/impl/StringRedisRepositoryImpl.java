@@ -22,6 +22,11 @@ public class StringRedisRepositoryImpl implements RedisRepository {
     }
 
     @Override
+    public Set<String> getSetMembers(String key) {
+        return redisTemplate.opsForSet().members(key);
+    }
+
+    @Override
     public void setValueWithTTL(String key, String value, Duration ttl) {
         redisTemplate.opsForValue().set(key, value, ttl);
     }

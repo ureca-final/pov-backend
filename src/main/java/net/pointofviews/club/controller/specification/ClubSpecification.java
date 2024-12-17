@@ -370,7 +370,7 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> joinPrivateClub(
+    ResponseEntity<BaseResponse<String>> joinPrivateClub(
             String code,
             Member loginMember
     );

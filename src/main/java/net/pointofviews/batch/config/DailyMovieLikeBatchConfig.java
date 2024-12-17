@@ -5,17 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.movie.domain.DailyMovieLike;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.dto.DailyMovieLikeDto;
-import net.pointofviews.movie.repository.DailyMovieLikeRepository;
 import net.pointofviews.movie.repository.MovieRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobScope;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
@@ -25,9 +23,11 @@ import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuild
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,14 +40,13 @@ public class DailyMovieLikeBatchConfig {
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
     private final MovieRepository movieRepository;
-    private final DailyMovieLikeRepository dailyMovieLikeRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     private static final int CHUNK_SIZE = 100;
     private static final int PAGE_SIZE = 100;
 
     @Bean
     public Job dailyMovieLikeJob(JobRepository jobRepository) throws Exception {
-
         log.info("DailyMovieLikeJob 초기화 중");
 
         return new JobBuilder("dailyMovieLikeJob", jobRepository)
@@ -57,9 +56,7 @@ public class DailyMovieLikeBatchConfig {
     }
 
     @Bean
-    @JobScope
     public Step dailyMovieLikeStep(JobRepository jobRepository) throws Exception {
-
         log.info("DailyMovieLikeStep 초기화 중");
 
         return new StepBuilder("dailyMovieLikeStep", jobRepository)
@@ -71,9 +68,7 @@ public class DailyMovieLikeBatchConfig {
     }
 
     @Bean
-    @StepScope
     public JdbcPagingItemReader<DailyMovieLikeDto> extractMovieLikeItemReader() throws Exception {
-
         log.info("extractMovieLikeItemReader 시작: 영화 좋아요 데이터 읽기");
 
         return new JdbcPagingItemReaderBuilder<DailyMovieLikeDto>()
@@ -89,8 +84,9 @@ public class DailyMovieLikeBatchConfig {
                 .build();
     }
 
-    @StepScope
+    @Bean
     public ItemProcessor<DailyMovieLikeDto, DailyMovieLike> top10MovieLikeProcessor() {
+
         return new ItemProcessor<DailyMovieLikeDto, DailyMovieLike>() {
             private final List<DailyMovieLikeDto> topMovies = new ArrayList<>();
 
@@ -117,25 +113,35 @@ public class DailyMovieLikeBatchConfig {
         };
     }
 
-    /**
-     * Writer: 좋아요 수가 가장 많은 상위 10개의 영화를 반환
-     */
     @Bean
-    @StepScope
     public ItemWriter<DailyMovieLike> dailyMovieLikeWriter() {
 
-        return items -> {
-            log.info("DailyMovieLike 저장 중");
+        return new ItemWriter<DailyMovieLike>() {
+            @Override
+            public void write(Chunk<? extends DailyMovieLike> chunk) throws Exception {
+                log.info("DailyMovieLike 저장 중");
 
-            // 좋아요 수 기준으로 정렬하고 상위 10개 선택
-            List<DailyMovieLike> top10Movies = items.getItems().stream()
-                    .sorted(Comparator.comparing(DailyMovieLike::getTotalCount).reversed())
-                    .limit(10)
-                    .collect(Collectors.toList());
+                List<? extends DailyMovieLike> items = chunk.getItems();
 
-            dailyMovieLikeRepository.saveAll(top10Movies);
+                List<DailyMovieLike> top10Movies = items.stream()
+                        .sorted(Comparator.comparing(DailyMovieLike::getTotalCount).reversed())
+                        .limit(10)
+                        .collect(Collectors.toList());
 
-            log.info("상위 10개 영화 저장 완료: {}", top10Movies.size());
+                String sql = "INSERT INTO daily_movie_like (movie_id, total_like_count, created_at) VALUES (?, ?, ?)";
+
+                List<Object[]> batchArgs = top10Movies.stream()
+                        .map(movie -> new Object[]{
+                                movie.getMovie().getId(),
+                                movie.getTotalCount(),
+                                LocalDateTime.now()
+                        })
+                        .collect(Collectors.toList());
+
+                jdbcTemplate.batchUpdate(sql, batchArgs);
+
+                log.info("상위 10개 영화 저장 완료: {}", top10Movies.size());
+            }
         };
     }
 

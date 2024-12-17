@@ -52,6 +52,7 @@ public class ReviewNotificationServiceImpl implements ReviewNotificationService 
                 templateVariables
         );
 
+        log.info("Send notice request: {}", noticeRequest);
         noticeService.sendNotice(noticeRequest);
     }
 }

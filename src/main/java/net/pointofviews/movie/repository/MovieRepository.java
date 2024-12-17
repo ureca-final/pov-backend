@@ -121,4 +121,5 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     @Query("SELECT DISTINCT m FROM Movie m WHERE m.id = :movieId")
     Optional<Movie> findMovieWithDetailsById(Long movieId);
 
+    Optional<Movie> findMovieByTmdbId(Integer tmdbId);
 }

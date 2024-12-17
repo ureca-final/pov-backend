@@ -1,6 +1,7 @@
 package net.pointofviews.movie.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.Member;
@@ -9,6 +10,7 @@ import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.repository.MovieContentRepository;
 import net.pointofviews.movie.repository.MovieLikeCountRepository;
+import net.pointofviews.movie.repository.MovieLikeRepository;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.MovieSearchService;
 import net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto;
@@ -32,6 +34,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     private final CommonCodeService commonCodeService;
     private final MovieContentRepository movieContentRepository;
     private final MovieLikeCountRepository movieLikeCountRepository;
+    private final MovieLikeRepository movieLikeRepository;
 
     @Override
     public SearchMovieListResponse searchMovies(String query, Member loginMember, Pageable pageable) {
@@ -63,7 +66,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     }
 
     @Override
-    public ReadDetailMovieResponse readDetailMovie(Long movieId) {
+    public ReadDetailMovieResponse readDetailMovie(Long movieId, MemberDetailsDto memberDetails) {
         Movie movieDetails = movieRepository.findMovieWithDetailsById(movieId)
                 .orElseThrow(() -> MovieException.movieNotFound(movieId));
 
@@ -74,6 +77,11 @@ public class MovieSearchServiceImpl implements MovieSearchService {
         Long movieLikeCount = movieLikeCountRepository.findById(movieId)
                 .map(MovieLikeCount::getLikeCount)
                 .orElse(0L);
+
+        boolean isLiked = false;
+        if (memberDetails != null) {
+            isLiked = movieLikeRepository.existsByMovieIdAndMemberId(movieId, memberDetails.member().getId());
+        }
 
         Set<MovieCrew> crews = movieDetails.getCrews();
         List<ReadDetailMovieResponse.ReadMovieCrewResponse> crewResponses = crews.stream()
@@ -114,6 +122,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 countries,
                 images,
                 videos,
+                isLiked,
                 reviews
         );
     }
