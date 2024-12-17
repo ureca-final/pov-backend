@@ -2,7 +2,7 @@ package net.pointofviews.movie.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Schema(description = "영화 응답 DTO")
 public record MovieResponse(
@@ -13,7 +13,7 @@ public record MovieResponse(
         String poster,
 
         @Schema(description = "출시일", example = "2010-07-16", format = "date")
-        Date released,
+        LocalDate released,
 
         @Schema(description = "좋아요 여부", example = "true")
         boolean isLiked,

@@ -22,20 +22,19 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
 
     @Query("""
-            SELECT new net.pointofviews.movie.dto.response(
+            SELECT
                 m.title,
                 m.poster,
                 m.released,
                 CASE WHEN EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
                 COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
                 COUNT(r.id)
-            )
             FROM Movie m
             LEFT JOIN m.reviews r
             GROUP BY m.id, m.title, m.poster, m.released
             ORDER BY m.released DESC
             """)
-    Slice<MovieResponse> findAllMovies(@Param("memberId") UUID memberId, Pageable pageable);
+    Slice<Object[]> findAllMovies(@Param("memberId") UUID memberId, Pageable pageable);
 
 
     /**
