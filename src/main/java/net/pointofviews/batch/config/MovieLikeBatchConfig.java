@@ -22,6 +22,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -74,27 +75,41 @@ public class MovieLikeBatchConfig {
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public ItemReader<String> movieLikeRedisReader() {
-        return new ItemReader<String>() {
-            private final Set<String> keys = redisService.getKeys("MovieLiked:*");
-            private final Iterator<String> keysIterator = keys.iterator();
+    @RequiredArgsConstructor
+    public class MovieLikeRedisReader implements ItemReader<String> {
+        private final Set<String> keys;
+        private final Iterator<String> keysIterator;
 
-            @Override
-            public String read() {
-                if (keysIterator.hasNext()) {
-                    return keysIterator.next();
-                }
-                return null;
+        public MovieLikeRedisReader(RedisService redisService) {
+            this.keys = redisService.getKeys("MovieLiked:*");
+            this.keysIterator = keys.iterator();
+        }
+
+        @Override
+        public String read() {
+            if (keysIterator.hasNext()) {
+                return keysIterator.next();
             }
-        };
+            return null;
+        }
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<String, MovieLike> movieLikeProcessor() {
-        return key -> {
+    public MovieLikeRedisReader movieLikeRedisReader(){
+        return new MovieLikeRedisReader(redisService);
+    }
+
+    @RequiredArgsConstructor
+    public class MovieLikeProcessor implements ItemProcessor<String, MovieLike> {
+        private final MovieRepository movieRepository;
+        private final MemberRepository memberRepository;
+        private final MovieLikeRepository movieLikeRepository;
+        private final MovieLikeCountRepository movieLikeCountRepository;
+        private final RedisService redisService;
+
+        @Override
+        public MovieLike process(String key){
             try {
                 // MovieLiked:memberId 형식에서 데이터 추출
                 String[] parts = key.split(":");
@@ -153,15 +168,35 @@ public class MovieLikeBatchConfig {
                 log.error("영화 좋아요 처리 중 오류: {} - {}", key, e.getMessage());
                 return null;  // 오류 발생 시 해당 항목 스킵
             }
-        };
+        }
     }
 
     @Bean
     @StepScope
-    public ItemWriter<MovieLike> movieLikeWriter() {
-        return items -> {
+    public MovieLikeProcessor movieLikeProcessor() {
+        return new MovieLikeProcessor(
+                movieRepository,
+                memberRepository,
+                movieLikeRepository,
+                movieLikeCountRepository,
+                redisService
+        );
+    }
+
+    @RequiredArgsConstructor
+    public class MovieLikeWriter implements ItemWriter<MovieLike> {
+        private final MovieLikeRepository movieLikeRepository;
+
+        @Override
+        public void write(Chunk<? extends MovieLike> items) {
             movieLikeRepository.saveAll(items);
             log.info("{} 개의 영화 좋아요 데이터 저장 완료", items.size());
-        };
+        }
+    }
+
+    @Bean
+    @StepScope
+    public MovieLikeWriter movieLikeWriter() {
+        return new MovieLikeWriter(movieLikeRepository);
     }
 }

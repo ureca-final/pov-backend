@@ -22,6 +22,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -74,27 +75,41 @@ public class ReviewLikeBatchConfig {
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public ItemReader<String> reviewLikeRedisReader() {
-        return new ItemReader<String>() {
-            private final Set<String> keys = redisService.getKeys("ReviewLiked:*");
-            private final Iterator<String> keysIterator = keys.iterator();
+    @RequiredArgsConstructor
+    public class ReviewLikeRedisReader implements ItemReader<String> {
+        private final Set<String> keys;
+        private final Iterator<String> keysIterator;
 
-            @Override
-            public String read() {
-                if (keysIterator.hasNext()) {
-                    return keysIterator.next();
-                }
-                return null;
+        public ReviewLikeRedisReader(RedisService redisService) {
+            this.keys = redisService.getKeys("ReviewLiked:*");
+            this.keysIterator = keys.iterator();
+        }
+
+        @Override
+        public String read() {
+            if (keysIterator.hasNext()) {
+                return keysIterator.next();
             }
-        };
+            return null;
+        }
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<String, ReviewLike> reviewLikeProcessor() {
-        return key -> {
+    public ReviewLikeRedisReader reviewLikeRedisReader() {
+        return new ReviewLikeRedisReader(redisService);
+    }
+
+    @RequiredArgsConstructor
+    public class ReviewLikeProcessor implements ItemProcessor<String, ReviewLike> {
+        private final ReviewRepository reviewRepository;
+        private final MemberRepository memberRepository;
+        private final ReviewLikeRepository reviewLikeRepository;
+        private final ReviewLikeCountRepository reviewLikeCountRepository;
+        private final RedisService redisService;
+
+        @Override
+        public ReviewLike process(String key) {
             try {
                 // ReviewLiked:reviewId:memberId 형식에서 데이터 추출
                 String[] parts = key.split(":");
@@ -151,17 +166,39 @@ public class ReviewLikeBatchConfig {
                 }
             } catch (Exception e) {
                 log.error("리뷰 좋아요 처리 중 오류: {} - {}", key, e.getMessage());
-                return null;  // 오류 발생 시 해당 항목 스킵
+                return null;
             }
-        };
+        }
+    }
+
+
+    @Bean
+    @StepScope
+    public ReviewLikeProcessor reviewLikeProcessor() {
+        return new ReviewLikeProcessor(
+                reviewRepository,
+                memberRepository,
+                reviewLikeRepository,
+                reviewLikeCountRepository,
+                redisService
+        );
+    }
+
+    @RequiredArgsConstructor
+    public class ReviewLikeWriter implements ItemWriter<ReviewLike> {
+        private final ReviewLikeRepository reviewLikeRepository;
+
+        @Override
+        public void write(Chunk<? extends ReviewLike> items) {  // List 대신 Chunk 사용
+            reviewLikeRepository.saveAll(items);
+            log.info("{} 개의 리뷰 좋아요 데이터 저장 완료", items.size());
+        }
     }
 
     @Bean
     @StepScope
-    public ItemWriter<ReviewLike> reviewLikeWriter() {
-        return items -> {
-            reviewLikeRepository.saveAll(items);
-            log.info("{} 개의 리뷰 좋아요 데이터 저장 완료", items.size());
-        };
+    public ReviewLikeWriter reviewLikeWriter() {
+        return new ReviewLikeWriter(reviewLikeRepository);
     }
+
 }
