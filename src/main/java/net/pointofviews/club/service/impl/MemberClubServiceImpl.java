@@ -119,7 +119,7 @@ public class MemberClubServiceImpl implements MemberClubService {
 
     @Override
     @Transactional
-    public void joinPrivateClub(Member loginMember, String value) {
+    public String joinPrivateClub(Member loginMember, String value) {
         String inviteCode = INVITE_CODE_TO_CLUB_KEY_PREFIX + value;
         String stringClubId = redisService.getValue(inviteCode);
 
@@ -142,5 +142,6 @@ public class MemberClubServiceImpl implements MemberClubService {
                 .build();
 
         memberClubRepository.save(newbie);
+        return stringClubId;
     }
 }
