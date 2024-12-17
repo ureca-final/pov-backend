@@ -11,22 +11,22 @@ import java.util.UUID;
 
 public interface MemberFavorGenreRepository extends JpaRepository<MemberFavorGenre, Long> {
 
-	@Query(value = """
-		SELECT mfg.genreCode
-		  FROM MemberFavorGenre mfg
-		 WHERE mfg.member.id = :memberId
-	""")
-	List<String> findGenreCodeByMemberId(UUID memberId);
+    @Query(value = """
+            	SELECT mfg.genreCode
+            	  FROM MemberFavorGenre mfg
+            	 WHERE mfg.member.id = :memberId
+            """)
+    List<String> findGenreCodeByMemberId(UUID memberId);
 
-	void deleteByMemberIdAndGenreCodeIn(UUID memberId, Collection<String> genreCodes);
+    void deleteByMemberIdAndGenreCodeIn(UUID memberId, Collection<String> genreCodes);
 
-	@Query(value = """
-		SELECT cc.code.code
-		  FROM CommonCode cc
-		 WHERE cc.description = :genreName
-		   AND cc.groupCode.groupCode = :groupCode
-	""")
-	String findGenreCodeByGenreName(@Param("genreName") String genreName, @Param("groupCode") String groupCode);
+    @Query(value = """
+            	SELECT cc.code.code
+            	  FROM CommonCode cc
+            	 WHERE cc.description = :genreName
+            	   AND cc.groupCode.groupCode = :groupCode
+            """)
+    String findGenreCodeByGenreName(@Param("genreName") String genreName, @Param("groupCode") String groupCode);
 
-	boolean existsByMemberId(UUID memberId);
+    boolean existsByMemberId(UUID memberId);
 }
