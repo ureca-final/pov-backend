@@ -1,12 +1,15 @@
 package net.pointofviews.movie.service;
 
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.country.domain.Country;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.repository.MovieContentRepository;
 import net.pointofviews.movie.repository.MovieLikeCountRepository;
+import net.pointofviews.movie.repository.MovieLikeRepository;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.impl.MovieSearchServiceImpl;
 import net.pointofviews.people.domain.People;
@@ -32,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -56,6 +60,9 @@ class MovieSearchServiceImplTest {
 
     @Mock
     private MovieContentRepository movieContentRepository;
+
+    @Mock
+    private MovieLikeRepository movieLikeRepository;
 
     @Mock
     private CommonCodeService commonCodeService;
@@ -253,6 +260,12 @@ class MovieSearchServiceImplTest {
             void 영화_상세_조회() {
                 // given
                 Long movieId = 1L;
+                UUID memberId = UUID.randomUUID();
+                MemberDetailsDto memberDetails = mock(MemberDetailsDto.class);
+                Member member = mock(Member.class);
+
+                given(memberDetails.member()).willReturn(member);
+                given(member.getId()).willReturn(memberId);
 
                 Movie mockMovie = movieFixture();
                 mockMovie.addGenre(MovieGenre.builder().genreCode("01").movie(mockMovie).build());
@@ -299,9 +312,10 @@ class MovieSearchServiceImplTest {
                 given(movieContentRepository.findAllByMovieId(movieId)).willReturn(mockMovieContents);
                 given(reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(eq(movieId), any(PageRequest.class)))
                         .willReturn(mockTopReviews);
+                given(movieLikeRepository.existsByMovieIdAndMemberId(movieId, memberId)).willReturn(Boolean.TRUE);
 
                 // when
-                ReadDetailMovieResponse response = movieSearchService.readDetailMovie(movieId);
+                ReadDetailMovieResponse response = movieSearchService.readDetailMovie(movieId, memberDetails);
 
                 // then
                 Assertions.assertThat(response.title()).isEqualTo(mockMovie.getTitle());

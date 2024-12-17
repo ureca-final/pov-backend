@@ -20,5 +20,5 @@ public interface MemberClubService {
 
     ReadAllClubMembersResponse readAllMembersByClubId(UUID clubId);
 
-    void joinPrivateClub(Member loginMember, String value);
+    String joinPrivateClub(Member loginMember, String value);
 }
