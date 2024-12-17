@@ -44,6 +44,7 @@ logging:
   level:
     root: info
     net.pointofviews.batch.config: warn
+    net.pointofviews.batch.config.DailyMovieLikeBatchConfig: debug
     org.springframework.batch.core.job.SimpleStepHandler: warn
     org.springframework.batch.core.step.AbstractStep: warn
     org.springframework.batch.core.launch.support.SimpleJobLauncher: warn
