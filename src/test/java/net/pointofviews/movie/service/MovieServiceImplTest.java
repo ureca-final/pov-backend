@@ -3,10 +3,14 @@ package net.pointofviews.movie.service;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.country.domain.Country;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest.UpdateMoviePeopleRequest;
+import net.pointofviews.movie.dto.response.MovieListResponse;
+import net.pointofviews.movie.dto.response.MovieResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
+import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.repository.MovieContentRepository;
 import net.pointofviews.movie.repository.MovieLikeCountRepository;
@@ -26,12 +30,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -130,6 +138,43 @@ public class MovieServiceImplTest {
                 );
 
             }
+        }
+    }
+
+
+    @Nested
+    class ReadMovies {
+        @Test
+        void 영화_리스트_조회_성공() {
+            // given
+            UUID memberId = UUID.randomUUID();
+            Member loginMember = mock(Member.class);
+            given(loginMember.getId()).willReturn(memberId);
+
+            PageRequest pageable = PageRequest.of(0, 10);
+
+            // Mocking 데이터 생성
+            List<Object[]> mockResults = new ArrayList<>();
+            mockResults.add(new Object[]{"Inception", "https://example.com/poster.jpg", LocalDate.now(), true, 123, 10});
+
+
+            Slice<Object[]> mockSlice = new PageImpl<>(mockResults, pageable, mockResults.size());
+            given(movieRepository.findAllMovies(memberId, pageable)).willReturn(mockSlice);
+
+
+            // when
+            MovieListResponse response = movieService.readMovies(loginMember, pageable);
+
+            // then
+            Assertions.assertThat(response.movies().getContent()).hasSize(1); // 결과가 1개 있어야 함
+
+            MovieResponse movie = response.movies().getContent().get(0);
+
+            // 영화 정보 검증
+            Assertions.assertThat(movie.title()).isEqualTo("Inception");
+            Assertions.assertThat(movie.poster()).isEqualTo("https://example.com/poster.jpg");
+            Assertions.assertThat(movie.movieLikeCount()).isEqualTo(123);
+            Assertions.assertThat(movie.movieReviewCount()).isEqualTo(10);
         }
     }
 
