@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.member.domain.Member;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
@@ -25,6 +27,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         try {
+            log.info("naver OAuth 로그인 실행");
             OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
             OAuth2User oAuth2User = authToken.getPrincipal();
 
