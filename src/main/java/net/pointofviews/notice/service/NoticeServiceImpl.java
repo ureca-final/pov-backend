@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.common.service.RedisService;
 import net.pointofviews.member.domain.MemberFcmToken;
 import net.pointofviews.member.repository.MemberFcmTokenRepository;
 import net.pointofviews.movie.domain.MovieGenre;
-import net.pointofviews.notice.domain.FcmResult;
-import net.pointofviews.notice.domain.Notice;
-import net.pointofviews.notice.domain.NoticeReceive;
-import net.pointofviews.notice.domain.NoticeSend;
+import net.pointofviews.notice.domain.*;
 import net.pointofviews.notice.dto.request.CreateNoticeTemplateRequest;
 import net.pointofviews.notice.dto.request.SendNoticeRequest;
 import net.pointofviews.notice.dto.response.CreateNoticeTemplateResponse;
@@ -43,7 +41,7 @@ public class NoticeServiceImpl implements NoticeService {
     private final ReviewRepository reviewRepository;
     private final CommonCodeService commonCodeService;
     private final FcmUtil fcmUtil;
-    private final StringRedisTemplate stringRedisTemplate;
+    private final RedisService stringRedisService;
 
     @Override
     @Transactional
@@ -251,7 +249,7 @@ public class NoticeServiceImpl implements NoticeService {
     // redis에서 실제 대상자 uuid 조회
     private Set<UUID> getTargetMembers(String genreKey) {
         try {
-            Set<String> members = stringRedisTemplate.opsForSet().members(genreKey);
+            Set<String> members = stringRedisService.getKeys(genreKey);
             if (members == null) {
                 return new HashSet<>();
             }
