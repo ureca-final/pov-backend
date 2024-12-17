@@ -19,7 +19,7 @@ spring:
               - birthday
             client-name: Naver
             authorization-grant-type: authorization_code
-            redirect-uri: http://pov-elb-01-1418143664.ap-northeast-2.elb.amazonaws.com/login/oauth2/code/naver
+            redirect-uri: https://point-of-views.com/login/oauth2/code/naver
 
         provider:
           naver:
