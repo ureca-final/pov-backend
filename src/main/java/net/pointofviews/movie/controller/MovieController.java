@@ -36,6 +36,7 @@ public class MovieController implements MovieSpecification {
         return BaseResponse.ok("영화가 성공적으로 검색되었습니다.", response);
     }
 
+    @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/{movieId}")
     public ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(@PathVariable Long movieId) {
