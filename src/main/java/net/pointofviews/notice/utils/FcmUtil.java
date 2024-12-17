@@ -38,6 +38,7 @@ public class FcmUtil {
     private FcmResult sendWithRetry(String token, String title, String body, Long reviewId, String noticeContent,  NoticeSend noticeSend) {
         int retryCount = 0;
         Exception lastException = null;
+        FcmErrorCode lastErrorCode = null;
 
         while (retryCount < MAX_RETRY_COUNT) {
             try {
@@ -61,13 +62,13 @@ public class FcmUtil {
                         .build();
             } catch (FirebaseMessagingException e) {
                 lastException = e;
-                FcmErrorCode errorCode = FcmErrorCode.fromCode(e.getErrorCode().toString());
+                lastErrorCode = FcmErrorCode.fromCode(e.getErrorCode().toString());
 
-                if (isNonRetryableError(errorCode)) {
+                if (isNonRetryableError(lastErrorCode)) {
                     return FcmResult.builder()
                             .token(token)
                             .isSuccess(false)
-                            .errorCode(errorCode)
+                            .errorCode(lastErrorCode)
                             .noticeSend(noticeSend)
                             .build();
                 }
@@ -94,7 +95,7 @@ public class FcmUtil {
         return FcmResult.builder()
                 .token(token)
                 .isSuccess(false)
-                .errorCode(errorCode)
+                .errorCode(lastErrorCode != null ? lastErrorCode : FcmErrorCode.UNKNOWN)
                 .noticeSend(noticeSend)
                 .build();
     }

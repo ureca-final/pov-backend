@@ -31,6 +31,20 @@ public class StringRedisServiceImpl implements RedisService {
     }
 
     @Override
+    public Set<String> getSetMembers(String key) {
+        try {
+            Set<String> members = redisRepository.getSetMembers(key);
+            if (members == null) {
+                return Collections.emptySet();
+            }
+            return members;
+        } catch (Exception e) {
+            log.error("Set의 모든 멤버를 가져오는데 실패했습니다.: {}", key, e);
+            throw RedisException.redisServerError(key);
+        }
+    }
+
+    @Override
     public void setValue(String key, String value, Duration ttl) {
         try {
             redisRepository.setValueWithTTL(key, value, ttl);
