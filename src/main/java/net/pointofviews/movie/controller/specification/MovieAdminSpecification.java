@@ -385,4 +385,30 @@ public interface MovieAdminSpecification {
     })
     ResponseEntity<BaseResponse<SearchMovieTrendingApiResponse>> adminSearchTrendingMovies(
             @Parameter(description = "페이지", example = "1") int page);
+
+    @Operation(
+            summary = "관리자 image api 영화 검색",
+            description = "image API를 조회하기 위한 api."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "검색 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<SearchMovieImageApiResponse>> adminSearchImageMovies(
+            @Parameter(description = "tmdb id (인셉션)", example = "27205") String tmdbId
+    );
 }

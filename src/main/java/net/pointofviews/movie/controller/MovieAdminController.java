@@ -150,4 +150,12 @@ public class MovieAdminController implements MovieAdminSpecification {
         return BaseResponse.ok("OK", day);
     }
 
+    @Override
+    @GetMapping("/tmdb-search/movie/{tmdbId}/image")
+    public ResponseEntity<BaseResponse<SearchMovieImageApiResponse>> adminSearchImageMovies(
+            @PathVariable String tmdbId
+    ){
+        SearchMovieImageApiResponse response = movieApiSearchService.searchImageMovie(tmdbId);
+        return BaseResponse.ok("OK", response);
+    }
 }
