@@ -7,20 +7,20 @@ import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.response.*;
 import net.pointofviews.movie.repository.MovieContentRepository;
 import net.pointofviews.movie.repository.MovieLikeCountRepository;
+import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.impl.MovieSearchServiceImpl;
 import net.pointofviews.people.domain.People;
-import net.pointofviews.review.domain.Review;
+import net.pointofviews.review.domain.ReviewPreference;
 import net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto;
 import net.pointofviews.review.dto.ReviewPreferenceCountDto;
 import net.pointofviews.review.repository.ReviewRepository;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import net.pointofviews.movie.repository.MovieRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +28,7 @@ import org.springframework.data.domain.Slice;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -258,12 +259,13 @@ class MovieSearchServiceImplTest {
 
                 MovieCountry movieCountry = new MovieCountry(mock(Country.class));
                 mockMovie.addCountry(movieCountry);
+
                 MovieCrew mockCrew = mock(MovieCrew.class);
                 mockMovie.addCrew(mockCrew);
                 MovieCast mockCast = mock(MovieCast.class);
                 mockMovie.addCast(mockCast);
-                given(mockCrew.getPeople()).willReturn(mock(People.class));
-                given(mockCast.getPeople()).willReturn(mock(People.class));
+                given(mockCrew.getPeople()).willReturn(People.builder().name("크리스토퍼 놀란").build());
+                given(mockCast.getPeople()).willReturn(People.builder().name("레오나르도 디카프리오").build());
 
                 List<ReviewPreferenceCountDto> mockReviewPreferences = List.of(
                         new ReviewPreferenceCountDto(10L, 2L)
@@ -275,13 +277,24 @@ class MovieSearchServiceImplTest {
                 );
 
                 List<ReviewDetailsWithLikeCountDto> mockTopReviews = List.of(
-                        new ReviewDetailsWithLikeCountDto(mock(Review.class), 10L),
-                        new ReviewDetailsWithLikeCountDto(mock(Review.class), 20L)
+                        new ReviewDetailsWithLikeCountDto(
+                                1L,
+                                "인셉션 리뷰",
+                                "이 영화는 상상력을 자극합니다.",
+                                "https://example.com/thumbnail.jpg",
+                                ReviewPreference.GOOD,
+                                false,
+                                false,
+                                LocalDateTime.of(2024, 12, 13, 10, 0, 0),
+                                20L,
+                                "https://profile.image.com/user.jpg",
+                                "사용자 닉네임"
+                        )
                 );
 
                 given(movieRepository.findMovieWithDetailsById(movieId)).willReturn(Optional.of(mockMovie));
                 given(commonCodeService.convertCommonCodeToName("01", CodeGroupEnum.MOVIE_GENRE)).willReturn("액션");
-                given(movieLikeCountRepository.findById(movieId)).willReturn(Optional.of(MovieLikeCount.builder().movie(mockMovie).build()));
+                given(movieLikeCountRepository.findById(movieId)).willReturn(Optional.of(MovieLikeCount.builder().movie(mockMovie).likeCount(5L).build()));
                 given(reviewRepository.countReviewPreferenceByMovieId(movieId)).willReturn(mockReviewPreferences);
                 given(movieContentRepository.findAllByMovieId(movieId)).willReturn(mockMovieContents);
                 given(reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(eq(movieId), any(PageRequest.class)))
@@ -293,14 +306,16 @@ class MovieSearchServiceImplTest {
                 // then
                 Assertions.assertThat(response.title()).isEqualTo(mockMovie.getTitle());
                 Assertions.assertThat(response.released()).isEqualTo(mockMovie.getReleased());
-                Assertions.assertThat(response.movieLikeCount()).isEqualTo(0L);
+                Assertions.assertThat(response.movieLikeCount()).isEqualTo(5L);
                 Assertions.assertThat(response.genre()).containsExactly("액션");
                 Assertions.assertThat(response.preferenceCounts()).hasSize(1);
                 Assertions.assertThat(response.preferenceCounts().get(0).goodCount()).isEqualTo(10L);
                 Assertions.assertThat(response.preferenceCounts().get(0).badCount()).isEqualTo(2L);
                 Assertions.assertThat(response.images()).containsExactly("https://image1.jpg");
                 Assertions.assertThat(response.videos()).containsExactly("https://video1.mp4");
-                Assertions.assertThat(response.reviews()).hasSize(2);
+                Assertions.assertThat(response.reviews()).hasSize(1);
+                Assertions.assertThat(response.reviews().get(0).title()).isEqualTo("인셉션 리뷰");
+                Assertions.assertThat(response.reviews().get(0).likeCount()).isEqualTo(20L);
             }
         }
     }
