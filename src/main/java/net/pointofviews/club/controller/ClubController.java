@@ -178,11 +178,11 @@ public class ClubController implements ClubSpecification {
 
     @Override
     @PostMapping("/join")
-    public ResponseEntity<BaseResponse<Void>> joinPrivateClub(
+    public ResponseEntity<BaseResponse<String>> joinPrivateClub(
             @RequestParam String code,
             @AuthenticationPrincipal(expression = "member") Member loginMember
     ) {
-        memberClubService.joinPrivateClub(loginMember, code);
-        return BaseResponse.ok("비공개 클럽에 가입되었습니다.");
+        String response = memberClubService.joinPrivateClub(loginMember, code);
+        return BaseResponse.ok("비공개 클럽에 가입되었습니다.", response);
     }
 }

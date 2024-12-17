@@ -5,6 +5,7 @@ import net.pointofviews.club.dto.response.ReadClubMoviesListResponse;
 import net.pointofviews.club.repository.ClubMoviesRepository;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.service.impl.ClubMovieServiceImpl;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.club.domain.Club;
 import net.pointofviews.club.domain.ClubMovie;
@@ -56,44 +57,46 @@ class ClubMovieServiceImplTest {
         void 클럽_영화_조회_성공() {
             // given
             UUID clubId = UUID.randomUUID();
+            Member loginMember = mock(Member.class);
             PageRequest pageable = PageRequest.of(0, 10);
 
             List<ReadClubMovieResponse> movieList = List.of(
-                    new ReadClubMovieResponse("Inception", "https://example.com/poster1.jpg", LocalDate.of(2010, 7, 16), 156L, 15L),
-                    new ReadClubMovieResponse("Interstellar", "https://example.com/poster2.jpg", LocalDate.of(2014, 11, 7), 200L, 25L)
+                    new ReadClubMovieResponse("Inception", "https://example.com/poster1.jpg", LocalDate.of(2010, 7, 16), true, 156L, 15L),
+                    new ReadClubMovieResponse("Interstellar", "https://example.com/poster2.jpg", LocalDate.of(2014, 11, 7), true, 200L, 25L)
             );
             Slice<ReadClubMovieResponse> movies = new SliceImpl<>(movieList, pageable, true);
 
-            given(clubMoviesRepository.findMovieDetailsByClubId(clubId, pageable)).willReturn(movies);
+            given(clubMoviesRepository.findMovieDetailsByClubId(clubId, loginMember.getId(), pageable)).willReturn(movies);
 
             // when
-            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, pageable);
+            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, loginMember, pageable);
 
             // then
             assertThat(response.clubMovies().getContent()).hasSize(2);
             assertThat(response.clubMovies().getContent().get(0).title()).isEqualTo("Inception");
             assertThat(response.clubMovies().getContent().get(1).title()).isEqualTo("Interstellar");
 
-            verify(clubMoviesRepository).findMovieDetailsByClubId(clubId, pageable);
+            verify(clubMoviesRepository).findMovieDetailsByClubId(clubId, loginMember.getId(), pageable);
         }
 
         @Test
         void 클럽_영화_조회_결과가_없는_경우() {
             // given
             UUID clubId = UUID.randomUUID();
+            Member loginMember = mock(Member.class);
             PageRequest pageable = PageRequest.of(0, 10);
 
             Slice<ReadClubMovieResponse> emptyMovies = new SliceImpl<>(List.of(), pageable, false);
 
-            given(clubMoviesRepository.findMovieDetailsByClubId(clubId, pageable)).willReturn(emptyMovies);
+            given(clubMoviesRepository.findMovieDetailsByClubId(clubId, loginMember.getId(), pageable)).willReturn(emptyMovies);
 
             // when
-            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, pageable);
+            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, loginMember, pageable);
 
             // then
             assertThat(response.clubMovies().getContent()).isEmpty();
 
-            verify(clubMoviesRepository).findMovieDetailsByClubId(clubId, pageable);
+            verify(clubMoviesRepository).findMovieDetailsByClubId(clubId, loginMember.getId(), pageable);
         }
     }
 

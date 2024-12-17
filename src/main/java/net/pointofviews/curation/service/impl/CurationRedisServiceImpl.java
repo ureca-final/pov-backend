@@ -138,66 +138,6 @@ public class CurationRedisServiceImpl implements CurationRedisService {
                 .collect(Collectors.toSet());
     }
 
-    @Override
-    @Transactional
-    public void saveTodayCurationDetail(Long curationId, SaveTodayCurationRequest saveTodayCurationRequest) {
-        String key = generateCurationKey(curationId);
-
-        // Redis에 큐레이션 데이터를 저장
-        Map<String, Object> curationData = new HashMap<>();
-        curationData.put("title", saveTodayCurationRequest.curationTitle());
-
-        // movies 데이터를 String으로 변환하여 저장
-        List<Map<String, Object>> movieList = saveTodayCurationRequest.curationMovies().stream()
-                .map(movie -> {
-                    Map<String, Object> movieMap = new HashMap<>();
-                    movieMap.put("title", movie.title());
-                    movieMap.put("poster", movie.poster());
-                    movieMap.put("released", movie.released() != null ? movie.released().toString() : null); // LocalDate -> String
-                    movieMap.put("movieLikeCount", movie.movieLikeCount().toString()); // Long -> String
-                    movieMap.put("movieReviewCount", movie.movieReviewCount().toString()); // Long -> String
-                    return movieMap;
-                })
-                .collect(Collectors.toList());
-
-        curationData.put("movies", movieList);
-
-        redisTemplate.opsForHash().putAll(key, curationData);
-    }
-
-    @Override
-    public ReadUserCurationResponse readTodayCurationDetail(Long curationId) {
-        String key = generateCurationKey(curationId);
-
-        // Redis에서 데이터를 조회
-        Map<Object, Object> curationData = redisTemplate.opsForHash().entries(key);
-
-        if (curationData == null || curationData.isEmpty()) {
-            return new ReadUserCurationResponse("", List.of());
-        }
-
-        String title = (String) curationData.get("title");
-        List<ReadUserCurationMovieResponse> movies = new ArrayList<>();
-
-        if (curationData.get("movies") != null) {
-            List<?> rawMovies = (List<?>) curationData.get("movies");
-            rawMovies.forEach(movie -> {
-                if (movie instanceof Map) {
-                    Map<String, Object> movieMap = (Map<String, Object>) movie;
-                    movies.add(new ReadUserCurationMovieResponse(
-                            (String) movieMap.get("title"),
-                            (String) movieMap.get("poster"),
-                            movieMap.get("released") != null ? LocalDate.parse((String) movieMap.get("released")) : null,
-                            Long.valueOf((String) movieMap.get("movieLikeCount")),
-                            Long.valueOf((String) movieMap.get("movieReviewCount"))
-                    ));
-                }
-            });
-        }
-
-        return new ReadUserCurationResponse(title, movies);
-    }
-
     private String generateMovieKey(Long curationId) {
         return "curation:movies:" + curationId;
     }
@@ -206,7 +146,4 @@ public class CurationRedisServiceImpl implements CurationRedisService {
         return "curation:" + date.toString();
     }
 
-    private String generateCurationKey(Long curationId) {
-        return "curation:" + curationId;
-    }
 }

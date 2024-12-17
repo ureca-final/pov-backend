@@ -27,6 +27,7 @@ public interface ClubMovieSpecification {
     })
     ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies(
             @PathVariable UUID clubId,
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
             @PageableDefault Pageable pageable);
 
 }
