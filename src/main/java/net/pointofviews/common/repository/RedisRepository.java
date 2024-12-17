@@ -13,4 +13,6 @@ public interface RedisRepository {
     Boolean setIfAbsent(String key, String value, Duration ttl);
 
     Set<String> getKeysByPattern(String pattern);
+
+    Long removeFromSet(String key, String value);
 }

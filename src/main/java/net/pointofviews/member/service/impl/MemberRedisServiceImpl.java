@@ -3,7 +3,7 @@ package net.pointofviews.member.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.member.service.MemberRedisService;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import net.pointofviews.common.service.RedisService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class MemberRedisServiceImpl implements MemberRedisService {
-    private final StringRedisTemplate stringRedisTemplate;
+    private final RedisService stringRedisService;
     private static final String GENRE_PREFERENCES_KEY = "genre:preferences:";
 
     @Override
@@ -23,7 +23,7 @@ public class MemberRedisServiceImpl implements MemberRedisService {
     public void saveGenresToRedis(UUID memberId, List<String> genreCodes) {
         genreCodes.forEach(genreCode -> {
             String key = GENRE_PREFERENCES_KEY + genreCode;
-            stringRedisTemplate.opsForSet().add(key, memberId.toString());
+            stringRedisService.addToSet(key, memberId.toString());
         });
     }
 
@@ -33,13 +33,13 @@ public class MemberRedisServiceImpl implements MemberRedisService {
         // 기존 장르 삭제
         existingGenreCodes.forEach(genreCode -> {
             String key = GENRE_PREFERENCES_KEY + genreCode;
-            stringRedisTemplate.opsForSet().remove(key, memberId.toString());
+            stringRedisService.removeFromSet(key, memberId.toString());
         });
 
         // 새로운 장르 추가
         newGenreCodes.forEach(genreCode -> {
             String key = GENRE_PREFERENCES_KEY + genreCode;
-            stringRedisTemplate.opsForSet().add(key, memberId.toString());
+            stringRedisService.addToSet(key, memberId.toString());
         });
     }
 }

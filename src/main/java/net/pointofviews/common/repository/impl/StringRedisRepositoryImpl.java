@@ -40,4 +40,7 @@ public class StringRedisRepositoryImpl implements RedisRepository {
     public Set<String> getKeysByPattern(String pattern) {
         return redisTemplate.keys(pattern);
     }
+
+    @Override
+    public Long removeFromSet(String key, String value) {return redisTemplate.opsForSet().remove(key, value);}
 }

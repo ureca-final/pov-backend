@@ -77,4 +77,18 @@ public class StringRedisServiceImpl implements RedisService {
             throw RedisException.redisServerError(pattern);
         }
     }
+
+    @Override
+    public Long removeFromSet(String key, String value) {
+        try {
+            Long result = redisRepository.removeFromSet(key, value);
+            if (result == null) {
+                throw RedisException.redisServerError(key);
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("set에서 값을 제거하는 데 실패했습니다.: {}", key, e);
+            throw RedisException.redisServerError(key);
+        }
+    }
 }
