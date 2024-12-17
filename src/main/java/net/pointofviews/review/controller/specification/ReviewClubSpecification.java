@@ -67,6 +67,7 @@ public interface ReviewClubSpecification {
     })
     ResponseEntity<BaseResponse<ReadMyClubReviewListResponse>> readMyClubReviews(
             @PathVariable UUID clubId,
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
             @PageableDefault Pageable pageable
     );
 }
