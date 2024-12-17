@@ -60,6 +60,8 @@ public class GlobalSecurityConfig {
                 new AntPathRequestMatcher("/api/v3/api-docs/**"),
                 new AntPathRequestMatcher("/api/swagger-resources/**"),
                 new AntPathRequestMatcher("/api/swagger-ui/**"),
+                new AntPathRequestMatcher("/login/**"),
+                new AntPathRequestMatcher("/oauth/**"),
                 PathRequest.toStaticResources().atCommonLocations()
         );
     }
