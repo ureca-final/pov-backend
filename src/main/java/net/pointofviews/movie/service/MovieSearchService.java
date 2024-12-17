@@ -1,6 +1,9 @@
 package net.pointofviews.movie.service;
 
-import net.pointofviews.movie.dto.response.*;
+import net.pointofviews.auth.dto.MemberDetailsDto;
+import net.pointofviews.movie.dto.response.AdminSearchMovieListResponse;
+import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
+import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface MovieSearchService {
@@ -8,5 +11,5 @@ public interface MovieSearchService {
 
     AdminSearchMovieListResponse adminSearchMovies(String query, Pageable pageable);
 
-    ReadDetailMovieResponse readDetailMovie(Long movieId);
+    ReadDetailMovieResponse readDetailMovie(Long movieId, MemberDetailsDto memberDetails);
 }
