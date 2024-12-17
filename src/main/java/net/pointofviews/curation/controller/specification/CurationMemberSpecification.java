@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.dto.response.ReadUserCurationListResponse;
+import net.pointofviews.member.domain.Member;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Tag(name = "Curation", description = "사용자 영화 추천 큐레이션 API")
 public interface CurationMemberSpecification {
@@ -19,5 +21,7 @@ public interface CurationMemberSpecification {
                     description = "조회 성공"
             )
     })
-    ResponseEntity<BaseResponse<ReadUserCurationListResponse>> readScheduledCurations();
+    ResponseEntity<BaseResponse<ReadUserCurationListResponse>> readScheduledCurations(
+            @AuthenticationPrincipal(expression = "member") Member loginMember
+    );
 }

@@ -731,7 +731,7 @@ class ClubServiceImplTest {
                 given(memberClubService.isMemberOfClub(clubId, loginMember.getId())).willReturn(true);
                 given(memberClubService.readMembersByClubId(clubId)).willReturn(members);
                 given(reviewClubService.findReviewByClub(clubId, loginMember, Pageable.unpaged())).willReturn(reviews);
-                given(clubMovieService.readClubMovies(clubId, Pageable.unpaged())).willReturn(bookmarks);
+                given(clubMovieService.readClubMovies(clubId, loginMember, Pageable.unpaged())).willReturn(bookmarks);
 
                 // when
                 ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember, Pageable.unpaged());
@@ -753,7 +753,7 @@ class ClubServiceImplTest {
                 verify(memberClubService).isMemberOfClub(clubId, loginMember.getId());
                 verify(memberClubService).readMembersByClubId(clubId);
                 verify(reviewClubService).findReviewByClub(clubId, loginMember, Pageable.unpaged());
-                verify(clubMovieService).readClubMovies(clubId, Pageable.unpaged());
+                verify(clubMovieService).readClubMovies(clubId, loginMember, Pageable.unpaged());
 
             }
         }

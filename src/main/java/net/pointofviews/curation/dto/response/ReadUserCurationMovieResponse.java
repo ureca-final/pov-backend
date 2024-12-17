@@ -15,17 +15,12 @@ public record ReadUserCurationMovieResponse(
         @Schema(description = "출시일", example = "2010-07-16", format = "date")
         LocalDate released,
 
+        @Schema(description = "좋아요 여부", example = "true")
+        boolean isLiked,
+
         @Schema(description = "영화 좋아요 수", example = "156")
         Long movieLikeCount,
 
         @Schema(description = "영화 리뷰 수", example = "15")
         Long movieReviewCount
-) {
-        public ReadUserCurationMovieResponse(String title, String poster, LocalDate released, Long movieLikeCount, Long movieReviewCount) {
-                this.title = title;
-                this.poster = poster;
-                this.released = released;
-                this.movieLikeCount = movieLikeCount != null ? movieLikeCount : 0L; // Null 처리
-                this.movieReviewCount = movieReviewCount != null ? movieReviewCount : 0L; // Null 처리
-        }
-}
+) {}

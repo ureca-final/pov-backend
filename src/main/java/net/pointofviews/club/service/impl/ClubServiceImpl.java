@@ -379,7 +379,7 @@ public class ClubServiceImpl implements ClubService {
 
         ReadClubMemberListResponse members = memberClubService.readMembersByClubId(clubId);
         ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
-        ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, pageable);
+        ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, loginMember, pageable);
 
         int reviewCount = reviews != null ? reviews.reviews().getSize() : 0;
 
