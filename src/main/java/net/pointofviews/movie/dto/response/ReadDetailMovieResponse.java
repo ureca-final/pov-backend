@@ -38,6 +38,9 @@ public record ReadDetailMovieResponse(
         @Schema(description = "포스터 URL", example = "https://example.com/poster.jpg")
         String poster,
 
+        @Schema(description = "배경 URL", example = "backdrop.jpg")
+        String backdrop,
+
         @Schema(description = "제작 국가 목록", example = "[\"USA\", \"UK\"]")
         List<String> country,
 

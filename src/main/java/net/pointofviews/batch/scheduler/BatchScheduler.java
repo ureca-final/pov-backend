@@ -70,7 +70,7 @@ public class BatchScheduler {
     @Scheduled(cron = "0 */1 * * * *")
     public void reviewLikeSync() {
         LocalDateTime start = LocalDateTime.now();
-        log.info("리뷰 좋아요 동기화 배치 시작: {}", start);
+        log.trace("리뷰 좋아요 동기화 배치 시작: {}", start);
 
         try {
             Job job = jobRegistry.getJob("reviewLikeJob");
@@ -81,19 +81,19 @@ public class BatchScheduler {
 
             jobLauncher.run(job, jobParameters);
 
-            log.info("리뷰 좋아요 동기화 배치 성공");
+            log.trace("리뷰 좋아요 동기화 배치 성공");
         } catch (Exception ex) {
             log.error("리뷰 좋아요 동기화 배치 실패: {}", ex.getMessage());
         } finally {
             LocalDateTime end = LocalDateTime.now();
-            log.info("리뷰 좋아요 동기화 배치 종료: {}", end);
+            log.trace("리뷰 좋아요 동기화 배치 종료: {}", end);
         }
     }
 
     @Scheduled(cron = "0 */1 * * * *")
     public void movieLikeSync() {
         LocalDateTime start = LocalDateTime.now();
-        log.info("영화 좋아요 동기화 배치 시작: {}", start);
+        log.trace("영화 좋아요 동기화 배치 시작: {}", start);
 
         try {
             Job job = jobRegistry.getJob("movieLikeJob");
@@ -104,12 +104,12 @@ public class BatchScheduler {
 
             jobLauncher.run(job, jobParameters);
 
-            log.info("영화 좋아요 동기화 배치 성공");
+            log.trace("영화 좋아요 동기화 배치 성공");
         } catch (Exception ex) {
             log.error("영화 좋아요 동기화 배치 실패: {}", ex.getMessage());
         } finally {
             LocalDateTime end = LocalDateTime.now();
-            log.info("영화 좋아요 동기화 배치 종료: {}", end);
+            log.trace("영화 좋아요 동기화 배치 종료: {}", end);
         }
     }
 }
