@@ -47,7 +47,6 @@ public class DailyMovieLikeBatchConfig {
 
     @Bean
     public Job dailyMovieLikeJob(JobRepository jobRepository) throws Exception {
-
         log.info("DailyMovieLikeJob 초기화 중");
 
         return new JobBuilder("dailyMovieLikeJob", jobRepository)
@@ -59,7 +58,6 @@ public class DailyMovieLikeBatchConfig {
     @Bean
     @JobScope
     public Step dailyMovieLikeStep(JobRepository jobRepository) throws Exception {
-
         log.info("DailyMovieLikeStep 초기화 중");
 
         return new StepBuilder("dailyMovieLikeStep", jobRepository)
@@ -73,7 +71,6 @@ public class DailyMovieLikeBatchConfig {
     @Bean
     @StepScope
     public JdbcPagingItemReader<DailyMovieLikeDto> extractMovieLikeItemReader() throws Exception {
-
         log.info("extractMovieLikeItemReader 시작: 영화 좋아요 데이터 읽기");
 
         return new JdbcPagingItemReaderBuilder<DailyMovieLikeDto>()
@@ -117,9 +114,6 @@ public class DailyMovieLikeBatchConfig {
         };
     }
 
-    /**
-     * Writer: 좋아요 수가 가장 많은 상위 10개의 영화를 반환
-     */
     @Bean
     @StepScope
     public ItemWriter<DailyMovieLike> dailyMovieLikeWriter() {
