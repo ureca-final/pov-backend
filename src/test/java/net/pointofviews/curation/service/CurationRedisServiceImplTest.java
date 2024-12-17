@@ -144,12 +144,17 @@ class CurationRedisServiceImplTest {
                 given(redisTemplate.hasKey(key)).willReturn(true);
                 given(redisTemplate.delete(key)).willReturn(true);
 
+                ArgumentCaptor<Object[]> captor = ArgumentCaptor.forClass(Object[].class);
+
                 // when
                 Set<Long> result = curationRedisService.updateMoviesToCuration(curationId, newMovieIds);
 
                 // then
                 assertThat(result).containsExactlyInAnyOrder(201L, 202L);
-                verify(setOperations).add(eq(key), eq(201L), eq(202L));
+
+                // ArgumentCaptor를 사용하여 순서에 상관없이 검증
+                verify(setOperations).add(eq(key), captor.capture());
+                assertThat(captor.getValue()).containsExactlyInAnyOrder(201L, 202L);
             }
         }
 
