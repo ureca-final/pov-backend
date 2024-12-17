@@ -51,7 +51,7 @@ public record ReadDetailMovieResponse(
         List<String> videos,
 
         @Schema(description = "좋아요 여부", example = "false")
-        boolean isLiked,
+        Boolean isLiked,
 
         @Schema(description = "리뷰 상세 정보 목록")
         List<ReviewDetailsWithLikeCountDto> reviews
