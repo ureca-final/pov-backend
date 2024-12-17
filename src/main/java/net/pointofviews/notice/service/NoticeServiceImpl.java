@@ -231,7 +231,6 @@ public class NoticeServiceImpl implements NoticeService {
             );
             String genreKey = generateRedisKey(movieGenre.getGenreCode());
 
-            System.out.println("1genreKey: " + genreKey);
             Set<UUID> genreTargetMembers = getTargetMembers(genreKey);
 
             if (genreTargetMembers.isEmpty()) {
@@ -251,9 +250,7 @@ public class NoticeServiceImpl implements NoticeService {
     // redis에서 실제 대상자 uuid 조회
     private Set<UUID> getTargetMembers(String genreKey) {
         try {
-            System.out.println("2genreKey: " + genreKey);
             Set<String> members = stringRedisService.getSetMembers(genreKey);
-            System.out.println("members: " + members);
             if (members == null) {
                 return new HashSet<>();
             }
