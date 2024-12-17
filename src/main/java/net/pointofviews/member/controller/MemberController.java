@@ -32,6 +32,7 @@ public class MemberController implements MemberSpecification {
 
     @Override
     @PostMapping("/logout")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<BaseResponse<Void>> logout(
             @AuthenticationPrincipal MemberDetailsDto memberDetails,
             HttpServletResponse response
