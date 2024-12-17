@@ -118,12 +118,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                     r.modifiedAt,
                     COALESCE(CAST(rlc.reviewLikeCount AS long), 0L),
                     m.profileImage,
-                    m.nickname
-                )
+                    m.nickname,
+                    COALESCE(rl.isLiked, false)
+                    )
                 FROM Review r
                 LEFT JOIN r.member m
                 LEFT JOIN ReviewLikeCount rlc ON r.id = rlc.review.id
-                WHERE r.movie.id = :movieId
+                LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+                WHERE r.movie.id = :movieId AND rl.member.id = :memberId
                 ORDER BY COALESCE(rlc.reviewLikeCount, 0) DESC
             """)
     List<ReviewDetailsWithLikeCountDto> findTop3ByMovieIdOrderByReviewLikeCountDesc(@Param("movieId") Long movieId, Pageable pageable);

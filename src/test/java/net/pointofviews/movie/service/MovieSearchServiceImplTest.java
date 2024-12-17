@@ -317,7 +317,8 @@ class MovieSearchServiceImplTest {
                                 LocalDateTime.of(2024, 12, 13, 10, 0, 0),
                                 20L,
                                 "https://profile.image.com/user.jpg",
-                                "사용자 닉네임"
+                                "사용자 닉네임",
+                                true
                         )
                 );
 

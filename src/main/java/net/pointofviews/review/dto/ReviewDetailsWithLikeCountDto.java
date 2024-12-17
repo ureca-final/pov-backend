@@ -38,6 +38,9 @@ public record ReviewDetailsWithLikeCountDto(
         String profileImage,
 
         @Schema(description = "유저 닉네임")
-        String nickname
+        String nickname,
+
+        @Schema(description = "현재 회원의 리뷰 좋아요 여부")
+        Boolean isLiked
 ) {
 }
