@@ -7,10 +7,15 @@ import net.pointofviews.premiere.dto.response.ReadDetailPremiereResponse;
 import net.pointofviews.premiere.dto.response.ReadPremiereListResponse;
 import net.pointofviews.premiere.service.PremiereMemberService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("permitAll()")
 @RequestMapping("/api/premieres")
 public class PremiereMemberController implements PremiereMemberSpecification {
 

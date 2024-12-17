@@ -9,11 +9,16 @@ import net.pointofviews.payment.dto.request.ConfirmPaymentRequest;
 import net.pointofviews.payment.service.PaymentService;
 import net.pointofviews.payment.service.TempPaymentService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ROLE_USER')")
 @RequestMapping("/api/payments")
 public class PaymentController implements PaymentSpecification {
 

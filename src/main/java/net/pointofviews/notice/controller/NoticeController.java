@@ -10,6 +10,7 @@ import net.pointofviews.notice.dto.response.CreateNoticeTemplateResponse;
 import net.pointofviews.notice.dto.response.ReadNoticeResponse;
 import net.pointofviews.notice.service.NoticeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class NoticeController implements NoticeSpecification {
 
     private final NoticeService noticeService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/templates")
     @Override
     public ResponseEntity<BaseResponse<CreateNoticeTemplateResponse>> createNoticeTemplate(
@@ -32,6 +34,7 @@ public class NoticeController implements NoticeSpecification {
         return BaseResponse.ok("알림 템플릿이 성공적으로 생성되었습니다.", response);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/send")
     @Override
     public ResponseEntity<BaseResponse<Void>> sendNotice(@Valid @RequestBody SendNoticeRequest request) {
@@ -39,6 +42,7 @@ public class NoticeController implements NoticeSpecification {
         return BaseResponse.ok("알림이 성공적으로 발송되었습니다.");
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping
     @Override
     public ResponseEntity<BaseResponse<List<ReadNoticeResponse>>> readNotices(
@@ -48,6 +52,7 @@ public class NoticeController implements NoticeSpecification {
         return BaseResponse.ok("알림 목록을 성공적으로 조회했습니다.", responses);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping("/{noticeId}/read")
     @Override
     public ResponseEntity<BaseResponse<Void>> putNotice(

@@ -19,8 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/movies")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ROLE_ADMIN')")
+@RequestMapping("/api/movies")
 public class MovieAdminController implements MovieAdminSpecification {
 
     private final MovieContentService movieContentService;

@@ -11,20 +11,23 @@ import net.pointofviews.movie.service.MovieMemberService;
 import net.pointofviews.movie.service.MovieSearchService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/movies")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ROLE_USER')")
+@RequestMapping("/api/movies")
 public class MovieController implements MovieSpecification {
 
-    private final MovieMemberService movieMemberService;
+    private final MovieMemberService memberService;
     private final MovieSearchService movieSearchService;
     private final ClubMovieService clubMovieService;
 
+    @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/search")
     public ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(@RequestParam String query,
@@ -51,15 +54,15 @@ public class MovieController implements MovieSpecification {
     @Override
     @PostMapping("/{movieId}/like")
     public ResponseEntity<BaseResponse<Void>> putMovieLike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
-        movieMemberService.updateMovieLike(movieId, loginMember);
-        return BaseResponse.ok("영화 좋아요 등록이 성공적으로 완료되었습니다.");
+        memberService.updateMovieLike(movieId, loginMember);
+        return BaseResponse.ok("좋아요 등록이 완료되었습니다.");
     }
 
     @Override
     @PostMapping("/{movieId}/dislike")
     public ResponseEntity<BaseResponse<Void>> putMovieDislike(@PathVariable Long movieId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
-        movieMemberService.updateMovieDisLike(movieId, loginMember);
-        return BaseResponse.ok("영화 좋아요 취소가 성공적으로 완료되었습니다.");
+        memberService.updateMovieDisLike(movieId, loginMember);
+        return BaseResponse.ok("좋아요 취소가 완료되었습니다.");
     }
 
 
