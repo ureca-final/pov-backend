@@ -9,4 +9,5 @@ public interface RedisService {
     Long addToSet(String key, String value);
     Boolean setIfAbsent(String key, String value, Duration ttl);
     Set<String> getKeys(String pattern);
+    Long removeFromSet(String key, String value);
 }
