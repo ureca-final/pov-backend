@@ -63,3 +63,6 @@ firebase:
 
 toss:
   secret-key:
+
+oauth:
+  baseurl: https://point-of-views.com

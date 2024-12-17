@@ -138,6 +138,8 @@ class ReviewClubServiceTest {
                 // given -- 테스트의 상태 설정
                 Club club = mock(Club.class);
                 UUID clubId = UUID.randomUUID();
+                Member loginMember = mock(Member.class);
+
 
                 given(clubRepository.findById(any())).willReturn(Optional.of(club));
 
@@ -147,12 +149,12 @@ class ReviewClubServiceTest {
                 List<ReadReviewResponse> reviewList = List.of(review1, review2);
                 Slice<ReadReviewResponse> reviews = new SliceImpl<>(reviewList);
 
-                given(memberClubRepository.findReviewsWithLikesByClubId(any(), any())).willReturn(reviews);
+                given(memberClubRepository.findReviewsWithLikesByClubId(any(), any(), any())).willReturn(reviews);
 
                 Pageable pageable = PageRequest.of(0, 10);
 
                 // when -- 테스트하고자 하는 행동
-                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, pageable);
+                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -167,18 +169,19 @@ class ReviewClubServiceTest {
             void 해당_클럽에_리뷰가_없을_시_빈_목록_반환() {
                 // given -- 테스트의 상태 설정
                 Club club = mock(Club.class);
+                Member loginMember = mock(Member.class);
                 UUID clubId = UUID.randomUUID();
 
                 given(clubRepository.findById(any())).willReturn(Optional.of(club));
 
                 Slice<ReadReviewResponse> reviews = new SliceImpl<>(List.of());
 
-                given(memberClubRepository.findReviewsWithLikesByClubId(any(), any())).willReturn(reviews);
+                given(memberClubRepository.findReviewsWithLikesByClubId(any(), any(), any())).willReturn(reviews);
 
                 Pageable pageable = PageRequest.of(0, 10);
 
                 // when -- 테스트하고자 하는 행동
-                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, pageable);
+                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -196,18 +199,20 @@ class ReviewClubServiceTest {
             void 존재하지_않는_클럽_ClubException_clubNotFound_예외발생() {
                 // given -- 테스트의 상태 설정
                 UUID clubId = UUID.randomUUID();
+                Member loginMember = mock(Member.class);
+
                 given(clubRepository.findById(any())).willReturn(Optional.empty());
 
                 // when -- 테스트하고자 하는 행동
                 ClubException exception = assertThrows(ClubException.class, () ->
-                        reviewClubService.findReviewByClub(clubId, null)
+                        reviewClubService.findReviewByClub(clubId, loginMember, null)
                 );
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
                     softly.assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
                     softly.assertThat(exception.getMessage()).isEqualTo(String.format("클럽(Id: %s)이 존재하지 않습니다.", clubId));
-                    verify(memberClubRepository, times(0)).findReviewsWithLikesByClubId(any(), any());
+                    verify(memberClubRepository, times(0)).findReviewsWithLikesByClubId(any(), any(), any());
                 });
             }
         }

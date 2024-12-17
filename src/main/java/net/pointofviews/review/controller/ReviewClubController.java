@@ -42,8 +42,10 @@ public class ReviewClubController implements ReviewClubSpecification {
     @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/{clubId}/reviews")
-    public ResponseEntity<BaseResponse<ReadMyClubReviewListResponse>> readMyClubReviews(@PathVariable UUID clubId, @PageableDefault Pageable pageable) {
-        ReadMyClubReviewListResponse response = reviewClubService.findReviewByClub(clubId, pageable);
+    public ResponseEntity<BaseResponse<ReadMyClubReviewListResponse>> readMyClubReviews(@PathVariable UUID clubId,
+                                                                                        @AuthenticationPrincipal(expression = "member") Member loginMember,
+                                                                                        @PageableDefault Pageable pageable) {
+        ReadMyClubReviewListResponse response = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
 
         if (response.reviews().isEmpty()) {
             return BaseResponse.noContent();

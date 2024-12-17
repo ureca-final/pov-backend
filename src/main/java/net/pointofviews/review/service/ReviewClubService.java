@@ -11,5 +11,5 @@ public interface ReviewClubService {
 
     ReadMyClubInfoListResponse findMyClubList(Member loginMember);
 
-    ReadMyClubReviewListResponse findReviewByClub(UUID clubId, Pageable pageable);
+    ReadMyClubReviewListResponse findReviewByClub(UUID clubId, Member loginMember, Pageable pageable);
 }
