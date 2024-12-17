@@ -8,6 +8,7 @@ import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubMoviesRepository;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.service.ClubMovieService;
+import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.repository.MovieRepository;
 import org.springframework.data.domain.Slice;
@@ -29,8 +30,8 @@ public class ClubMovieServiceImpl implements ClubMovieService {
     private final MovieRepository movieRepository;
 
     @Override
-    public ReadClubMoviesListResponse readClubMovies(UUID clubId, Pageable pageable) {
-        Slice<ReadClubMovieResponse> movies = clubMoviesRepository.findMovieDetailsByClubId(clubId,pageable);
+    public ReadClubMoviesListResponse readClubMovies(UUID clubId, Member loginMember, Pageable pageable) {
+        Slice<ReadClubMovieResponse> movies = clubMoviesRepository.findMovieDetailsByClubId(clubId, loginMember.getId(), pageable);
         return new ReadClubMoviesListResponse(movies);
     }
 
