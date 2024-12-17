@@ -39,3 +39,11 @@ management:
   endpoints:
     web:
       base-path: /api/actuator
+
+logging:
+  level:
+    root: info
+    net.pointofviews.batch.config: warn
+    org.springframework.batch.core.job.SimpleStepHandler: warn
+    org.springframework.batch.core.step.AbstractStep: warn
+    org.springframework.batch.core.launch.support.SimpleJobLauncher: warn
