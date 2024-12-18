@@ -20,13 +20,12 @@ import java.util.UUID;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
-
     @Query("""
             SELECT
                 m.title,
                 m.poster,
                 m.released,
-                CASE WHEN EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
+                CASE WHEN :memberId IS NOT NULL AND EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND ml.isLiked = true) THEN true ELSE false END,
                 COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
                 COUNT(r.id)
             FROM Movie m
@@ -45,34 +44,34 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
            m.title AS title,
            m.poster AS poster,
            m.released AS released,
-           CASE WHEN EXISTS (
-               SELECT 1 FROM movie_like ml 
-               WHERE ml.movie_id = m.id 
-                 AND ml.member_id = :memberId 
+           CASE WHEN :memberId IS NOT NULL AND EXISTS (
+               SELECT 1 FROM movie_like ml
+               WHERE ml.movie_id = m.id
+                 AND ml.member_id = :memberId
                  AND ml.is_liked = true
            ) THEN true ELSE false END AS isLiked,
            COALESCE((
-               SELECT mlc.like_count 
-               FROM movie_like_count mlc 
+               SELECT mlc.like_count
+               FROM movie_like_count mlc
                WHERE mlc.movie_id = m.id
            ), 0) AS movieLikeCount,
-           (SELECT COUNT(*) 
-            FROM review r 
+           (SELECT COUNT(*)
+            FROM review r
             WHERE r.movie_id = m.id) AS movieReviewCount
     FROM movie m
-    WHERE MATCH(m.title) AGAINST(:query IN NATURAL LANGUAGE MODE)
+    WHERE MATCH(m.title) AGAINST(:query IN BOOLEAN MODE)
        OR EXISTS (
-           SELECT 1 
-           FROM people p 
-           JOIN movie_cast mc ON mc.people_id = p.id 
-           WHERE MATCH(p.name) AGAINST(:query IN NATURAL LANGUAGE MODE)
+           SELECT 1
+           FROM people p
+           JOIN movie_cast mc ON mc.people_id = p.id
+           WHERE MATCH(p.name) AGAINST(:query IN BOOLEAN MODE)
              AND mc.movie_id = m.id
        )
        OR EXISTS (
-           SELECT 1 
-           FROM people p 
-           JOIN movie_crew mcr ON mcr.people_id = p.id 
-           WHERE MATCH(p.name) AGAINST(:query IN NATURAL LANGUAGE MODE)
+           SELECT 1
+           FROM people p
+           JOIN movie_crew mcr ON mcr.people_id = p.id
+           WHERE MATCH(p.name) AGAINST(:query IN BOOLEAN MODE)
              AND mcr.movie_id = m.id
        )
     """,
@@ -106,7 +105,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 m.title,
                 m.poster,
                 m.released,
-                CASE WHEN EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
+                CASE WHEN :memberId IS NOT NULL AND EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
                 COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
                 COUNT(r.id)
             )

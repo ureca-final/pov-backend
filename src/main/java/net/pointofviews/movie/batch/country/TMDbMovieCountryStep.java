@@ -1,7 +1,7 @@
 package net.pointofviews.movie.batch.country;
 
 import lombok.RequiredArgsConstructor;
-import net.pointofviews.movie.batch.config.MovieChunkListener;
+import net.pointofviews.movie.batch.listener.MovieChunkListener;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.domain.MovieCountry;
 import org.springframework.batch.core.Step;

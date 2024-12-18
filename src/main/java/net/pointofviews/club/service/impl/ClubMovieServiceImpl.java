@@ -30,8 +30,8 @@ public class ClubMovieServiceImpl implements ClubMovieService {
     private final MovieRepository movieRepository;
 
     @Override
-    public ReadClubMoviesListResponse readClubMovies(UUID clubId, Member loginMember, Pageable pageable) {
-        Slice<ReadClubMovieResponse> movies = clubMoviesRepository.findMovieDetailsByClubId(clubId, loginMember.getId(), pageable);
+    public ReadClubMoviesListResponse readClubMovies(UUID clubId, UUID memberId, Pageable pageable) {
+        Slice<ReadClubMovieResponse> movies = clubMoviesRepository.findMovieDetailsByClubId(clubId, memberId, pageable);
         return new ReadClubMoviesListResponse(movies);
     }
 

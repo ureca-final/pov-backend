@@ -77,7 +77,7 @@
 //            given(movieRepository.findUserCurationMoviesByIds(movieIds2, memberId)).willReturn(movieDetails2);
 //
 //            // when
-//            ReadUserCurationListResponse response = curationMemberService.readUserCurations(loginMember);
+//            ReadUserCurationListResponse response = curationMemberService.readUserCurations(loginMember.getId());
 //
 //            // then
 //            assertThat(response.userCurationList()).hasSize(2);
@@ -107,7 +107,7 @@
 //            given(curationRedisService.readTodayCurationId()).willReturn(Set.of());
 //
 //            // when
-//            ReadUserCurationListResponse response = curationMemberService.readUserCurations(loginMember);
+//            ReadUserCurationListResponse response = curationMemberService.readUserCurations(loginMember.getId());
 //
 //            // then
 //            assertThat(response.userCurationList()).isEmpty();

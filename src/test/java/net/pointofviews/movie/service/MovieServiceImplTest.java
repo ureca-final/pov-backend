@@ -159,11 +159,11 @@ public class MovieServiceImplTest {
 
 
             Slice<Object[]> mockSlice = new PageImpl<>(mockResults, pageable, mockResults.size());
-            given(movieRepository.findAllMovies(memberId, pageable)).willReturn(mockSlice);
+            given(movieRepository.findAllMovies(loginMember.getId(), pageable)).willReturn(mockSlice);
 
 
             // when
-            MovieListResponse response = movieService.readMovies(loginMember, pageable);
+            MovieListResponse response = movieService.readMovies(memberId, pageable);
 
             // then
             Assertions.assertThat(response.movies().getContent()).hasSize(1); // 결과가 1개 있어야 함

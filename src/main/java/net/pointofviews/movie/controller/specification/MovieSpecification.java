@@ -32,7 +32,7 @@ public interface MovieSpecification {
             )
     })
     ResponseEntity<BaseResponse<MovieListResponse>> MovieList(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto memberDetails,
             Pageable pageable
     );
 
@@ -56,7 +56,7 @@ public interface MovieSpecification {
             )
     })
     ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto memberDetails,
             @RequestParam String query,
             Pageable pageable
     );

@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface ClubMovieService {
-    ReadClubMoviesListResponse readClubMovies(UUID clubId, Member loginMember, Pageable pageable);
+    ReadClubMoviesListResponse readClubMovies(UUID clubId, UUID memberId, Pageable pageable);
 
     void saveMovieToMyClub(Long movieId, UUID clubId);
 }

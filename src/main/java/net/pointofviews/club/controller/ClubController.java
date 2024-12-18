@@ -53,8 +53,11 @@ public class ClubController implements ClubSpecification {
     @PreAuthorize("permitAll()")
     @GetMapping("/{clubId}")
     @Override
-    public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember, Pageable pageable) {
-        ReadClubDetailsResponse response = clubService.readClubDetails(clubId, loginMember, pageable);
+    public ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(@PathVariable UUID clubId, @AuthenticationPrincipal MemberDetailsDto memberDetails, Pageable pageable) {
+
+        UUID memberId = memberDetails != null ? memberDetails.member().getId() : null;
+
+        ReadClubDetailsResponse response = clubService.readClubDetails(clubId, memberId, pageable);
         return BaseResponse.ok("클럽 상세 정보를 성공적으로 조회했습니다.", response);
     }
 
@@ -164,15 +167,21 @@ public class ClubController implements ClubSpecification {
 
     @Override
     @GetMapping("/code")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<BaseResponse<ReadPrivateClubDetailsResponse>> readPrivateClubDetails(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto loginMember,
             @RequestParam String value
     ) {
-        ReadPrivateClubDetailsResponse response = clubService.readPrivateClubDetails(loginMember, value);
+        if (loginMember == null) {
+            return BaseResponse.redirection("https://www.point-of-views.com/login");
+        }
+
+        ReadPrivateClubDetailsResponse response = clubService.readPrivateClubDetails(loginMember.member(), value);
 
         if (response.isMember()) {
             return BaseResponse.redirection("https://www.point-of-views.com/club/" + response.clubId() + "/detail");
         }
+
         return BaseResponse.ok("비공개 클럽 가입 페이지", response);
     }
 

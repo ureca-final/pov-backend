@@ -1,7 +1,6 @@
 package net.pointofviews.movie.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.Member;
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,15 +37,15 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     private final MovieLikeRepository movieLikeRepository;
 
     @Override
-    public SearchMovieListResponse searchMovies(String query, Member loginMember, Pageable pageable) {
+    public SearchMovieListResponse searchMovies(String query, UUID memberId, Pageable pageable) {
 
-        Slice<SearchMovieResponse> responses = movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(), pageable)
+        Slice<SearchMovieResponse> responses = movieRepository.searchMoviesByTitleOrPeople(query, memberId, pageable)
                 .map(row -> new SearchMovieResponse(
                         ((Number) row[0]).longValue(),    // id
                         (String) row[1],                 // title
                         (String) row[2],                 // poster
                         row[3] != null ? LocalDate.parse(row[3].toString()) : null, // released
-                        row[4] instanceof Number ? ((Number) row[4]).intValue() == 1 : (Boolean) row[4], // isLiked
+                        row[4] != null ? (row[4] instanceof Number ? ((Number) row[4]).intValue() == 1 : (Boolean) row[4]) : false, // isLiked
                         row[5] != null ? ((Number) row[5]).longValue() : 0L,  // movieLikeCount
                         row[6] != null ? ((Number) row[6]).longValue() : 0L   // movieReviewCount
                 ));
@@ -66,7 +66,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     }
 
     @Override
-    public ReadDetailMovieResponse readDetailMovie(Long movieId, MemberDetailsDto memberDetails) {
+    public ReadDetailMovieResponse readDetailMovie(Long movieId, UUID memberId) {
         Movie movieDetails = movieRepository.findMovieWithDetailsById(movieId)
                 .orElseThrow(() -> MovieException.movieNotFound(movieId));
 
@@ -79,8 +79,8 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 .orElse(0L);
 
         boolean isLiked = false;
-        if (memberDetails != null) {
-            isLiked = movieLikeRepository.existsByMovieIdAndMemberId(movieId, memberDetails.member().getId());
+        if (memberId != null) {
+            isLiked = movieLikeRepository.existsByMovieIdAndMemberId(movieId, memberId);
         }
 
         Set<MovieCrew> crews = movieDetails.getCrews();
@@ -106,7 +106,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 .map(MovieContent::getContent)
                 .toList();
 
-        List<ReviewDetailsWithLikeCountDto> reviews = reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(movieId, PageRequest.of(0, 3));
+        List<ReviewDetailsWithLikeCountDto> reviews = reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(movieId, memberId, PageRequest.of(0, 3));
 
         return new ReadDetailMovieResponse(
                 movieDetails.getTitle(),
