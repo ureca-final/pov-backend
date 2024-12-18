@@ -159,7 +159,7 @@ public class MovieServiceImplTest {
 
 
             Slice<Object[]> mockSlice = new PageImpl<>(mockResults, pageable, mockResults.size());
-            given(movieRepository.findAllMovies(memberId, pageable)).willReturn(mockSlice);
+            given(movieRepository.findAllMovies(loginMember.getId(), pageable)).willReturn(mockSlice);
 
 
             // when
