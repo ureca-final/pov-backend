@@ -1,7 +1,6 @@
 package net.pointofviews.movie.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.member.domain.Member;
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +66,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
     }
 
     @Override
-    public ReadDetailMovieResponse readDetailMovie(Long movieId, MemberDetailsDto memberDetails) {
+    public ReadDetailMovieResponse readDetailMovie(Long movieId, UUID memberId) {
         Movie movieDetails = movieRepository.findMovieWithDetailsById(movieId)
                 .orElseThrow(() -> MovieException.movieNotFound(movieId));
 
@@ -79,8 +79,8 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 .orElse(0L);
 
         boolean isLiked = false;
-        if (memberDetails != null) {
-            isLiked = movieLikeRepository.existsByMovieIdAndMemberId(movieId, memberDetails.member().getId());
+        if (memberId != null) {
+            isLiked = movieLikeRepository.existsByMovieIdAndMemberId(movieId, memberId);
         }
 
         Set<MovieCrew> crews = movieDetails.getCrews();
@@ -106,7 +106,7 @@ public class MovieSearchServiceImpl implements MovieSearchService {
                 .map(MovieContent::getContent)
                 .toList();
 
-        List<ReviewDetailsWithLikeCountDto> reviews = reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(movieId, PageRequest.of(0, 3));
+        List<ReviewDetailsWithLikeCountDto> reviews = reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(movieId, memberId, PageRequest.of(0, 3));
 
         return new ReadDetailMovieResponse(
                 movieDetails.getTitle(),

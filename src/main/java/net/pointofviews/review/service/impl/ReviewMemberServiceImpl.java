@@ -37,7 +37,8 @@ import java.util.stream.Collectors;
 import static net.pointofviews.common.exception.S3Exception.invalidTotalImageSize;
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
 import static net.pointofviews.movie.exception.MovieException.movieNotFound;
-import static net.pointofviews.review.exception.ReviewException.*;
+import static net.pointofviews.review.exception.ReviewException.reviewNotFound;
+import static net.pointofviews.review.exception.ReviewException.unauthorizedReview;
 
 @Service
 @Slf4j
@@ -193,8 +194,8 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public ReadReviewListResponse findAllReview(Pageable pageable) {
-        Slice<ReadReviewResponse> reviews = reviewRepository.findAllSliced(pageable);
+    public ReadReviewListResponse findAllReview(Pageable pageable, UUID memberId) {
+        Slice<ReadReviewResponse> reviews = reviewRepository.findAllSliced(memberId, pageable);
         return new ReadReviewListResponse(reviews);
     }
 

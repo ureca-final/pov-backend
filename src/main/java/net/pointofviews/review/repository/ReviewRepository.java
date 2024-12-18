@@ -73,27 +73,29 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findReviewDetailById(@Param("reviewId") Long reviewId);
 
     @Query(value = """
-            	SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
-            			r.id,
-            			mv.id,
-            			mv.title,
-            			r.title,
-            			r.contents,
-            			m.nickname,
-            			m.profileImage,
-            			mv.poster,
-            			r.createdAt,
-            			COALESCE((SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id), 0),
-            			CASE WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.isLiked = true) THEN true ELSE false END,
-            			r.isSpoiler
-            	 )
-            	 FROM Review r
-            	 LEFT JOIN r.member m
-            	 LEFT JOIN r.movie mv
-            	 WHERE r.deletedAt IS NULL
+                SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
+                    r.id,
+                    mv.id,
+                    mv.title,
+                    r.title,
+                    r.contents,
+                    m.nickname,
+                    m.profileImage,
+                    mv.poster,
+                    r.createdAt,
+                    COALESCE((SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id), 0),
+                    COALESCE(rl.isLiked, false),
+                    r.isSpoiler
+                )
+                FROM Review r
+                LEFT JOIN r.member m
+                LEFT JOIN r.movie mv
+                LEFT JOIN ReviewLike rl ON rl.review.id = r.id AND (:memberId IS NOT NULL AND rl.member.id = :memberId)
+                WHERE r.deletedAt IS NULL
                 ORDER BY r.createdAt DESC
             """)
-    Slice<ReadReviewResponse> findAllSliced(Pageable pageable);
+    Slice<ReadReviewResponse> findAllSliced(@Param("memberId") UUID memberId, Pageable pageable);
+
 
     @Query("""
                 SELECT new net.pointofviews.review.dto.ReviewPreferenceCountDto(
@@ -107,28 +109,28 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 
     @Query("""
-                SELECT new net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto(
-                    r.id,
-                    r.title,
-                    r.contents,
-                    r.thumbnail,
-                    r.preference,
-                    r.isSpoiler,
-                    r.disabled,
-                    r.modifiedAt,
-                    COALESCE(CAST(rlc.reviewLikeCount AS long), 0L),
-                    m.profileImage,
-                    m.nickname,
-                    COALESCE(rl.isLiked, false)
-                    )
-                FROM Review r
-                LEFT JOIN r.member m
-                LEFT JOIN ReviewLikeCount rlc ON r.id = rlc.review.id
-                LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-                WHERE r.movie.id = :movieId AND rl.member.id = :memberId
-                ORDER BY COALESCE(rlc.reviewLikeCount, 0) DESC
-            """)
-    List<ReviewDetailsWithLikeCountDto> findTop3ByMovieIdOrderByReviewLikeCountDesc(@Param("movieId") Long movieId, Pageable pageable);
+        SELECT new net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto(
+            r.id,
+            r.title,
+            r.contents,
+            r.thumbnail,
+            r.preference,
+            r.isSpoiler,
+            r.disabled,
+            r.modifiedAt,
+            COALESCE(CAST(rlc.reviewLikeCount AS long), 0L),
+            m.profileImage,
+            m.nickname,
+            COALESCE(rl.isLiked, false)
+            )
+        FROM Review r
+        LEFT JOIN r.member m
+        LEFT JOIN ReviewLikeCount rlc ON r.id = rlc.review.id
+        LEFT JOIN ReviewLike rl ON rl.review.id = r.id AND (:memberId IS NULL OR rl.member.id = :memberId)
+        WHERE r.movie.id = :movieId
+        ORDER BY COALESCE(rlc.reviewLikeCount, 0) DESC
+        """)
+    List<ReviewDetailsWithLikeCountDto> findTop3ByMovieIdOrderByReviewLikeCountDesc(@Param("movieId") Long movieId, @Param("memberId") UUID memberId, Pageable pageable);
 
 
     @Query(value = """

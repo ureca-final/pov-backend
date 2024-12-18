@@ -55,10 +55,10 @@ public interface ReviewMemberSpecification {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                {
-                    "message": "로그인이 필요한 서비스입니다."
-                }
-                """)
+                                    {
+                                        "message": "로그인이 필요한 서비스입니다."
+                                    }
+                                    """)
                     )
             ),
             @ApiResponse(
@@ -125,10 +125,10 @@ public interface ReviewMemberSpecification {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                {
-                    "message": "로그인이 필요한 서비스입니다."
-                }
-                """)
+                                    {
+                                        "message": "로그인이 필요한 서비스입니다."
+                                    }
+                                    """)
                     )
             ),
             @ApiResponse(
@@ -137,10 +137,10 @@ public interface ReviewMemberSpecification {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                {
-                    "message": "리뷰 수정 권한이 없습니다."
-                }
-                """)
+                                    {
+                                        "message": "리뷰 수정 권한이 없습니다."
+                                    }
+                                    """)
                     )
             ),
             @ApiResponse(
@@ -182,10 +182,10 @@ public interface ReviewMemberSpecification {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             examples = @ExampleObject(value = """
-                                {
-                                    "message": "리뷰 삭제 권한이 없습니다."
-                                }
-                                """
+                                    {
+                                        "message": "리뷰 삭제 권한이 없습니다."
+                                    }
+                                    """
                             )
                     )
             ),
@@ -256,7 +256,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(Pageable pageable);
+    ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(Pageable pageable, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 상세 조회",

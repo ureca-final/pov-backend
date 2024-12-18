@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -76,11 +78,18 @@ public class ReviewMemberController implements ReviewMemberSpecification {
         return BaseResponse.ok("영화별 리뷰가 성공적으로 조회되었습니다.", response);
     }
 
-    @PreAuthorize("permitAll()")
     @Override
+    @PreAuthorize("permitAll()")
     @GetMapping("/reviews")
-    public ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(@PageableDefault Pageable pageable) {
-        ReadReviewListResponse response = reviewMemberService.findAllReview(pageable);
+    public ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(@PageableDefault Pageable pageable,
+                                                                            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto) {
+
+        UUID memberId = Optional.ofNullable(memberDetailsDto)
+                .map(MemberDetailsDto::member)
+                .map(Member::getId)
+                .orElse(null);
+
+        ReadReviewListResponse response = reviewMemberService.findAllReview(pageable, memberId);
 
         return BaseResponse.ok("모든 리뷰가 성공적으로 조회되었습니다.", response);
     }

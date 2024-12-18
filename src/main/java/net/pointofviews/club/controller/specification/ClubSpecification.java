@@ -349,7 +349,7 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadPrivateClubDetailsResponse>> readPrivateClubDetails(Member loginMember, String value);
+    ResponseEntity<BaseResponse<ReadPrivateClubDetailsResponse>> readPrivateClubDetails(MemberDetailsDto loginMember, String value);
 
     @Operation(summary = "비공개 클럽 가입", description = "초대코드를 이용해 클럽에 가입하는 api.")
     @ApiResponses(value = {

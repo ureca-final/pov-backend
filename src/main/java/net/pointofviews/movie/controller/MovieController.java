@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -39,8 +40,6 @@ public class MovieController implements MovieSpecification {
         return BaseResponse.ok("영화가 성공적으로 조회되었습니다.", response);
     }
 
-
-
     @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/search")
@@ -57,7 +56,11 @@ public class MovieController implements MovieSpecification {
     @GetMapping("/{movieId}")
     public ResponseEntity<BaseResponse<ReadDetailMovieResponse>> readDetailsMovie(@PathVariable Long movieId,
                                                                                   @AuthenticationPrincipal MemberDetailsDto memberDetails) {
-        ReadDetailMovieResponse readDetailMovieResponse = movieSearchService.readDetailMovie(movieId, memberDetails);
+        UUID memberId = Optional.ofNullable(memberDetails)
+                .map(MemberDetailsDto::member)
+                .map(Member::getId)
+                .orElse(null);
+        ReadDetailMovieResponse readDetailMovieResponse = movieSearchService.readDetailMovie(movieId, memberId);
 
         return BaseResponse.ok("OK", readDetailMovieResponse);
     }

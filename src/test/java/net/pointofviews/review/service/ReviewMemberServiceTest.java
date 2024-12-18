@@ -753,6 +753,7 @@ class ReviewMemberServiceTest {
             void 전체_리뷰_조회() {
                 // given
                 Pageable pageable = PageRequest.of(0, 10);
+                UUID memberId = UUID.randomUUID();
 
                 List<ReadReviewResponse> reviewResponses = Arrays.asList(
                         mock(ReadReviewResponse.class), mock(ReadReviewResponse.class), mock(ReadReviewResponse.class)
@@ -760,11 +761,11 @@ class ReviewMemberServiceTest {
 
                 Slice<ReadReviewResponse> mockSlice = new SliceImpl<>(reviewResponses, pageable, true);
 
-                BDDMockito.given(reviewRepository.findAllSliced(pageable))
+                BDDMockito.given(reviewRepository.findAllSliced(memberId, pageable))
                         .willReturn(mockSlice);
 
                 // when
-                ReadReviewListResponse allReview = reviewService.findAllReview(pageable);
+                ReadReviewListResponse allReview = reviewService.findAllReview(pageable, memberId);
 
                 // then
                 assertThat(allReview.reviews()).hasSize(3);
