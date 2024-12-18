@@ -22,6 +22,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("""
             SELECT
+                m.id,
                 m.title,
                 m.poster,
                 m.released,
