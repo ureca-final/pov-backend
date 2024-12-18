@@ -52,6 +52,7 @@ public interface CurationRepository extends JpaRepository<Curation, Long> {
 
     @Query("""
        SELECT new net.pointofviews.curation.dto.response.ReadAdminCurationMovieResponse(
+           m.id,
            m.title,
            m.released
        )
