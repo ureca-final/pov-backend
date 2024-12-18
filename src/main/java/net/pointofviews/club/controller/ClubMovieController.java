@@ -1,11 +1,11 @@
 package net.pointofviews.club.controller;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.club.controller.specification.ClubMovieSpecification;
 import net.pointofviews.club.dto.response.*;
 import net.pointofviews.club.service.ClubMovieService;
 import net.pointofviews.common.dto.BaseResponse;
-import net.pointofviews.member.domain.Member;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +26,11 @@ public class ClubMovieController implements ClubMovieSpecification {
     @GetMapping("/{clubId}/bookmark")
     @Override
     public ResponseEntity<BaseResponse<ReadClubMoviesListResponse>> readMyClubMovies(@PathVariable UUID clubId,
-                                                                                     @AuthenticationPrincipal(expression = "member") Member loginMember,
+                                                                                     @AuthenticationPrincipal MemberDetailsDto memberDetails,
                                                                                      @PageableDefault Pageable pageable) {
-        ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, loginMember, pageable);
+        UUID memberId = memberDetails != null ? memberDetails.member().getId() : null;
+
+        ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, memberId, pageable);
 
         if (response.clubMovies().isEmpty()) {
             return BaseResponse.noContent();

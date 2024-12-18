@@ -1,6 +1,7 @@
 package net.pointofviews.curation.controller;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.controller.specification.CurationMemberSpecification;
 import net.pointofviews.curation.dto.response.ReadUserCurationListResponse;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("permitAll()")
@@ -23,8 +26,11 @@ public class CurationMemberController implements CurationMemberSpecification {
 
     @GetMapping("/today")
     @Override
-    public ResponseEntity<BaseResponse<ReadUserCurationListResponse>> readScheduledCurations(@AuthenticationPrincipal(expression = "member") Member loginMember) {
-        ReadUserCurationListResponse response = curationMemberService.readUserCurations(loginMember);
+    public ResponseEntity<BaseResponse<ReadUserCurationListResponse>> readScheduledCurations(@AuthenticationPrincipal MemberDetailsDto memberDetails) {
+
+        UUID memberId = memberDetails != null ? memberDetails.member().getId() : null;
+
+        ReadUserCurationListResponse response = curationMemberService.readUserCurations(memberId);
         return BaseResponse.ok("사용자 스케줄링 된 큐레이션 조회에 성공하였습니다.", response);
     }
 }

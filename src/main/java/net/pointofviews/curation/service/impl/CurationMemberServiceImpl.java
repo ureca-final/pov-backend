@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +27,7 @@ public class CurationMemberServiceImpl implements CurationMemberService {
     private final MovieRepository movieRepository;
 
     @Override
-    public ReadUserCurationListResponse readUserCurations(Member loginMember) {
+    public ReadUserCurationListResponse readUserCurations(UUID memberId) {
 
         // 오늘 활성화된 큐레이션 ID 조회
         Set<Long> curationIds = curationRedisService.readTodayCurationId();
@@ -42,7 +43,7 @@ public class CurationMemberServiceImpl implements CurationMemberService {
                     Set<Long> movieIds = curationRedisService.readMoviesForCuration(curationId);
 
                     // 영화 정보를 DB에서 조회
-                    List<ReadUserCurationMovieResponse> movieDetails = movieRepository.findUserCurationMoviesByIds(movieIds, loginMember.getId())
+                    List<ReadUserCurationMovieResponse> movieDetails = movieRepository.findUserCurationMoviesByIds(movieIds, memberId)
                             .stream()
                             .map(movie -> new ReadUserCurationMovieResponse(
                                     movie.title(),

@@ -72,7 +72,7 @@ public interface ClubSpecification {
     })
     ResponseEntity<BaseResponse<ReadClubDetailsResponse>> readClubDetails(
             @PathVariable UUID clubId,
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto memberDetails,
             Pageable pageable
     );
 

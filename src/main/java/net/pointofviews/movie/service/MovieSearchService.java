@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface MovieSearchService {
-    SearchMovieListResponse searchMovies(String query, Member loginMember, Pageable pageable);
+    SearchMovieListResponse searchMovies(String query, UUID memberId, Pageable pageable);
 
     AdminSearchMovieListResponse adminSearchMovies(String query, Pageable pageable);
 

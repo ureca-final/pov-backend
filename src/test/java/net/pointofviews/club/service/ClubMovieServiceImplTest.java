@@ -69,7 +69,7 @@ class ClubMovieServiceImplTest {
             given(clubMoviesRepository.findMovieDetailsByClubId(clubId, loginMember.getId(), pageable)).willReturn(movies);
 
             // when
-            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, loginMember, pageable);
+            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, loginMember.getId(), pageable);
 
             // then
             assertThat(response.clubMovies().getContent()).hasSize(2);
@@ -91,7 +91,7 @@ class ClubMovieServiceImplTest {
             given(clubMoviesRepository.findMovieDetailsByClubId(clubId, loginMember.getId(), pageable)).willReturn(emptyMovies);
 
             // when
-            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, loginMember, pageable);
+            ReadClubMoviesListResponse response = clubMovieService.readClubMovies(clubId, loginMember.getId(), pageable);
 
             // then
             assertThat(response.clubMovies().getContent()).isEmpty();

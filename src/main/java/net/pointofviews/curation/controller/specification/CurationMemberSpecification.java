@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.curation.dto.response.ReadUserCurationListResponse;
 import net.pointofviews.member.domain.Member;
@@ -22,6 +23,6 @@ public interface CurationMemberSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadUserCurationListResponse>> readScheduledCurations(
-            @AuthenticationPrincipal(expression = "member") Member loginMember
+            @AuthenticationPrincipal MemberDetailsDto memberDetails
     );
 }
