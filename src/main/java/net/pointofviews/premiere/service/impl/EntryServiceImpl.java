@@ -49,6 +49,15 @@ public class EntryServiceImpl implements EntryService {
         Premiere premiere = premiereRepository.findById(premiereId)
                 .orElseThrow(() -> premiereNotFound(premiereId));
 
+        Long currQuantity = entryRepository.countEntriesByPremiereId(premiereId);
+        if (currQuantity + request.quantity() > premiere.getMaxQuantity()) {
+            log.warn("[응모오류] 수량 초과 - 시사회 수량: {}, 초과된 시사회 수량: {}",
+                    premiere.getMaxQuantity(),
+                    currQuantity + request.quantity() - premiere.getMaxQuantity());
+
+            throw quantityExceeded();
+        }
+
         if (entryRepository.existsEntryByMemberIdAndPremiereId(member.getId(), premiereId)) {
             log.warn("[응모오류] 응모 중복 - 회원 ID: {}, 응모한 시사회 ID: {}", member.getId(), premiereId);
             throw duplicateEntry();
@@ -60,16 +69,6 @@ public class EntryServiceImpl implements EntryService {
         if (requestTotalAmount != premiereTotalAmount) {
             log.warn("[응모오류] 금액 불일치 - 요청한 수량의 총 금액: {}, 실제 총 금액: {}", requestTotalAmount, premiereTotalAmount);
             throw entryBadRequest();
-        }
-
-        Long currQuantity = entryRepository.countEntriesByPremiereId(premiereId);
-
-        if (currQuantity + request.quantity() > premiere.getMaxQuantity()) {
-            log.warn("[응모오류] 수량 초과 - 시사회 수량: {}, 초과된 시사회 수량: {}",
-                    premiere.getMaxQuantity(),
-                    currQuantity + request.quantity() - premiere.getMaxQuantity());
-
-            throw quantityExceeded();
         }
 
         String orderId = UUID.randomUUID().toString();

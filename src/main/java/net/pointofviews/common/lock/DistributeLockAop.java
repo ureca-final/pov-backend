@@ -38,14 +38,16 @@ public class DistributeLockAop {
         RLock lock = redissonClient.getLock(key);
 
         try {
+            log.info("락을 시도합니다. 키: {}", key);
+
             boolean available = lock.tryLock(distributeLock.waitTime(), distributeLock.leaseTime(), distributeLock.timeUnit());
 
-            if (!available) {
-                log.warn("Redisson 락 타임아웃 Key: {}", key);
+            if (available) {
+                log.info("락을 획득했습니다. 키: {}", key);
+            } else {
+                log.warn("락 획득 실패. 키: {}", key);
                 throw new IllegalAccessException("락을 획득할 수 없습니다.");
             }
-
-            log.info("락을 성공적으로 획득했습니다.");
 
             return aopForTransaction.proceed(joinPoint);
 
@@ -54,8 +56,10 @@ public class DistributeLockAop {
         } catch (Exception ex) {
             throw new InterruptedException(ex.getMessage());
         } finally {
-            log.info("락을 해제합니다.");
-            lock.unlock();
+            if (lock != null && lock.isHeldByCurrentThread()){
+                log.info("락을 해제합니다.");
+                lock.unlock();
+            }
         }
     }
 }
