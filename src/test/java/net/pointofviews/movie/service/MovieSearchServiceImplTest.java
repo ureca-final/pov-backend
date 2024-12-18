@@ -346,7 +346,7 @@ class MovieSearchServiceImplTest {
                 Assertions.assertThat(response.videos()).containsExactly("https://video1.mp4");
                 Assertions.assertThat(response.reviews()).hasSize(1);
                 Assertions.assertThat(response.reviews().get(0).title()).isEqualTo("인셉션 리뷰");
-                Assertions.assertThat(response.reviews().get(0).likeCount()).isEqualTo(20L);
+                Assertions.assertThat(response.reviews().get(0).likeAmount()).isEqualTo(20L);
             }
         }
     }
