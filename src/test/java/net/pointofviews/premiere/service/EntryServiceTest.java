@@ -198,7 +198,6 @@ class EntryServiceTest {
 
                 given(memberRepository.findById(any())).willReturn(Optional.of(member));
                 given(premiereRepository.findById(any())).willReturn(Optional.of(premiere));
-                given(entryRepository.existsEntryByMemberIdAndPremiereId(any(), anyLong())).willReturn(false);
 
                 CreateEntryRequest request = new CreateEntryRequest(1, premiere.getAmount());
                 given(entryRepository.countEntriesByPremiereId(anyLong())).willReturn(10L);
