@@ -404,12 +404,12 @@ class ReviewMemberServiceTest {
                 List<ReadReviewResponse> reviewList = List.of(review1, review2);
                 Slice<ReadReviewResponse> reviews = new SliceImpl<>(reviewList);
 
-                given(reviewRepository.findReviewsWithLikesByMovieId(any(), any())).willReturn(reviews);
+                given(reviewRepository.findReviewsWithLikesByMovieId(any(), any(), any())).willReturn(reviews);
 
                 Pageable pageable = PageRequest.of(0, 10);
 
                 // when -- 테스트하고자 하는 행동
-                ReadReviewListResponse result = reviewService.findReviewByMovie(1L, pageable);
+                ReadReviewListResponse result = reviewService.findReviewByMovie(UUID.randomUUID(), 1L, pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -425,12 +425,12 @@ class ReviewMemberServiceTest {
                 given(movieRepository.findById(any())).willReturn(Optional.of(movie));
 
                 Slice<ReadReviewResponse> reviews = new SliceImpl<>(List.of());
-                given(reviewRepository.findReviewsWithLikesByMovieId(any(), any())).willReturn(reviews);
+                given(reviewRepository.findReviewsWithLikesByMovieId(any(), any(), any())).willReturn(reviews);
 
                 Pageable pageable = PageRequest.of(0, 10);
 
                 // when -- 테스트하고자 하는 행동
-                ReadReviewListResponse result = reviewService.findReviewByMovie(1L, pageable);
+                ReadReviewListResponse result = reviewService.findReviewByMovie(UUID.randomUUID(), 1L, pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -450,7 +450,7 @@ class ReviewMemberServiceTest {
 
                 // when -- 테스트하고자 하는 행동
                 MovieException exception = assertThrows(MovieException.class, () ->
-                        reviewService.findReviewByMovie(-1L, PageRequest.of(0, 10))
+                        reviewService.findReviewByMovie(UUID.randomUUID(), -1L, PageRequest.of(0, 10))
                 );
 
                 // then -- 예상되는 변화 및 결과
@@ -562,12 +562,12 @@ class ReviewMemberServiceTest {
                 given(review.getMovie()).willReturn(movie);
 
                 given(reviewRepository.findReviewDetailById(any())).willReturn(Optional.of(review));
-                given(reviewLikeRepository.getIsLikedByReviewId(any())).willReturn(Optional.of(true));
+                given(reviewLikeRepository.getIsLikedByReviewId(any(), any())).willReturn(Optional.of(true));
                 given(reviewLikeCountRepository.getReviewLikeCountByReviewId(any())).willReturn(Optional.of(10L));
                 given(reviewKeywordLinkRepository.findKeywordsByReviewId(any())).willReturn(List.of("흥미진진", "몰입감"));
 
                 // when -- 테스트하고자 하는 행동
-                ReadReviewDetailResponse result = reviewService.findReviewDetail(1L);
+                ReadReviewDetailResponse result = reviewService.findReviewDetail(UUID.randomUUID(), 1L);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -595,7 +595,7 @@ class ReviewMemberServiceTest {
 
                 // when -- 테스트하고자 하는 행동
                 ReviewException exception = assertThrows(ReviewException.class, () ->
-                        reviewService.findReviewDetail(-1L)
+                        reviewService.findReviewDetail(UUID.randomUUID(), -1L)
                 );
 
                 // then -- 예상되는 변화 및 결과
@@ -753,6 +753,7 @@ class ReviewMemberServiceTest {
             void 전체_리뷰_조회() {
                 // given
                 Pageable pageable = PageRequest.of(0, 10);
+                UUID memberId = UUID.randomUUID();
 
                 List<ReadReviewResponse> reviewResponses = Arrays.asList(
                         mock(ReadReviewResponse.class), mock(ReadReviewResponse.class), mock(ReadReviewResponse.class)
@@ -760,11 +761,11 @@ class ReviewMemberServiceTest {
 
                 Slice<ReadReviewResponse> mockSlice = new SliceImpl<>(reviewResponses, pageable, true);
 
-                BDDMockito.given(reviewRepository.findAllSliced(pageable))
+                BDDMockito.given(reviewRepository.findAllSliced(memberId, pageable))
                         .willReturn(mockSlice);
 
                 // when
-                ReadReviewListResponse allReview = reviewService.findAllReview(pageable);
+                ReadReviewListResponse allReview = reviewService.findAllReview(pageable, memberId);
 
                 // then
                 assertThat(allReview.reviews()).hasSize(3);

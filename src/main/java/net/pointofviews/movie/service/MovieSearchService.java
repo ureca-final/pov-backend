@@ -1,7 +1,6 @@
 package net.pointofviews.movie.service;
 
 import net.pointofviews.member.domain.Member;
-import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.movie.dto.response.AdminSearchMovieListResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
@@ -14,5 +13,5 @@ public interface MovieSearchService {
 
     AdminSearchMovieListResponse adminSearchMovies(String query, Pageable pageable);
 
-    ReadDetailMovieResponse readDetailMovie(Long movieId, MemberDetailsDto memberDetails);
+    ReadDetailMovieResponse readDetailMovie(Long movieId, UUID memberId);
 }

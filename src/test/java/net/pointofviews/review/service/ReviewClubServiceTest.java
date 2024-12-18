@@ -154,7 +154,7 @@ class ReviewClubServiceTest {
                 Pageable pageable = PageRequest.of(0, 10);
 
                 // when -- 테스트하고자 하는 행동
-                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
+                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, loginMember.getId(), pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -181,7 +181,7 @@ class ReviewClubServiceTest {
                 Pageable pageable = PageRequest.of(0, 10);
 
                 // when -- 테스트하고자 하는 행동
-                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
+                ReadMyClubReviewListResponse result = reviewClubService.findReviewByClub(clubId, loginMember.getId(), pageable);
 
                 // then -- 예상되는 변화 및 결과
                 assertSoftly(softly -> {
@@ -205,7 +205,7 @@ class ReviewClubServiceTest {
 
                 // when -- 테스트하고자 하는 행동
                 ClubException exception = assertThrows(ClubException.class, () ->
-                        reviewClubService.findReviewByClub(clubId, loginMember, null)
+                        reviewClubService.findReviewByClub(clubId, loginMember.getId(), null)
                 );
 
                 // then -- 예상되는 변화 및 결과

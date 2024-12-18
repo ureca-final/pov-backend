@@ -164,15 +164,21 @@ public class ClubController implements ClubSpecification {
 
     @Override
     @GetMapping("/code")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<BaseResponse<ReadPrivateClubDetailsResponse>> readPrivateClubDetails(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto loginMember,
             @RequestParam String value
     ) {
-        ReadPrivateClubDetailsResponse response = clubService.readPrivateClubDetails(loginMember, value);
+        if (loginMember == null) {
+            return BaseResponse.redirection("https://www.point-of-views.com/login");
+        }
+
+        ReadPrivateClubDetailsResponse response = clubService.readPrivateClubDetails(loginMember.member(), value);
 
         if (response.isMember()) {
             return BaseResponse.redirection("https://www.point-of-views.com/club/" + response.clubId() + "/detail");
         }
+
         return BaseResponse.ok("비공개 클럽 가입 페이지", response);
     }
 

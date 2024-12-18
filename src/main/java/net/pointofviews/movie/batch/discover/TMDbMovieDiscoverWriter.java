@@ -110,10 +110,12 @@ public class TMDbMovieDiscoverWriter implements ItemWriter<List<BatchDiscoverMov
         StepExecution stepExecution = StepSynchronizationManager.getContext().getStepExecution();
         ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
 
-        jobExecutionContext.put("firstMoviePk", firstPk);
+        if (!jobExecutionContext.containsKey("firstMoviePk")) {
+            jobExecutionContext.put("firstMoviePk", firstPk);
+            log.info("첫 번째 청크의 첫 번째 영화 PK 저장: {}", firstPk);
+        }
+
         jobExecutionContext.put("lastMoviePk", lastPk);
-
-        log.info("스텝 처리 완료: 첫 번째 영화 PK: {}, 마지막 영화 PK: {}", firstPk, lastPk);
+        log.info("현재 청크의 마지막 영화 PK 저장: {}", lastPk);
     }
-
 }
