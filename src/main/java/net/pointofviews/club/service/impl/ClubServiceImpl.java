@@ -378,7 +378,7 @@ public class ClubServiceImpl implements ClubService {
         int validatedMaxParticipants = validateMaxParticipants(basicInfo.maxParticipants());
 
         ReadClubMemberListResponse members = memberClubService.readMembersByClubId(clubId);
-        ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
+        ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, loginMember.getId(), pageable);
         ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, loginMember, pageable);
 
         int reviewCount = reviews != null ? reviews.reviews().getSize() : 0;

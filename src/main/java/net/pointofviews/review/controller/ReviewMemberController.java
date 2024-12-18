@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,8 +71,14 @@ public class ReviewMemberController implements ReviewMemberSpecification {
     @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/{movieId}/reviews")
-    public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(@PathVariable Long movieId, @PageableDefault Pageable pageable) {
-        ReadReviewListResponse response = reviewMemberService.findReviewByMovie(movieId, pageable);
+    public ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(
+            @AuthenticationPrincipal MemberDetailsDto memberDetail,
+            @PathVariable Long movieId,
+            @PageableDefault Pageable pageable
+    ) {
+        UUID memberId = memberDetail != null ? memberDetail.member().getId() : null;
+
+        ReadReviewListResponse response = reviewMemberService.findReviewByMovie(memberId, movieId, pageable);
 
         return BaseResponse.ok("영화별 리뷰가 성공적으로 조회되었습니다.", response);
     }
@@ -88,8 +95,14 @@ public class ReviewMemberController implements ReviewMemberSpecification {
     @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/{movieId}/reviews/{reviewId}")
-    public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(@PathVariable Long movieId, @PathVariable Long reviewId) {
-        ReadReviewDetailResponse response = reviewMemberService.findReviewDetail(reviewId);
+    public ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(
+            @AuthenticationPrincipal MemberDetailsDto memberDetail,
+            @PathVariable Long movieId,
+            @PathVariable Long reviewId
+    ) {
+        UUID memberId = memberDetail != null ? memberDetail.member().getId() : null;
+
+        ReadReviewDetailResponse response = reviewMemberService.findReviewDetail(memberId, reviewId);
 
         return BaseResponse.ok("리뷰가 성공적으로 상세 조회되었습니다.", response);
     }
