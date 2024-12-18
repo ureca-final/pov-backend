@@ -30,7 +30,7 @@ public interface ClubService {
 
     ReadAllClubsListResponse readAllMyClubs(Member loginMember);
 
-    ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember, Pageable pageable);
+    ReadClubDetailsResponse readClubDetails(UUID clubId, UUID memberId, Pageable pageable);
 
     ReadPrivateClubDetailsResponse readPrivateClubDetails(Member loginMember, String value);
 }

@@ -17,7 +17,7 @@ public interface ClubMoviesRepository extends JpaRepository<ClubMovie, Long> {
                 m.title,
                 m.poster,
                 m.released,
-                CASE WHEN EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
+                CASE WHEN :memberId IS NOT NULL AND EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND  ml.isLiked = true) THEN true ELSE false END,
                 COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
                 COUNT(r.id)
             )

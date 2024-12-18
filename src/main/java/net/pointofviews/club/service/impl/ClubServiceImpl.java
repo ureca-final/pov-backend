@@ -365,7 +365,7 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ReadClubDetailsResponse readClubDetails(UUID clubId, Member loginMember, Pageable pageable) {
+    public ReadClubDetailsResponse readClubDetails(UUID clubId, UUID memberId, Pageable pageable) {
         // 1. 클럽 기본 정보 조회
         FindBasicClubInfo basicInfo = clubRepository.findBasicClubInfoById(clubId)
                 .orElseThrow(() -> ClubException.clubNotFound(clubId));
@@ -373,13 +373,13 @@ public class ClubServiceImpl implements ClubService {
         List<String> genres = clubFavorGenreService.readGenreNamesByClubId(clubId);
 
         // 2. 클럽 가입 여부 확인
-        boolean isMember = memberClubService.isMemberOfClub(clubId, loginMember.getId());
+        boolean isMember = memberClubService.isMemberOfClub(clubId, memberId);
 
         int validatedMaxParticipants = validateMaxParticipants(basicInfo.maxParticipants());
 
         ReadClubMemberListResponse members = memberClubService.readMembersByClubId(clubId);
-        ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, loginMember.getId(), pageable);
-        ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, loginMember, pageable);
+        ReadMyClubReviewListResponse reviews = reviewClubService.findReviewByClub(clubId, memberId, pageable);
+        ReadClubMoviesListResponse bookmarks = clubMovieService.readClubMovies(clubId, memberId, pageable);
 
         int reviewCount = reviews != null ? reviews.reviews().getSize() : 0;
 
