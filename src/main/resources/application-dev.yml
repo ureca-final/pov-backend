@@ -19,7 +19,7 @@ spring:
               - birthday
             client-name: Naver
             authorization-grant-type: authorization_code
-            redirect-uri: https://point-of-views.com/login/oauth2/code/naver
+            redirect-uri: https://www.point-of-views.com/login/oauth2/code/naver
 
         provider:
           naver:
@@ -66,4 +66,4 @@ toss:
   secret-key: ${TOSS_SECRET_KEY}
 
 oauth:
-  baseurl: http://localhost:5173
+  baseurl: https://www.point-of-views.com
