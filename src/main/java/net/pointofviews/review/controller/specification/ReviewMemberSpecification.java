@@ -229,6 +229,7 @@ public interface ReviewMemberSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadReviewListResponse>> readMovieReviews(
+            MemberDetailsDto memberDetail,
             @Parameter(description = "영화 ID", example = "1") Long movieId,
             @ParameterObject Pageable pageable
     );
@@ -282,6 +283,7 @@ public interface ReviewMemberSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadReviewDetailResponse>> readReviewDetail(
+            MemberDetailsDto memberDetail,
             @Parameter(description = "영화 ID", example = "1") Long movieId,
             @Parameter(description = "리뷰 ID", example = "1") Long reviewId
     );

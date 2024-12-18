@@ -55,13 +55,13 @@ public class ReviewClubServiceImpl implements ReviewClubService {
     }
 
     @Override
-    public ReadMyClubReviewListResponse findReviewByClub(UUID clubId, Member loginMember, Pageable pageable) {
+    public ReadMyClubReviewListResponse findReviewByClub(UUID clubId, UUID memberId, Pageable pageable) {
 
         if (clubRepository.findById(clubId).isEmpty()) {
             throw clubNotFound(clubId);
         }
 
-        Slice<ReadReviewResponse> reviews = memberClubRepository.findReviewsWithLikesByClubId(clubId, loginMember.getId(), pageable);
+        Slice<ReadReviewResponse> reviews = memberClubRepository.findReviewsWithLikesByClubId(clubId, memberId, pageable);
 
         return new ReadMyClubReviewListResponse(clubId, reviews);
     }

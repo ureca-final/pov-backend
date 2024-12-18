@@ -182,13 +182,13 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable) {
+    public ReadReviewListResponse findReviewByMovie(UUID memberId, Long movieId, Pageable pageable) {
 
         if (movieRepository.findById(movieId).isEmpty()) {
             throw movieNotFound(movieId);
         }
 
-        Slice<ReadReviewResponse> reviews = reviewRepository.findReviewsWithLikesByMovieId(movieId, pageable);
+        Slice<ReadReviewResponse> reviews = reviewRepository.findReviewsWithLikesByMovieId(memberId, movieId, pageable);
 
         return new ReadReviewListResponse(reviews);
     }
@@ -200,13 +200,13 @@ public class ReviewMemberServiceImpl implements ReviewMemberService {
     }
 
     @Override
-    public ReadReviewDetailResponse findReviewDetail(Long reviewId) {
+    public ReadReviewDetailResponse findReviewDetail(UUID memberId, Long reviewId) {
 
         Review review = reviewRepository.findReviewDetailById(reviewId)
                 .orElseThrow(() -> reviewNotFound(reviewId));
 
         Long likeAmount = reviewLikeCountRepository.getReviewLikeCountByReviewId(reviewId).orElse(0L);
-        boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(reviewId).orElse(false);
+        boolean isLiked = reviewLikeRepository.getIsLikedByReviewId(memberId, reviewId).orElse(false);
         List<String> keywords = reviewKeywordLinkRepository.findKeywordsByReviewId(reviewId);
 
         ReadReviewDetailResponse response = new ReadReviewDetailResponse(

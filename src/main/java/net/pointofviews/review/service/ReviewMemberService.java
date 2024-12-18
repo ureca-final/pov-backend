@@ -24,11 +24,11 @@ public interface ReviewMemberService {
 
     void deleteReview(Long movieId, Long reviewId, Member loginMember);
 
-    ReadReviewListResponse findReviewByMovie(Long movieId, Pageable pageable);
-
     ReadReviewListResponse findAllReview(Pageable pageable, UUID memberDetailsDto);
 
-    ReadReviewDetailResponse findReviewDetail(Long reviewId);
+    ReadReviewListResponse findReviewByMovie(UUID memberId, Long movieId, Pageable pageable);
+
+    ReadReviewDetailResponse findReviewDetail(UUID memberId, Long reviewId);
 
     ReadReviewListResponse findReviewByMember(Member loginMember, Pageable pageable);
 

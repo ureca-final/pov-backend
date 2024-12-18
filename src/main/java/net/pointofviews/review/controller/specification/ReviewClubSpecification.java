@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.dto.response.ReadMyClubInfoListResponse;
@@ -15,7 +16,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
@@ -66,8 +66,8 @@ public interface ReviewClubSpecification {
             )
     })
     ResponseEntity<BaseResponse<ReadMyClubReviewListResponse>> readMyClubReviews(
-            @PathVariable UUID clubId,
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            UUID clubId,
+            MemberDetailsDto userDetail,
             @PageableDefault Pageable pageable
     );
 }
