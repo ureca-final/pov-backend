@@ -1,7 +1,7 @@
 package net.pointofviews.movie.batch.discover;
 
 import lombok.RequiredArgsConstructor;
-import net.pointofviews.movie.batch.config.MovieChunkListener;
+import net.pointofviews.movie.batch.listener.MovieChunkListener;
 import net.pointofviews.movie.dto.response.BatchDiscoverMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieDiscoverApiResponse;
 import org.springframework.batch.core.Step;
