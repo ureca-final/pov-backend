@@ -19,13 +19,18 @@ public class TMDbMovieImageReader {
 
     private int totalItemsRead = 0;
 
-    @StepScope
     @Bean(name = "movieImageJpaReader")
+    @StepScope
     public JpaPagingItemReader<Movie> movieImageJpaReader(EntityManagerFactory entityManagerFactory,
-                                                          @Value("#{jobExecutionContext['lastProcessedMovieId']}") Long lastProcessedMovieId,
                                                           @Value("#{jobExecutionContext['firstMoviePk']}") Long firstMoviePk,
-                                                          @Value("#{jobExecutionContext['lastMoviePk']}") Long lastMoviePk
-    ) {
+                                                          @Value("#{jobExecutionContext['lastMoviePk']}") Long lastMoviePk,
+                                                          @Value("#{stepExecutionContext['lastProcessedMovieId']}") Long lastProcessedMovieId) {
+
+        if (lastProcessedMovieId != null && lastProcessedMovieId >= lastMoviePk) {
+            log.info("lastProcessedMovieId ({})가 lastMoviePk ({})를 초과했습니다. 스텝 종료를 요청합니다.", lastProcessedMovieId, lastMoviePk);
+            return null;
+        }
+
         JpaPagingItemReader<Movie> reader = new JpaPagingItemReader<>() {
             @Override
             protected Movie doRead() throws Exception {
@@ -42,7 +47,6 @@ public class TMDbMovieImageReader {
             public int getPage() {
                 return 0;
             }
-
         };
         reader.setEntityManagerFactory(entityManagerFactory);
 
@@ -64,5 +68,4 @@ public class TMDbMovieImageReader {
         log.info("PK 범위로 영화 데이터를 읽습니다: firstMoviePk={}, lastMoviePk={}, lastProcessedMovieId={}", firstMoviePk, lastMoviePk, lastProcessedMovieId);
         return reader;
     }
-
 }

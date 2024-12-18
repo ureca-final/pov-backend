@@ -32,6 +32,6 @@ public class TMDbMovieImageProcessor implements ItemProcessor<Movie, MovieConten
                         .movie(movie)
                         .build()).limit(5).toList();
 
-        return new MovieContentsDto(posters);
+        return new MovieContentsDto(posters, movie.getId());
     }
 }

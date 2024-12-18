@@ -10,6 +10,7 @@ import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.dto.response.MovieListResponse;
+import net.pointofviews.movie.dto.response.MovieTrendingListResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.data.domain.Pageable;
@@ -100,8 +101,6 @@ public interface MovieSpecification {
     );
 
 
-
-
     @Operation(summary = "영화 좋아요 요청 기능", description = "영화 ID를 기반으로 사용자의 좋아요 요청 API")
     @ApiResponses({
             @ApiResponse(
@@ -135,7 +134,6 @@ public interface MovieSpecification {
     );
 
 
-
     @Operation(summary = "영화 좋아요 취소 기능", description = "영화 ID를 기반으로 사용자의 좋아요 상태 취소 API")
     @ApiResponses({
             @ApiResponse(
@@ -166,5 +164,28 @@ public interface MovieSpecification {
     ResponseEntity<?> putMovieDislike(
             @PathVariable Long movieId,
             @AuthenticationPrincipal(expression = "member") Member loginMember
+    );
+
+    @Operation(summary = "영화 트렌딩 목록 검색", description = "트렌딩 영화 목록을 조회하는 API.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 성공"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "검색 실패",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "message": "잘못된 요청입니다."
+                                    }
+                                    """)
+                    )
+            )
+    })
+    ResponseEntity<BaseResponse<MovieTrendingListResponse>> readMovieTrendingList(
+            MemberDetailsDto memberDetailsDto
     );
 }

@@ -5,6 +5,7 @@ import net.pointofviews.movie.domain.MovieContent;
 import java.util.List;
 
 public record MovieContentsDto(
-        List<MovieContent> movieContents
+        List<MovieContent> movieContents,
+        Long movieId
 ) {
 }

@@ -105,4 +105,24 @@ public class StringRedisServiceImpl implements RedisService {
             throw RedisException.redisServerError(key);
         }
     }
+
+    @Override
+    public boolean removeKey(String key) {
+        try {
+            return redisRepository.deleteKeysByPattern(key);
+        } catch (Exception e) {
+            log.error("key를 제거하는 데 실패했습니다.: {}", key, e);
+            throw RedisException.redisServerError(key);
+        }
+    }
+
+    @Override
+    public boolean setTTL(String key, Duration ttl) {
+        try {
+            return redisRepository.setTTL(key, ttl);
+        } catch (Exception e) {
+            log.error("TTL 설정에 실패했습니다.: {}", key, e);
+            throw RedisException.redisServerError(key);
+        }
+    }
 }
