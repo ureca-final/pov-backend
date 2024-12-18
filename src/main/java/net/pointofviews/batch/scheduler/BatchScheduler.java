@@ -44,6 +44,29 @@ public class BatchScheduler {
         }
     }
 
+    @Scheduled(cron = "0 0 2 * * *")
+    public void trendingMovieBatch() {
+        LocalDate start = LocalDate.now();
+        log.info("트렌딩 영화 배치 스케쥴링 시작: {}", start);
+
+        try {
+            Job job = jobRegistry.getJob("movieTrendingJob");
+
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("runDate", start.toString())
+                    .toJobParameters();
+
+            jobLauncher.run(job, jobParameters);
+
+            log.info("트렌딩 영화 배치 스케쥴링 성공");
+        } catch (Exception ex) {
+            log.info("트렌딩 영화 배치 스케쥴링 실패: {}", ex.getMessage());
+        } finally {
+            LocalDate end = LocalDate.now();
+            log.info("트렌딩 영화 배치 스케쥴링 종료: {}", end.toString());
+        }
+    }
+
     @Scheduled(cron = "0 */1 * * * *")
     public void reviewLikeSync() {
         LocalDateTime start = LocalDateTime.now();

@@ -6,10 +6,12 @@ import net.pointofviews.club.service.ClubMovieService;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieSpecification;
+import net.pointofviews.movie.dto.response.MovieListResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import net.pointofviews.movie.service.MovieMemberService;
 import net.pointofviews.movie.service.MovieSearchService;
+import net.pointofviews.movie.service.MovieService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,14 +28,27 @@ public class MovieController implements MovieSpecification {
 
     private final MovieMemberService memberService;
     private final MovieSearchService movieSearchService;
+    private final MovieService movieService;
     private final ClubMovieService clubMovieService;
 
     @PreAuthorize("permitAll()")
     @Override
+    @GetMapping
+    public ResponseEntity<BaseResponse<MovieListResponse>> MovieList(@AuthenticationPrincipal(expression = "member") Member loginMember, Pageable pageable) {
+        MovieListResponse response = movieService.readMovies(loginMember, pageable);
+        return BaseResponse.ok("영화가 성공적으로 조회되었습니다.", response);
+    }
+
+
+
+    @PreAuthorize("permitAll()")
+    @Override
     @GetMapping("/search")
-    public ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(@RequestParam String query,
-                                                                                 Pageable pageable) {
-        SearchMovieListResponse response = movieSearchService.searchMovies(query, pageable);
+    public ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @RequestParam String query,
+            Pageable pageable) {
+        SearchMovieListResponse response = movieSearchService.searchMovies(query, loginMember, pageable);
         return BaseResponse.ok("영화가 성공적으로 검색되었습니다.", response);
     }
 
