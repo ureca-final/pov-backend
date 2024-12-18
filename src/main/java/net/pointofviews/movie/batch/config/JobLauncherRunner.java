@@ -20,36 +20,62 @@ import java.time.LocalDate;
 public class JobLauncherRunner implements ApplicationRunner {
 
     private final JobLauncher jobLauncher;
-    private final Job tmdbMovieDiscoverJob;
+    private final Job fetchMovieJob;
+    private final Job movieTrendingJob;
     private final JobExecutionRepository jobExecutionRepository;
     private final JobRepository jobRepository;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        String startDate = calculateStartDate();
+    public void run(ApplicationArguments args) {
+        log.info("서버 시작 시 최초 1회 실행");
+
+        if (runJob(fetchMovieJob)) {
+            runJob(movieTrendingJob);
+        } else {
+            log.warn("첫 번째 Job이 실패했거나 실행 중단되어 두 번째 Job은 실행되지 않습니다.");
+        }
+    }
+
+    private boolean runJob(Job job) {
+        String startDate = calculateStartDate(job.getName());
         String endDate = calculateEndDate();
 
-        if(startDate.equals(endDate)) {
-            log.info("금일 실행 된 JobInstance가 존재합니다. Job을 실행하지 않습니다.");
-            return;
+        if (startDate.equals(endDate) || isJobAlreadyExecuted(job, startDate, endDate)) {
+            log.info("{} Job은 이미 실행된 기록이 있습니다.", job.getName());
+            return true;
         }
 
+        try {
+            JobParameters parameters = new JobParametersBuilder()
+                    .addString("startDate", startDate)
+                    .addString("endDate", endDate)
+                    .toJobParameters();
+
+            log.info("Job 실행: {} ({} ~ {})", job.getName(), startDate, endDate);
+            jobLauncher.run(job, parameters);
+            return true;
+        } catch (Exception e) {
+            log.error("{} Job 실행 중 오류 발생", job.getName(), e);
+            return false;
+        }
+    }
+
+    private boolean isJobAlreadyExecuted(Job job, String startDate, String endDate) {
         JobParameters parameters = new JobParametersBuilder()
                 .addString("startDate", startDate)
                 .addString("endDate", endDate)
                 .toJobParameters();
 
-        if (jobRepository.isJobInstanceExists(tmdbMovieDiscoverJob.getName(), parameters)) {
-            log.info("이미 동일한 파라미터로 실행된 JobInstance가 존재합니다. Job을 실행하지 않습니다.");
-            return;
+        try {
+            return jobRepository.isJobInstanceExists(job.getName(), parameters);
+        } catch (Exception e) {
+            log.error("{} Job 기록 확인 중 오류 발생", job.getName(), e);
+            return false;
         }
-
-        log.info("TMDb 영화 배치 잡 실행 {} {} ~ {}", tmdbMovieDiscoverJob.getName(), startDate, endDate);
-        jobLauncher.run(tmdbMovieDiscoverJob, parameters);
     }
 
-    private String calculateStartDate() {
-        LocalDate lastExecutedTime = jobExecutionRepository.getLastExecutionDate(tmdbMovieDiscoverJob.getName());
+    private String calculateStartDate(String jobName) {
+        LocalDate lastExecutedTime = jobExecutionRepository.getLastExecutionDate(jobName);
         return lastExecutedTime.toString();
     }
 

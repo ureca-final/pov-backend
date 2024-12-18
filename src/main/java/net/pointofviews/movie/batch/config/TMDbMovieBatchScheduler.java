@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class TMDbMovieBatchScheduler {
 
     private final JobLauncher jobLauncher;
-    private final Job tmdbMovieDiscoverJob;
+    private final Job fetchMovieJob;
     private final JobRepository jobRepository;
     private final JobExecutionRepository jobExecutionRepository;
 
@@ -39,13 +39,13 @@ public class TMDbMovieBatchScheduler {
                     .addString("endDate", endDate)
                     .toJobParameters();
 
-            if (jobRepository.isJobInstanceExists(tmdbMovieDiscoverJob.getName(), parameters)) {
+            if (jobRepository.isJobInstanceExists(fetchMovieJob.getName(), parameters)) {
                 log.info("이미 실행된 JobInstance가 있습니다. Job을 실행하지 않습니다.");
                 return;
             }
 
-            log.info("TMDb 영화 배치 잡 실행 {} {} ~ {}", tmdbMovieDiscoverJob.getName(), startDate, endDate);
-            jobLauncher.run(tmdbMovieDiscoverJob, parameters);
+            log.info("TMDb 영화 배치 잡 실행 {} {} ~ {}", fetchMovieJob.getName(), startDate, endDate);
+            jobLauncher.run(fetchMovieJob, parameters);
 
         } catch (Exception e) {
             log.error("배치 잡 실행 중 오류 발생", e);
@@ -53,7 +53,7 @@ public class TMDbMovieBatchScheduler {
     }
 
     private String calculateStartDate() {
-        LocalDate lastExecutedTime = jobExecutionRepository.getLastExecutionDate(tmdbMovieDiscoverJob.getName());
+        LocalDate lastExecutedTime = jobExecutionRepository.getLastExecutionDate(fetchMovieJob.getName());
         return lastExecutedTime.toString();
     }
 
