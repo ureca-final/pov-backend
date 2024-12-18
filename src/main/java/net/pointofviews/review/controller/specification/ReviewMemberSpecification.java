@@ -257,7 +257,7 @@ public interface ReviewMemberSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(Pageable pageable);
+    ResponseEntity<BaseResponse<ReadReviewListResponse>> readReviews(Pageable pageable, MemberDetailsDto memberDetailsDto);
 
     @Operation(
             summary = "리뷰 상세 조회",

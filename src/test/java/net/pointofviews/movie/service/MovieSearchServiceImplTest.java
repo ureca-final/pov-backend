@@ -144,7 +144,7 @@ class MovieSearchServiceImplTest {
 
                 // when
                 Slice<Object[]> mockSlice = new PageImpl<>(List.of(), pageable, 0);
-                given(movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(),  pageable)).willReturn(mockSlice);
+                given(movieRepository.searchMoviesByTitleOrPeople(query, loginMember.getId(), pageable)).willReturn(mockSlice);
 
                 SearchMovieListResponse response = movieSearchService.searchMovies(query, loginMember, pageable);
 
@@ -327,12 +327,12 @@ class MovieSearchServiceImplTest {
                 given(movieLikeCountRepository.findById(movieId)).willReturn(Optional.of(MovieLikeCount.builder().movie(mockMovie).likeCount(5L).build()));
                 given(reviewRepository.countReviewPreferenceByMovieId(movieId)).willReturn(mockReviewPreferences);
                 given(movieContentRepository.findAllByMovieId(movieId)).willReturn(mockMovieContents);
-                given(reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(eq(movieId), any(PageRequest.class)))
+                given(reviewRepository.findTop3ByMovieIdOrderByReviewLikeCountDesc(eq(movieId), eq(memberId), any(PageRequest.class)))
                         .willReturn(mockTopReviews);
                 given(movieLikeRepository.existsByMovieIdAndMemberId(movieId, memberId)).willReturn(Boolean.TRUE);
 
                 // when
-                ReadDetailMovieResponse response = movieSearchService.readDetailMovie(movieId, memberDetails);
+                ReadDetailMovieResponse response = movieSearchService.readDetailMovie(movieId, memberDetails.member().getId());
 
                 // then
                 Assertions.assertThat(response.title()).isEqualTo(mockMovie.getTitle());
