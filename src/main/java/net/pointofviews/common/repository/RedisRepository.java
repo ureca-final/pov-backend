@@ -17,4 +17,8 @@ public interface RedisRepository {
     Set<String> getKeysByPattern(String pattern);
 
     Long removeFromSet(String key, String value);
+
+    boolean deleteKeysByPattern(String pattern);
+
+    boolean setTTL(String key, Duration timeout);
 }

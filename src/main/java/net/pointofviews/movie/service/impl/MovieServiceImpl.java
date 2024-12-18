@@ -3,15 +3,14 @@ package net.pointofviews.movie.service.impl;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
+import net.pointofviews.common.service.RedisService;
 import net.pointofviews.country.domain.Country;
-import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.domain.*;
 import net.pointofviews.movie.dto.request.CreateMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.response.MovieListResponse;
 import net.pointofviews.movie.dto.response.MovieResponse;
-import net.pointofviews.movie.dto.response.SearchMovieListResponse;
-import net.pointofviews.movie.dto.response.SearchMovieResponse;
+import net.pointofviews.movie.dto.response.MovieTrendingListResponse;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.MovieService;
 import net.pointofviews.people.domain.People;
@@ -22,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -38,6 +37,7 @@ import static net.pointofviews.movie.exception.MovieException.movieNotFound;
 @RequiredArgsConstructor
 public class MovieServiceImpl implements MovieService {
 
+    private final RedisService redisService;
     private final MovieRepository movieRepository;
     private final CommonCodeService commonCodeService;
     private final MovieCountryServiceImpl movieCountryServiceImpl;
@@ -118,14 +118,22 @@ public class MovieServiceImpl implements MovieService {
     public MovieListResponse readMovies(UUID memberId, Pageable pageable) {
         Slice<MovieResponse> responses = movieRepository.findAllMovies(memberId, pageable)
                 .map(row -> new MovieResponse(
-                        (String) row[0],                 // title
-                        (String) row[1],                 // poster
-                        (LocalDate) row[2],                   // released
-                        row[3] != null ? (row[3] instanceof Number ? ((Number) row[3]).intValue() == 1 : (Boolean) row[3]) : false, // isLiked
-                        row[4] != null ? ((Number) row[4]).longValue() : 0L,  // movieLikeCount
-                        row[5] != null ? ((Number) row[5]).longValue() : 0L   // movieReviewCount
+                        ((Number) row[0]).longValue(), // id
+                        (String) row[1],                 // title
+                        (String) row[2],                 // poster
+                        (LocalDate) row[3],                   // released
+                        row[4] != null && (row[4] instanceof Number ? ((Number) row[4]).intValue() == 1 : (Boolean) row[4]), // isLiked
+                        row[5] != null ? ((Number) row[5]).longValue() : 0L,  // movieLikeCount
+                        row[6] != null ? ((Number) row[6]).longValue() : 0L   // movieReviewCount
                 ));
         return new MovieListResponse(responses);
+    }
+
+    @Override
+    public MovieTrendingListResponse getTrendingMovies(UUID memberId) {
+        List<Long> trendingMovieId = redisService.getSetMembers("trending").stream().map(Long::parseLong).toList();
+
+        return new MovieTrendingListResponse(movieRepository.findAllTrendingMovie(trendingMovieId, memberId));
     }
 
     private List<MovieGenre> convertStringsToMovieGenre(List<String> stringGenres) {

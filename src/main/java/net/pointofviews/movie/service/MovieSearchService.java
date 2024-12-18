@@ -1,6 +1,5 @@
 package net.pointofviews.movie.service;
 
-import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.dto.response.AdminSearchMovieListResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;

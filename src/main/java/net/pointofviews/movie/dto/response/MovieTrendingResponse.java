@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 
-@Schema(description = "영화 응답 DTO")
-public record MovieResponse(
+@Schema(description = "영화 트렌딩 응답 DTO")
+public record MovieTrendingResponse(
         @Schema(description = "영화 식별자", example = "1")
         Long id,
 
@@ -19,7 +19,7 @@ public record MovieResponse(
         LocalDate released,
 
         @Schema(description = "좋아요 여부", example = "true")
-        boolean isLiked,
+        Boolean isLiked,
 
         @Schema(description = "영화 좋아요 수", example = "156")
         Long movieLikeCount,

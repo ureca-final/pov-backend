@@ -7,6 +7,7 @@ import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.movie.controller.specification.MovieSpecification;
 import net.pointofviews.movie.dto.response.MovieListResponse;
+import net.pointofviews.movie.dto.response.MovieTrendingListResponse;
 import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import net.pointofviews.movie.service.MovieMemberService;
@@ -15,9 +16,7 @@ import net.pointofviews.movie.service.MovieService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -94,4 +93,18 @@ public class MovieController implements MovieSpecification {
         return BaseResponse.ok("좋아요 취소가 완료되었습니다.");
     }
 
+    @PreAuthorize("permitAll()")
+    @Override
+    @GetMapping("/trending")
+    public ResponseEntity<BaseResponse<MovieTrendingListResponse>> readMovieTrendingList(
+            @AuthenticationPrincipal MemberDetailsDto memberDetailsDto
+    ) {
+        UUID memberId = Optional.ofNullable(memberDetailsDto)
+                .map(MemberDetailsDto::member)
+                .map(Member::getId)
+                .orElse(null);
+
+        MovieTrendingListResponse response = movieService.getTrendingMovies(memberId);
+        return BaseResponse.ok("OK", response);
+    }
 }

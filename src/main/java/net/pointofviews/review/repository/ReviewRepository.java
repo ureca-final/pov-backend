@@ -123,7 +123,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             r.preference,
             r.isSpoiler,
             r.disabled,
-            r.modifiedAt,
+            r.createdAt,
             COALESCE(CAST(rlc.reviewLikeCount AS long), 0L),
             m.profileImage,
             m.nickname,
