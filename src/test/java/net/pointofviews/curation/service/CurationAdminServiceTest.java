@@ -254,8 +254,8 @@
 //            Set<Long> mockMovieIds = Set.of(101L, 102L);
 //
 //            List<ReadAdminCurationMovieResponse> mockMovies = List.of(
-//                    new ReadAdminCurationMovieResponse( "Movie1", LocalDate.now()),
-//                    new ReadAdminCurationMovieResponse( "Movie2", LocalDate.now())
+//                    new ReadAdminCurationMovieResponse(1L, "Movie1", LocalDate.now()),
+//                    new ReadAdminCurationMovieResponse( 2L,"Movie2", LocalDate.now())
 //            );
 //
 //            given(curationRepository.findCurationDetailById(curationId)).willReturn(Optional.of(mockCuration));
