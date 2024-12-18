@@ -155,7 +155,7 @@ public class MovieServiceImplTest {
 
             // Mocking 데이터 생성
             List<Object[]> mockResults = new ArrayList<>();
-            mockResults.add(new Object[]{"Inception", "https://example.com/poster.jpg", LocalDate.now(), true, 123, 10});
+            mockResults.add(new Object[]{1L,"Inception", "https://example.com/poster.jpg", LocalDate.now(), true, 123, 10});
 
 
             Slice<Object[]> mockSlice = new PageImpl<>(mockResults, pageable, mockResults.size());

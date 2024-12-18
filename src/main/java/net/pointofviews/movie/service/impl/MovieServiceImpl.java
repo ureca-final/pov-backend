@@ -118,12 +118,13 @@ public class MovieServiceImpl implements MovieService {
     public MovieListResponse readMovies(UUID memberId, Pageable pageable) {
         Slice<MovieResponse> responses = movieRepository.findAllMovies(memberId, pageable)
                 .map(row -> new MovieResponse(
-                        (String) row[0],                 // title
-                        (String) row[1],                 // poster
-                        (LocalDate) row[2],                   // released
-                        row[3] != null ? (row[3] instanceof Number ? ((Number) row[3]).intValue() == 1 : (Boolean) row[3]) : false, // isLiked
-                        row[4] != null ? ((Number) row[4]).longValue() : 0L,  // movieLikeCount
-                        row[5] != null ? ((Number) row[5]).longValue() : 0L   // movieReviewCount
+                        ((Number) row[0]).longValue(), // id
+                        (String) row[1],                 // title
+                        (String) row[2],                 // poster
+                        (LocalDate) row[3],                   // released
+                        row[4] != null ? (row[4] instanceof Number ? ((Number) row[4]).intValue() == 1 : (Boolean) row[4]) : false, // isLiked
+                        row[5] != null ? ((Number) row[5]).longValue() : 0L,  // movieLikeCount
+                        row[6] != null ? ((Number) row[6]).longValue() : 0L   // movieReviewCount
                 ));
         return new MovieListResponse(responses);
     }
