@@ -7,6 +7,8 @@ import net.pointofviews.movie.dto.response.MovieListResponse;
 import net.pointofviews.movie.dto.response.SearchMovieListResponse;
 import org.springframework.data.domain.Pageable;
 
+import java.util.UUID;
+
 public interface MovieService {
     void saveMovie(CreateMovieRequest request);
 
@@ -14,5 +16,5 @@ public interface MovieService {
 
     void updateMovie(Long movieId, PutMovieRequest request);
 
-    MovieListResponse readMovies(Member loginMember, Pageable pageable);
+    MovieListResponse readMovies(UUID memberId, Pageable pageable);
 }

@@ -15,7 +15,9 @@ import net.pointofviews.movie.service.MovieService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -34,8 +36,11 @@ public class MovieController implements MovieSpecification {
     @PreAuthorize("permitAll()")
     @Override
     @GetMapping
-    public ResponseEntity<BaseResponse<MovieListResponse>> MovieList(@AuthenticationPrincipal(expression = "member") Member loginMember, Pageable pageable) {
-        MovieListResponse response = movieService.readMovies(loginMember, pageable);
+    public ResponseEntity<BaseResponse<MovieListResponse>> MovieList(@AuthenticationPrincipal MemberDetailsDto memberDetails,
+                                                                     Pageable pageable) {
+        UUID memberId = memberDetails != null ? memberDetails.member().getId() : null;
+
+        MovieListResponse response = movieService.readMovies(memberId, pageable);
         return BaseResponse.ok("영화가 성공적으로 조회되었습니다.", response);
     }
 
@@ -45,10 +50,13 @@ public class MovieController implements MovieSpecification {
     @Override
     @GetMapping("/search")
     public ResponseEntity<BaseResponse<SearchMovieListResponse>> searchMovieList(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto memberDetails,
             @RequestParam String query,
             Pageable pageable) {
-        SearchMovieListResponse response = movieSearchService.searchMovies(query, loginMember, pageable);
+
+        UUID memberId = memberDetails != null ? memberDetails.member().getId() : null;
+
+        SearchMovieListResponse response = movieSearchService.searchMovies(query, memberId, pageable);
         return BaseResponse.ok("영화가 성공적으로 검색되었습니다.", response);
     }
 
@@ -82,6 +90,5 @@ public class MovieController implements MovieSpecification {
         memberService.updateMovieDisLike(movieId, loginMember);
         return BaseResponse.ok("좋아요 취소가 완료되었습니다.");
     }
-
 
 }

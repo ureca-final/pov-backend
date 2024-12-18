@@ -163,7 +163,7 @@ public class MovieServiceImplTest {
 
 
             // when
-            MovieListResponse response = movieService.readMovies(loginMember, pageable);
+            MovieListResponse response = movieService.readMovies(memberId, pageable);
 
             // then
             Assertions.assertThat(response.movies().getContent()).hasSize(1); // 결과가 1개 있어야 함
