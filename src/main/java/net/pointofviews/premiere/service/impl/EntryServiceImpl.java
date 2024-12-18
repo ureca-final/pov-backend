@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.pointofviews.common.lock.DistributeLock;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.member.repository.MemberRepository;
-import net.pointofviews.payment.domain.TempPayment;
 import net.pointofviews.payment.repository.TempPaymentRepository;
 import net.pointofviews.premiere.domain.Entry;
 import net.pointofviews.premiere.domain.Premiere;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static net.pointofviews.member.exception.MemberException.memberNotFound;
