@@ -1,6 +1,7 @@
 package net.pointofviews.review.controller;
 
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.review.controller.specification.ReviewClubSpecification;
@@ -42,10 +43,14 @@ public class ReviewClubController implements ReviewClubSpecification {
     @PreAuthorize("permitAll()")
     @Override
     @GetMapping("/{clubId}/reviews")
-    public ResponseEntity<BaseResponse<ReadMyClubReviewListResponse>> readMyClubReviews(@PathVariable UUID clubId,
-                                                                                        @AuthenticationPrincipal(expression = "member") Member loginMember,
-                                                                                        @PageableDefault Pageable pageable) {
-        ReadMyClubReviewListResponse response = reviewClubService.findReviewByClub(clubId, loginMember, pageable);
+    public ResponseEntity<BaseResponse<ReadMyClubReviewListResponse>> readMyClubReviews(
+            @PathVariable UUID clubId,
+            @AuthenticationPrincipal MemberDetailsDto userDetail,
+            @PageableDefault Pageable pageable
+    ) {
+        UUID memberId = userDetail != null ? userDetail.member().getId() : null;
+
+        ReadMyClubReviewListResponse response = reviewClubService.findReviewByClub(clubId, memberId, pageable);
 
         if (response.reviews().isEmpty()) {
             return BaseResponse.noContent();

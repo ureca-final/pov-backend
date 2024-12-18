@@ -29,7 +29,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             			mv.poster,
             			r.createdAt,
             			COALESCE((SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id), 0),
-            			CASE WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.isLiked = true) THEN true ELSE false END,
+            			CASE WHEN :memberId IS NULL THEN false
+                             WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.member.id = :memberId AND rl.isLiked = true) THEN true
+                             ELSE false
+                        END,
             			r.isSpoiler
             	 )
             	 FROM Review r
@@ -38,7 +41,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             	 WHERE mv.id = :movieId AND r.deletedAt IS NULL
                 ORDER BY r.createdAt DESC
             """)
-    Slice<ReadReviewResponse> findReviewsWithLikesByMovieId(@Param("movieId") Long movieId, Pageable pageable);
+    Slice<ReadReviewResponse> findReviewsWithLikesByMovieId(@Param("memberId") UUID memberId, @Param("movieId") Long movieId, Pageable pageable);
 
     @Query(value = """
             	SELECT new net.pointofviews.review.dto.response.ReadReviewResponse(
@@ -52,7 +55,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             			mv.poster,
             			r.createdAt,
             			COALESCE((SELECT rlc.reviewLikeCount FROM ReviewLikeCount rlc WHERE rlc.review.id = r.id), 0),
-            			CASE WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.isLiked = true) THEN true ELSE false END,
+            			CASE WHEN :memberId IS NULL THEN false
+                             WHEN EXISTS (SELECT 1 FROM ReviewLike rl WHERE rl.review.id = r.id AND rl.member.id = :memberId AND rl.isLiked = true) THEN true
+                             ELSE false
+                        END,
             			r.isSpoiler
             	 )
             	 FROM Review r
