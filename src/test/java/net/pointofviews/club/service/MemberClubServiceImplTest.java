@@ -228,7 +228,7 @@ class MemberClubServiceImplTest {
                 String result = memberClubService.generateInviteCode(clubId, member);
 
                 // then
-                assertThat(result).isEqualTo("https://point-of-views.com/clubs/code?value=" + existingInviteCode);
+                assertThat(result).isEqualTo("https://www.point-of-views.com/clubs/code?value=" + existingInviteCode);
                 then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
                 then(redisService).should().getValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId);
             }
@@ -254,7 +254,7 @@ class MemberClubServiceImplTest {
                     String result = memberClubService.generateInviteCode(clubId, member);
 
                     // then
-                    assertThat(result).isEqualTo("https://point-of-views.com/clubs/code?value=" + newInviteCode);
+                    assertThat(result).isEqualTo("https://www.point-of-views.com/clubs/code?value=" + newInviteCode);
                     then(redisService).should().setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + newInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds));
                     then(redisService).should().setValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
                     then(memberClubRepository).should().findByClubIdAndMemberId(clubId, member.getId());
@@ -286,7 +286,7 @@ class MemberClubServiceImplTest {
                     String result = memberClubService.generateInviteCode(clubId, member);
 
                     // then
-                    assertThat(result).isEqualTo("https://point-of-views.com/clubs/code?value=" + newInviteCode);
+                    assertThat(result).isEqualTo("https://www.point-of-views.com/clubs/code?value=" + newInviteCode);
                     then(redisService).should().setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + duplicateInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds));
                     then(redisService).should().setIfAbsent(INVITE_CODE_TO_CLUB_KEY_PREFIX + newInviteCode, clubId.toString(), Duration.ofSeconds(dayInSeconds));
                     then(redisService).should().setValue(CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId, newInviteCode, Duration.ofSeconds(dayInSeconds));
