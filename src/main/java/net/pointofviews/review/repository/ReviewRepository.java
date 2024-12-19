@@ -115,27 +115,27 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 
     @Query("""
-        SELECT new net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto(
-            r.id,
-            r.title,
-            r.contents,
-            r.thumbnail,
-            r.preference,
-            r.isSpoiler,
-            r.disabled,
-            r.createdAt,
-            COALESCE(CAST(rlc.reviewLikeCount AS long), 0L),
-            m.profileImage,
-            m.nickname,
-            COALESCE(rl.isLiked, false)
-            )
-        FROM Review r
-        LEFT JOIN r.member m
-        LEFT JOIN ReviewLikeCount rlc ON r.id = rlc.review.id
-        LEFT JOIN ReviewLike rl ON rl.review.id = r.id AND (:memberId IS NULL OR rl.member.id = :memberId)
-        WHERE r.movie.id = :movieId AND r.disabled = false
-        ORDER BY COALESCE(rlc.reviewLikeCount, 0) DESC
-        """)
+            SELECT new net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto(
+                r.id,
+                r.title,
+                r.contents,
+                r.thumbnail,
+                r.preference,
+                r.isSpoiler,
+                r.disabled,
+                r.createdAt,
+                COALESCE(CAST(rlc.reviewLikeCount AS long), 0L),
+                m.profileImage,
+                m.nickname,
+                COALESCE(rl.isLiked, false)
+                )
+            FROM Review r
+            LEFT JOIN r.member m
+            LEFT JOIN ReviewLikeCount rlc ON r.id = rlc.review.id
+            LEFT JOIN ReviewLike rl ON rl.review.id = r.id AND (:memberId IS NULL OR rl.member.id = :memberId)
+            WHERE r.movie.id = :movieId AND r.disabled = false AND r.deletedAt IS NULL
+            ORDER BY COALESCE(rlc.reviewLikeCount, 0) DESC
+            """)
     List<ReviewDetailsWithLikeCountDto> findTop3ByMovieIdOrderByReviewLikeCountDesc(@Param("movieId") Long movieId, @Param("memberId") UUID memberId, Pageable pageable);
 
 
