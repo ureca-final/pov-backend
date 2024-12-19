@@ -15,7 +15,7 @@ public class JobExecutionRepository {
 
     private final JobExplorer jobExplorer;
 
-    private static final LocalDate DEFAULT_START_DATE = LocalDate.of(2020, 1, 1);
+    private static final LocalDate DEFAULT_START_DATE = LocalDate.of(2010, 1, 1);
 
     public LocalDate getLastExecutionDate(String jobName) {
         List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, 1);
