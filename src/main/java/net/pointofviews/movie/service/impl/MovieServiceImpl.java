@@ -89,7 +89,7 @@ public class MovieServiceImpl implements MovieService {
     public void updateMovie(Long movieId, PutMovieRequest request) {
         Movie movie = movieRepository.findById(movieId).orElseThrow(() -> movieNotFound(movieId));
 
-        List<MovieGenre> genres = convertStringsToMovieGenre(request.genres());
+        List<MovieGenre> genres = convertStringsToMovieGenre(request.genre());
         genres.forEach(movie::addGenre);
 
         List<MovieCountry> countries = processMovieCountries(request.country());
