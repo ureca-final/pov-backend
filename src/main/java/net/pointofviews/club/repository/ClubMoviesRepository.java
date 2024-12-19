@@ -24,7 +24,7 @@ public interface ClubMoviesRepository extends JpaRepository<ClubMovie, Long> {
             FROM ClubMovie cm
             JOIN cm.movie m
             LEFT JOIN m.reviews r
-            WHERE cm.club.id = :clubId
+            WHERE cm.club.id = :clubId AND r.disabled = false
             GROUP BY m.id, m.title, m.poster, m.released
             """)
     Slice<ReadClubMovieResponse> findMovieDetailsByClubId(@Param("clubId") UUID clubId, @Param("memberId") UUID memberId, Pageable pageable);
