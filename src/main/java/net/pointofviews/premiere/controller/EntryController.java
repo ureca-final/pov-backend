@@ -35,6 +35,17 @@ public class EntryController implements EntrySpecification {
         return BaseResponse.ok("시사회 응모가 성공적으로 완료되었습니다.", response);
     }
 
+    @PostMapping("/{premiereId}/entry-2")
+    public ResponseEntity<BaseResponse<CreateEntryResponse>> createEntry2(
+            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @PathVariable Long premiereId,
+            @RequestBody @Valid CreateEntryRequest request
+    ) {
+        CreateEntryResponse response = entryService.saveEntry2(loginMember, premiereId, request);
+
+        return BaseResponse.ok("시사회 응모가 성공적으로 완료되었습니다.", response);
+    }
+
     @Override
     @DeleteMapping("/{premiereId}/entry/cancel")
     public ResponseEntity<BaseResponse<Void>> cancelEntry(

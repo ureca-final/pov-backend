@@ -10,6 +10,8 @@ public interface EntryService {
 
     CreateEntryResponse saveEntry(Member loginMember, Long premiereId, CreateEntryRequest request);
 
+    CreateEntryResponse saveEntry2(Member loginMember, Long premiereId, CreateEntryRequest request);
+
     void deleteEntry(Member loginMember, Long premiereId, DeleteEntryRequest request);
 
     ReadMyEntryListResponse findMyEntryList(Member loginMember);
