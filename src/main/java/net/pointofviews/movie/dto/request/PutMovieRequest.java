@@ -15,7 +15,7 @@ public record PutMovieRequest(
         String title,
 
         @Schema(description = "영화 장르 목록", example = "[\"스릴러\", \"라마\"]")
-        List<String> genres,
+        List<String> genre,
 
         @Schema(description = "국가", example = "[\"영국\", \"미국\"]")
         List<String> country,

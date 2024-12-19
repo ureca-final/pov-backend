@@ -1,27 +1,15 @@
 package net.pointofviews.member.service.impl;
 
-import static net.pointofviews.member.exception.MemberException.*;
-
-import net.pointofviews.auth.dto.response.CheckLoginResponse;
-import net.pointofviews.common.domain.CodeGroupEnum;
-import net.pointofviews.common.service.CommonCodeService;
-import net.pointofviews.member.domain.*;
-import net.pointofviews.member.repository.MemberFavorGenreRepository;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import net.pointofviews.member.repository.MemberFcmTokenRepository;
-import net.pointofviews.member.service.MemberRedisService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
+import lombok.RequiredArgsConstructor;
 import net.pointofviews.auth.dto.request.CreateMemberRequest;
 import net.pointofviews.auth.dto.request.LoginMemberRequest;
+import net.pointofviews.auth.dto.response.CheckLoginResponse;
 import net.pointofviews.auth.dto.response.CreateMemberResponse;
 import net.pointofviews.auth.dto.response.LoginMemberResponse;
+import net.pointofviews.common.domain.CodeGroupEnum;
+import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.common.service.S3Service;
+import net.pointofviews.member.domain.*;
 import net.pointofviews.member.dto.request.PutMemberGenreListRequest;
 import net.pointofviews.member.dto.request.PutMemberNicknameRequest;
 import net.pointofviews.member.dto.request.PutMemberNoticeRequest;
@@ -29,10 +17,22 @@ import net.pointofviews.member.dto.response.PutMemberGenreListResponse;
 import net.pointofviews.member.dto.response.PutMemberImageResponse;
 import net.pointofviews.member.dto.response.PutMemberNicknameResponse;
 import net.pointofviews.member.dto.response.PutMemberNoticeResponse;
+import net.pointofviews.member.repository.MemberFavorGenreRepository;
+import net.pointofviews.member.repository.MemberFcmTokenRepository;
 import net.pointofviews.member.repository.MemberRepository;
+import net.pointofviews.member.service.MemberRedisService;
 import net.pointofviews.member.service.MemberService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static net.pointofviews.member.exception.MemberException.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +52,10 @@ public class MemberServiceImpl implements MemberService {
         // 이메일 중복 검사
         if (memberRepository.existsByEmail(request.email())) {
             throw emailAlreadyExists();
+        }
+
+        if (memberRepository.existsByNickname(request.nickname())) {
+            throw nicknameDuplicate();
         }
 
         // 소셜 타입 검증
@@ -223,7 +227,7 @@ public class MemberServiceImpl implements MemberService {
 
         s3Service.validateImageFile(file);
 
-		String profileImage = s3Service.getImage(member.getProfileImage());
+        String profileImage = s3Service.getImage(member.getProfileImage());
 
         if (profileImage != null) {
             s3Service.deleteImage(profileImage);
