@@ -2,6 +2,7 @@ package net.pointofviews.movie.batch.discover;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.movie.batch.utils.ApiRateLimiter;
 import net.pointofviews.movie.dto.response.SearchMovieDiscoverApiResponse;
 import net.pointofviews.movie.service.impl.MovieTMDbSearchService;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
@@ -29,7 +31,9 @@ public class TMDbMovieDiscoverReader implements ItemReader<List<SearchMovieDisco
     private LocalDate startDate;
     private LocalDate endDate;
 
-    private int currentPage = 1;
+    private final ApiRateLimiter batchRateLimiter;
+    private final AtomicInteger currentPage = new AtomicInteger(1);
+
     private int totalPages = Integer.MAX_VALUE;
 
     @Override
@@ -39,14 +43,16 @@ public class TMDbMovieDiscoverReader implements ItemReader<List<SearchMovieDisco
             this.endDate = LocalDate.parse(endDateStr);
         }
 
-        if (currentPage > totalPages) {
+        int page = currentPage.getAndIncrement();
+
+        if (page > totalPages) {
             return null;
         }
 
-        log.info("Fetching page {} of {}", currentPage, totalPages);
-        SearchMovieDiscoverApiResponse response = movieService.searchDiscoverMovie(startDate, endDate, currentPage);
+        log.info("Fetching page {} of {}", page, totalPages);
+        batchRateLimiter.limit();
+        SearchMovieDiscoverApiResponse response = movieService.searchDiscoverMovie(startDate, endDate, page);
         totalPages = response.total_pages();
-        currentPage++;
 
         return response.results();
     }

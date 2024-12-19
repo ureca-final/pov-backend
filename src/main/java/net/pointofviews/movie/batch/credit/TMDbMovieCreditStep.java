@@ -22,7 +22,8 @@ public class TMDbMovieCreditStep {
     private final TMDbMovieCreditWriter writer;
 
     @Bean
-    public Step tmdbMovieCreditStep(PlatformTransactionManager transactionManager, MovieChunkListener movieChunkListener) {
+    public Step tmdbMovieCreditStep(PlatformTransactionManager transactionManager,
+                                    MovieChunkListener movieChunkListener) {
         return new StepBuilder("tmdbMovieCreditStep", jobRepository)
                 .<Movie, CreditProcessorResponse>chunk(100, transactionManager)
                 .reader(movieCreditJpaReader)

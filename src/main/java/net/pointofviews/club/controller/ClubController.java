@@ -150,8 +150,8 @@ public class ClubController implements ClubSpecification {
 
     @Override
     @PostMapping("/{clubId}/member")
-    public ResponseEntity<BaseResponse<Void>> joinClub(@PathVariable UUID clubId, @AuthenticationPrincipal(expression = "member") Member loginMember) {
-        memberClubService.joinClub(clubId, loginMember);
+    public ResponseEntity<BaseResponse<Void>> joinClub(@PathVariable UUID clubId, @AuthenticationPrincipal MemberDetailsDto loginMember) {
+        memberClubService.joinClub(clubId, loginMember.member());
         return BaseResponse.ok("클럽 가입에 성공했습니다");
     }
 

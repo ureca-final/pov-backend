@@ -320,7 +320,7 @@ public interface ClubSpecification {
                     )
             )
     })
-    ResponseEntity<BaseResponse<Void>> joinClub(UUID clubId, Member loginMember);
+    ResponseEntity<BaseResponse<Void>> joinClub(UUID clubId, MemberDetailsDto loginMember);
 
     @Operation(summary = "클럽 초대 코드 생성", description = "클럽에 가입할 수 있는 api로 연결하는 초대코드를 생성합니다.")
     @ApiResponses(value = {

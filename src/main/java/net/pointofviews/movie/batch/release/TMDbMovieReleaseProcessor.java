@@ -2,6 +2,7 @@ package net.pointofviews.movie.batch.release;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.movie.batch.utils.ApiRateLimiter;
 import net.pointofviews.movie.domain.KoreanFilmRating;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.dto.response.SearchReleaseApiResponse;
@@ -18,9 +19,11 @@ import java.time.ZonedDateTime;
 public class TMDbMovieReleaseProcessor implements ItemProcessor<Movie, Movie> {
 
     private final MovieTMDbSearchService searchService;
+    private final ApiRateLimiter batchApiRateLimiter;
 
     @Override
     public Movie process(Movie item) {
+        batchApiRateLimiter.limit();
         SearchReleaseApiResponse searchReleaseApiResponse = searchService.searchReleaseDate(item.getTmdbId().toString());
         if (searchReleaseApiResponse.results().isEmpty()) {
             return item;

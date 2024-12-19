@@ -8,6 +8,7 @@ import net.pointofviews.club.dto.response.ClubMemberResponse;
 import net.pointofviews.club.dto.response.ReadAllClubMembersResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberListResponse;
 import net.pointofviews.club.dto.response.ReadClubMemberResponse;
+import net.pointofviews.club.exception.ClubException;
 import net.pointofviews.club.repository.ClubRepository;
 import net.pointofviews.club.repository.MemberClubRepository;
 import net.pointofviews.club.service.MemberClubService;
@@ -66,6 +67,10 @@ public class MemberClubServiceImpl implements MemberClubService {
         boolean isAlreadyMember = memberClubRepository.findByClubIdAndMemberId(clubId, member.getId()).isPresent();
         if (isAlreadyMember) {
             throw memberAlreadyInClub();
+        }
+
+        if(memberClubRepository.countByClub(club) >= club.getMaxParticipants()) {
+            throw ClubException.participantLimitReached();
         }
 
         // MemberClub 엔티티 생성 및 저장

@@ -10,6 +10,7 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -23,20 +24,22 @@ public class TMDbMovieCountryWriter implements ItemWriter<List<MovieCountry>> {
 
     @Override
     public void write(Chunk<? extends List<MovieCountry>> movieCountryChunk) {
+        List<MovieCountry> movieCountryList = new ArrayList<>();
 
         for (List<MovieCountry> movieCountries : movieCountryChunk) {
             for (MovieCountry movieCountry : movieCountries) {
-                Country transientCountry = movieCountry.getCountry();
+                String countryName = movieCountry.getCountry().getName();
 
-                Country persistedCountry = findOrSaveCountry(transientCountry.getName());
+                Country persistedCountry = findOrSaveCountry(countryName);
                 movieCountry.updateCountry(persistedCountry);
-                entityManager.persist(movieCountry);
+                movieCountryList.add(movieCountry);
             }
         }
+
+        movieCountryList.forEach(entityManager::persist);
         entityManager.flush();
         entityManager.clear();
     }
-
 
     private Country findOrSaveCountry(String name) {
         return countryService.findCountryByName(name).orElseGet(() -> countryService.saveCountry(name));

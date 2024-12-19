@@ -38,4 +38,8 @@ public class ClubException extends BusinessException {
     public static ClubException inviteCodeNotFound(String code){
         return new ClubException(HttpStatus.NOT_FOUND, String.format("유효하지 않은 초대코드 입니다. code: %s", code));
     }
+
+    public static ClubException participantLimitReached(){
+        return new ClubException(HttpStatus.BAD_REQUEST, "클럽 가입 인원이 가득 찼습니다.");
+    }
 }

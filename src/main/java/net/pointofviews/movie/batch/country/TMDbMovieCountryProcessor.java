@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.country.domain.Country;
+import net.pointofviews.movie.batch.utils.ApiRateLimiter;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.domain.MovieCountry;
 import net.pointofviews.movie.dto.response.SearchFilteredMovieDetailResponse;
@@ -19,13 +20,14 @@ import java.util.Locale;
 public class TMDbMovieCountryProcessor implements ItemProcessor<Movie, List<MovieCountry>> {
 
     private final MovieTMDbSearchService searchService;
+    private final ApiRateLimiter batchApiRateLimiter;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     public List<MovieCountry> process(Movie item) {
         entityManager.detach(item);
-
+        batchApiRateLimiter.limit();
         SearchFilteredMovieDetailResponse detailsResponse = searchService.searchDetailsMovie(item.getTmdbId().toString());
         List<String> stringCountries = detailsResponse.originCountries();
 

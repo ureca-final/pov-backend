@@ -24,7 +24,8 @@ public class TMDbMovieCountryStep {
     private final TMDbMovieCountryProcessor processor;
 
     @Bean
-    public Step tmdbMovieCountryStep(PlatformTransactionManager transactionManager, MovieChunkListener movieChunkListener) {
+    public Step tmdbMovieCountryStep(PlatformTransactionManager transactionManager,
+                                     MovieChunkListener movieChunkListener) {
         return new StepBuilder("tmdbMovieCountryStep", jobRepository)
                 .<Movie, List<MovieCountry>>chunk(100, transactionManager)
                 .reader(movieCountryJpaReader)
