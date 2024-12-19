@@ -47,5 +47,17 @@ public class StringRedisRepositoryImpl implements RedisRepository {
     }
 
     @Override
-    public Long removeFromSet(String key, String value) {return redisTemplate.opsForSet().remove(key, value);}
+    public Long removeFromSet(String key, String value) {
+        return redisTemplate.opsForSet().remove(key, value);
+    }
+
+    @Override
+    public boolean deleteKeysByPattern(String pattern) {
+        return Boolean.TRUE.equals(redisTemplate.delete(pattern));
+    }
+
+    @Override
+    public boolean setTTL(String key, Duration timeout) {
+        return Boolean.TRUE.equals(redisTemplate.expire(key, timeout));
+    }
 }

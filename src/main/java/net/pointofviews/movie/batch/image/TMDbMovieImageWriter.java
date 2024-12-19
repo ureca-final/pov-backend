@@ -20,6 +20,7 @@ import java.util.List;
 public class TMDbMovieImageWriter implements ItemWriter<MovieContentsDto>, StepExecutionListener {
 
     private final JdbcTemplate jdbcTemplate;
+    private Long chunkSize;
     private Long lastProcessedMovieId = 0L;
 
     @Override
@@ -28,19 +29,17 @@ public class TMDbMovieImageWriter implements ItemWriter<MovieContentsDto>, StepE
                 .flatMap(dto -> dto.movieContents().stream())
                 .toList();
 
-        batchInsertMovieContents(allMovieContents);
+        if (!allMovieContents.isEmpty()) {
+            batchInsertMovieContents(allMovieContents);
 
-        updateLastProcessedMovieId(chunk);
-    }
-
-    private void updateLastProcessedMovieId(Chunk<? extends MovieContentsDto> chunk) {
-        MovieContentsDto lastDto = chunk.getItems().get(chunk.getItems().size() - 1);
-        if (!lastDto.movieContents().isEmpty()) {
-            lastProcessedMovieId = lastDto.movieContents()
-                    .get(lastDto.movieContents().size() - 1)
-                    .getMovie()
-                    .getId();
+            lastProcessedMovieId = chunk.getItems().stream()
+                    .map(MovieContentsDto::movieId)
+                    .reduce((first, second) -> second)
+                    .orElse(lastProcessedMovieId + 1);
+        } else {
+            lastProcessedMovieId += chunkSize;
         }
+        log.info("갱신된 마지막 Movie ID: {}", lastProcessedMovieId);
     }
 
     private void batchInsertMovieContents(List<MovieContent> movieContents) {
@@ -60,22 +59,20 @@ public class TMDbMovieImageWriter implements ItemWriter<MovieContentsDto>, StepE
                 .toList();
 
         jdbcTemplate.batchUpdate(sql, batchArgs);
-
-        log.info("총 {}개의 MovieContent를 배치로 저장했습니다.", batchArgs.size());
+        log.info("총 {}개의 MovieContent를 저장했습니다.", batchArgs.size());
     }
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        log.info("TMDbMovieImageWriter 시작");
+        lastProcessedMovieId = stepExecution.getExecutionContext().getLong("lastProcessedMovieId", 0L);
+        chunkSize = stepExecution.getJobParameters().getLong("chunkSize", 100L);
+        log.info("TMDbMovieImageWriter 시작. 마지막 처리된 Movie ID: {}", lastProcessedMovieId);
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-        stepExecution.getJobExecution()
-                .getExecutionContext()
-                .put("lastProcessedMovieId", lastProcessedMovieId);
-
-        log.info("스텝 종료: 마지막으로 처리된 movie ID: {}", lastProcessedMovieId);
+        stepExecution.getExecutionContext().put("lastProcessedMovieId", lastProcessedMovieId);
+        log.info("스텝 종료: 마지막으로 처리된 Movie ID: {}", lastProcessedMovieId);
         return ExitStatus.COMPLETED;
     }
 }

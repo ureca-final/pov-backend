@@ -2,10 +2,7 @@ package net.pointofviews.movie.repository;
 
 import net.pointofviews.curation.dto.response.ReadUserCurationMovieResponse;
 import net.pointofviews.movie.domain.Movie;
-import net.pointofviews.movie.dto.response.MovieListResponse;
-import net.pointofviews.movie.dto.response.MovieResponse;
-import net.pointofviews.movie.dto.response.SearchMovieListResponse;
-import net.pointofviews.movie.dto.response.SearchMovieResponse;
+import net.pointofviews.movie.dto.response.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -122,4 +119,27 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     Optional<Movie> findMovieWithDetailsById(Long movieId);
 
     Optional<Movie> findMovieByTmdbId(Integer tmdbId);
+
+    @Query("""
+        SELECT new net.pointofviews.movie.dto.response.MovieTrendingResponse(
+            m.id,
+            m.title,
+            m.poster,
+            m.released,
+            CASE WHEN :memberId IS NOT NULL AND EXISTS (
+                SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND ml.isLiked = true
+            ) THEN true ELSE false END,
+            COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
+            COALESCE(COUNT(r.id), 0)
+        )
+        FROM Movie m
+        LEFT JOIN m.reviews r
+        WHERE m.id IN :trendingMovieId
+        GROUP BY m.id, m.title, m.poster, m.released
+        ORDER BY m.released DESC
+        """)
+    List<MovieTrendingResponse> findAllTrendingMovie(
+            @Param("trendingMovieId") List<Long> trendingMovieId,
+            @Param("memberId") UUID memberId
+    );
 }

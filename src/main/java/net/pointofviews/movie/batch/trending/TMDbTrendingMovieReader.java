@@ -2,10 +2,10 @@ package net.pointofviews.movie.batch.trending;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.pointofviews.common.service.RedisService;
 import net.pointofviews.movie.dto.response.SearchMovieTrendingApiResponse;
 import net.pointofviews.movie.service.impl.MovieTMDbSearchService;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -23,12 +23,13 @@ public class TMDbTrendingMovieReader implements ItemReader<Integer> {
     private List<Integer> currentPageMovieIds = new ArrayList<>();
 
     private final MovieTMDbSearchService movieTMDbSearchService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisService redisService;
 
     @Override
-    public Integer read() throws Exception {
+    public Integer read() {
         long savedMoviesCount = countTrendingMovies();
 
+        log.info("saved movies count: {}", savedMoviesCount);
         if (savedMoviesCount >= 20) {
             log.info("[read] 배치 종료 - 트렌딩 영화 영화 저장 완료");
             return null;
@@ -59,7 +60,7 @@ public class TMDbTrendingMovieReader implements ItemReader<Integer> {
     }
 
     private long countTrendingMovies() {
-        Set<String> keys = redisTemplate.keys("trending:*");
+        Set<String> keys = redisService.getSetMembers("trending");
         return keys.size();
     }
 

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Schema(description = "리뷰 상세 정보와 좋아요 수 DTO")
 public record ReviewDetailsWithLikeCountDto(
         @Schema(description = "리뷰 ID", example = "1")
-        Long id,
+        Long reviewId,
 
         @Schema(description = "리뷰 제목", example = "놀라운 영화!")
         String title,
@@ -28,11 +28,11 @@ public record ReviewDetailsWithLikeCountDto(
         @Schema(description = "리뷰 비활성화 여부", example = "false")
         Boolean disabled,
 
-        @Schema(description = "리뷰 수정 일시", example = "2024-12-13T10:00:00")
-        LocalDateTime modifiedAt,
+        @Schema(description = "리뷰 생성 일시", example = "2024-12-13T10:00:00")
+        LocalDateTime createdAt,
 
         @Schema(description = "리뷰 좋아요 수", example = "25")
-        Long likeCount,
+        Long likeAmount,
 
         @Schema(description = "유저 프로필 이미지")
         String profileImage,
