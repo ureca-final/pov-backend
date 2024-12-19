@@ -69,7 +69,7 @@ public class MemberClubServiceImpl implements MemberClubService {
             throw memberAlreadyInClub();
         }
 
-        if(memberClubRepository.countByClub(club) >= club.getMaxParticipants()) {
+        if (memberClubRepository.countByClub(club) >= club.getMaxParticipants()) {
             throw ClubException.participantLimitReached();
         }
 
@@ -93,7 +93,7 @@ public class MemberClubServiceImpl implements MemberClubService {
         }
 
         String clubKey = CLUB_TO_INVITE_CODE_KEY_PREFIX + clubId;
-        String baseUrl = "https://point-of-views.com/clubs";
+        String baseUrl = "https://www.point-of-views.com/clubs";
 
         String existingInviteCode = redisService.getValue(clubKey);
         if (existingInviteCode != null) {
