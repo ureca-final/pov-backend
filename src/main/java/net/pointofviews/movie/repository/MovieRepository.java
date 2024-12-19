@@ -25,7 +25,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 m.released,
                 CASE WHEN :memberId IS NOT NULL AND EXISTS (SELECT 1 FROM MovieLike ml WHERE ml.movie.id = m.id AND ml.member.id = :memberId AND ml.isLiked = true) THEN true ELSE false END,
                 COALESCE((SELECT mlc.likeCount FROM MovieLikeCount mlc WHERE mlc.movie.id = m.id), 0),
-                COUNT(r.id)
+                COUNT(CASE WHEN r IS NOT NULL AND r.disabled = false THEN r.id ELSE NULL END)
             FROM Movie m
             LEFT JOIN m.reviews r
             WHERE r.disabled = false
