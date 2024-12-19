@@ -310,9 +310,21 @@ public class ClubServiceImpl implements ClubService {
                     String genreCodes = (String) data[6];
 
                     // 장르 코드 -> 장르 이름 변환
-                    List<String> genreNames = Arrays.stream(genreCodes.split(","))
-                            .map(code -> commonCodeService.convertCommonCodeToName(code, CodeGroupEnum.MOVIE_GENRE))
-                            .collect(Collectors.toList());
+                    List<String> genreNames;
+                    if (genreCodes == null || genreCodes.isEmpty()) {
+                        // 장르가 없는 경우
+                        genreNames = new ArrayList<>();
+                    } else if (!genreCodes.contains(",")) {
+                        // 장르가 하나인 경우
+                        genreNames = Collections.singletonList(
+                                commonCodeService.convertCommonCodeToName(genreCodes, CodeGroupEnum.MOVIE_GENRE)
+                        );
+                    } else {
+                        // 장르가 여러 개인 경우
+                        genreNames = Arrays.stream(genreCodes.split(","))
+                                .map(code -> commonCodeService.convertCommonCodeToName(code, CodeGroupEnum.MOVIE_GENRE))
+                                .collect(Collectors.toList());
+                    }
 
                     return new ReadAllClubsResponse(
                             clubId,
@@ -345,9 +357,21 @@ public class ClubServiceImpl implements ClubService {
                     String genreCodes = (String) data[6];
 
                     // 장르 코드 -> 장르 이름 변환
-                    List<String> genreNames = Arrays.stream(genreCodes.split(","))
-                            .map(code -> commonCodeService.convertCommonCodeToName(code, CodeGroupEnum.MOVIE_GENRE))
-                            .collect(Collectors.toList());
+                    List<String> genreNames;
+                    if (genreCodes == null || genreCodes.isEmpty()) {
+                        // 장르가 없는 경우
+                        genreNames = new ArrayList<>();
+                    } else if (!genreCodes.contains(",")) {
+                        // 장르가 하나인 경우
+                        genreNames = Collections.singletonList(
+                                commonCodeService.convertCommonCodeToName(genreCodes, CodeGroupEnum.MOVIE_GENRE)
+                        );
+                    } else {
+                        // 장르가 여러 개인 경우
+                        genreNames = Arrays.stream(genreCodes.split(","))
+                                .map(code -> commonCodeService.convertCommonCodeToName(code, CodeGroupEnum.MOVIE_GENRE))
+                                .collect(Collectors.toList());
+                    }
 
                     return new ReadAllClubsResponse(
                             clubId,
