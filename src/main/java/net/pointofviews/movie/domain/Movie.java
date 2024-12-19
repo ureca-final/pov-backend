@@ -53,6 +53,9 @@ public class Movie {
     @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final Set<MovieCast> casts = new HashSet<>();
 
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.REMOVE)
+    private final Set<MovieContent> contents = new HashSet<>();
+
     @Builder
     private Movie(String title, String plot, String poster,
                   LocalDate released, Integer tmdbId, String backdrop, KoreanFilmRating filmRating) {

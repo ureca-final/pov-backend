@@ -1,8 +1,8 @@
 package net.pointofviews.movie.batch.image;
 
 import lombok.RequiredArgsConstructor;
-import net.pointofviews.movie.batch.listener.MovieChunkListener;
 import net.pointofviews.movie.batch.dto.MovieContentsDto;
+import net.pointofviews.movie.batch.listener.MovieChunkListener;
 import net.pointofviews.movie.domain.Movie;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -22,13 +22,13 @@ public class TMDbMovieImageStep {
     private final TMDbMovieImageWriter writer;
 
     @Bean
-    public Step tmdbMovieImageStep(PlatformTransactionManager transactionManager, MovieChunkListener movieChunkListener) {
+    public Step tmdbMovieImageStep(PlatformTransactionManager transactionManager,
+                                   MovieChunkListener movieChunkListener) {
         return new StepBuilder("tmdbMovieImageStep", jobRepository)
                 .<Movie, MovieContentsDto>chunk(100, transactionManager)
                 .reader(movieImageJpaReader)
                 .processor(processor)
                 .writer(writer)
-                .listener(writer)
                 .listener(movieChunkListener)
                 .build();
     }

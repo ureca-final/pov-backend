@@ -23,13 +23,7 @@ public class TMDbMovieImageReader {
     @StepScope
     public JpaPagingItemReader<Movie> movieImageJpaReader(EntityManagerFactory entityManagerFactory,
                                                           @Value("#{jobExecutionContext['firstMoviePk']}") Long firstMoviePk,
-                                                          @Value("#{jobExecutionContext['lastMoviePk']}") Long lastMoviePk,
-                                                          @Value("#{stepExecutionContext['lastProcessedMovieId']}") Long lastProcessedMovieId) {
-
-        if (lastProcessedMovieId != null && lastProcessedMovieId >= lastMoviePk) {
-            log.info("lastProcessedMovieId ({})가 lastMoviePk ({})를 초과했습니다. 스텝 종료를 요청합니다.", lastProcessedMovieId, lastMoviePk);
-            return null;
-        }
+                                                          @Value("#{jobExecutionContext['lastMoviePk']}") Long lastMoviePk) {
 
         JpaPagingItemReader<Movie> reader = new JpaPagingItemReader<>() {
             @Override
@@ -42,30 +36,21 @@ public class TMDbMovieImageReader {
                 }
                 return movie;
             }
-
-            @Override
-            public int getPage() {
-                return 0;
-            }
         };
         reader.setEntityManagerFactory(entityManagerFactory);
 
         reader.setQueryString("""
                 SELECT m FROM Movie m
-                LEFT JOIN MovieContent mc ON mc.movie.id = m.id
-                WHERE mc.id IS NULL
-                AND m.id BETWEEN :firstMoviePk AND :lastMoviePk
-                AND m.id > :lastProcessedMovieId
+                WHERE m.id BETWEEN :firstMoviePk AND :lastMoviePk
                 """);
 
         reader.setParameterValues(Map.of(
                 "firstMoviePk", firstMoviePk,
-                "lastMoviePk", lastMoviePk,
-                "lastProcessedMovieId", (lastProcessedMovieId != null) ? lastProcessedMovieId : 0L
+                "lastMoviePk", lastMoviePk
         ));
         reader.setPageSize(100);
 
-        log.info("PK 범위로 영화 데이터를 읽습니다: firstMoviePk={}, lastMoviePk={}, lastProcessedMovieId={}", firstMoviePk, lastMoviePk, lastProcessedMovieId);
+        log.info("PK 범위로 영화 데이터를 읽습니다: firstMoviePk={}, lastMoviePk={}", firstMoviePk, lastMoviePk);
         return reader;
     }
 }

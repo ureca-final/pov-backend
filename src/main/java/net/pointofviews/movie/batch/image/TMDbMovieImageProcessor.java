@@ -2,6 +2,7 @@ package net.pointofviews.movie.batch.image;
 
 import lombok.RequiredArgsConstructor;
 import net.pointofviews.movie.batch.dto.MovieContentsDto;
+import net.pointofviews.movie.batch.utils.ApiRateLimiter;
 import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.domain.MovieContent;
 import net.pointofviews.movie.domain.MovieContentType;
@@ -18,10 +19,12 @@ import java.util.List;
 public class TMDbMovieImageProcessor implements ItemProcessor<Movie, MovieContentsDto> {
 
     private final MovieTMDbSearchService searchService;
+    private final ApiRateLimiter batchApiRateLimiter;
     private static final String MOVIE_URL = "https://image.tmdb.org/t/p/w342";
 
     @Override
     public MovieContentsDto process(Movie movie) {
+        batchApiRateLimiter.limit();
         SearchMovieImageApiResponse response = searchService.searchImageMovie(movie.getTmdbId().toString());
 
         List<MovieContent> posters = response.posters().stream()

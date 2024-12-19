@@ -14,7 +14,11 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -27,89 +31,94 @@ public class TMDbMovieCreditWriter implements ItemWriter<CreditProcessorResponse
     @Override
     @Transactional
     public void write(Chunk<? extends CreditProcessorResponse> items) {
+        // 캐시를 위한 Map 사용
+        Map<Integer, People> peopleCache = loadPeopleCache(items);
+        Map<Integer, MovieCrew> crewCache = new HashMap<>();
+        Map<Integer, MovieCast> castCache = new HashMap<>();
+
         for (CreditProcessorResponse item : items) {
+            Movie movie = item.movie();
+
+            // People 저장
             List<People> crewPeoples = item.crewPeoples().stream()
-                    .map(this::findOrSavePeople)
+                    .map(p -> findOrCreatePeople(p, peopleCache))
                     .toList();
+
             List<People> castPeoples = item.castPeoples().stream()
-                    .map(this::findOrSavePeople)
+                    .map(p -> findOrCreatePeople(p, peopleCache))
                     .toList();
 
-            boolean hasCrewOrCast = false;
-
+            // MovieCrew 저장
             for (int i = 0; i < crewPeoples.size(); i++) {
                 MovieCrew crew = item.crews().get(i);
                 crew.updatePeople(crewPeoples.get(i));
-                crew.updateMovie(item.movie());
-                hasCrewOrCast |= findOrSaveMovieCrew(crew);
+                crew.updateMovie(movie);
+                batchSaveMovieCrew(crew, crewCache);
             }
 
+            // MovieCast 저장
             for (int i = 0; i < castPeoples.size(); i++) {
                 MovieCast cast = item.casts().get(i);
                 cast.updatePeople(castPeoples.get(i));
-                cast.updateMovie(item.movie());
-                hasCrewOrCast |= findOrSaveMovieCast(cast);
+                cast.updateMovie(movie);
+                batchSaveMovieCast(cast, castCache);
             }
 
-            if (!hasCrewOrCast) {
-                log.info("Deleting movie: {}", item.movie().getId());
-                entityManager.remove(entityManager.contains(item.movie()) ? item.movie() : entityManager.merge(item.movie()));
-            } else {
-                entityManager.merge(item.movie());
-            }
+            // Movie 상태 업데이트
+            entityManager.merge(movie);
+
         }
+
+        flushAndClear();
     }
 
-    private People findOrSavePeople(People person) {
-        People existingPerson = findByTmdbId(person.getTmdbId());
-        if (existingPerson != null) {
-            return existingPerson;
-        }
-        entityManager.persist(person);
-        return person;
-    }
+    // People 캐시 로드
+    private Map<Integer, People> loadPeopleCache(Chunk<? extends CreditProcessorResponse> items) {
+        List<Integer> tmdbIds = items.getItems().stream()
+                .flatMap(item -> Stream.concat(item.crewPeoples().stream(), item.castPeoples().stream()))
+                .map(People::getTmdbId)
+                .distinct()
+                .toList();
 
-    private People findByTmdbId(Integer tmdbId) {
-        return entityManager.createQuery("SELECT p FROM People p WHERE p.tmdbId = :tmdbId", People.class)
-                .setParameter("tmdbId", tmdbId)
+        return entityManager.createQuery(
+                        "SELECT p FROM People p WHERE p.tmdbId IN :tmdbIds", People.class)
+                .setParameter("tmdbIds", tmdbIds)
                 .getResultStream()
-                .findFirst()
-                .orElse(null);
+                .collect(Collectors.toMap(People::getTmdbId, p -> p));
     }
 
-    private boolean findOrSaveMovieCrew(MovieCrew crew) {
-        boolean exists = existsMovieCrew(crew.getMovie(), crew.getPeople(), crew.getRole());
-        if (!exists) {
+    // People 저장 또는 캐시 사용
+    private People findOrCreatePeople(People person, Map<Integer, People> peopleCache) {
+        return peopleCache.computeIfAbsent(person.getTmdbId(), tmdbId -> {
+            entityManager.persist(person);
+            return person;
+        });
+    }
+
+    // MovieCrew Batch 저장
+    private boolean batchSaveMovieCrew(MovieCrew crew, Map<Integer, MovieCrew> crewCache) {
+        if (!crewCache.containsKey(crew.hashCode())) {
             entityManager.persist(crew);
+            crewCache.put(crew.hashCode(), crew);
             return true;
         }
         return false;
     }
 
-    private boolean existsMovieCrew(Movie movie, People people, String role) {
-        return entityManager.createQuery(
-                        "SELECT COUNT(mc) > 0 FROM MovieCrew mc WHERE mc.movie = :movie AND mc.people = :people AND mc.role = :role", Boolean.class)
-                .setParameter("movie", movie)
-                .setParameter("people", people)
-                .setParameter("role", role)
-                .getSingleResult();
-    }
-
-    private boolean findOrSaveMovieCast(MovieCast cast) {
-        boolean exists = existsMovieCast(cast.getMovie(), cast.getPeople(), cast.getRoleName());
-        if (!exists) {
+    // MovieCast Batch 저장
+    private boolean batchSaveMovieCast(MovieCast cast, Map<Integer, MovieCast> castCache) {
+        if (!castCache.containsKey(cast.hashCode())) {
             entityManager.persist(cast);
+            castCache.put(cast.hashCode(), cast);
             return true;
         }
         return false;
     }
 
-    private boolean existsMovieCast(Movie movie, People people, String roleName) {
-        return entityManager.createQuery(
-                        "SELECT COUNT(mc) > 0 FROM MovieCast mc WHERE mc.movie = :movie AND mc.people = :people AND mc.roleName = :roleName", Boolean.class)
-                .setParameter("movie", movie)
-                .setParameter("people", people)
-                .setParameter("roleName", roleName)
-                .getSingleResult();
+    // EntityManager Batch Insert 처리
+    private void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
     }
+
 }

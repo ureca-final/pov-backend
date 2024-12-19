@@ -35,20 +35,12 @@ public class TMDbMovieCreditReader {
                 }
                 return movie;
             }
-
-            @Override
-            public int getPage() {
-                return 0;
-            }
         };
 
         reader.setEntityManagerFactory(entityManagerFactory);
         reader.setQueryString("""
                     SELECT m FROM Movie m
-                    LEFT JOIN m.casts c
-                    LEFT JOIN m.crews cr
-                    WHERE c IS NULL AND cr IS NULL
-                      AND m.id BETWEEN :firstMoviePk AND :lastMoviePk
+                    WHERE m.id BETWEEN :firstMoviePk AND :lastMoviePk
                 """);
         reader.setParameterValues(Map.of("firstMoviePk", firstMoviePk, "lastMoviePk", lastMoviePk));
         reader.setPageSize(100);

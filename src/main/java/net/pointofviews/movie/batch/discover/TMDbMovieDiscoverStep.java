@@ -9,6 +9,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
@@ -23,12 +24,15 @@ public class TMDbMovieDiscoverStep {
     private final TMDbMovieDiscoverWriter writer;
 
     @Bean
-    public Step tmdbMovieDiscoverStep(PlatformTransactionManager transactionManager, MovieChunkListener movieChunkListener) {
+    public Step tmdbMovieDiscoverStep(PlatformTransactionManager transactionManager,
+                                      MovieChunkListener movieChunkListener,
+                                      TaskExecutor tmdbTaskExecutor) {
         return new StepBuilder("tmdbMovieDiscoverStep", jobRepository)
-                .<List<SearchMovieDiscoverApiResponse.MovieResult>, List<BatchDiscoverMovieResponse>>chunk(100, transactionManager)
+                .<List<SearchMovieDiscoverApiResponse.MovieResult>, List<BatchDiscoverMovieResponse>>chunk(25, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .taskExecutor(tmdbTaskExecutor)
                 .listener(movieChunkListener)
                 .build();
     }
