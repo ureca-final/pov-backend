@@ -28,6 +28,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 COUNT(r.id)
             FROM Movie m
             LEFT JOIN m.reviews r
+            WHERE r.disabled = false
             GROUP BY m.id, m.title, m.poster, m.released
             ORDER BY m.released DESC
             """)
@@ -55,7 +56,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
            ), 0) AS movieLikeCount,
            (SELECT COUNT(*)
             FROM review r
-            WHERE r.movie_id = m.id) AS movieReviewCount
+            WHERE r.movie_id = m.id AND r.disabled = false) AS movieReviewCount
     FROM movie m
     WHERE MATCH(m.title) AGAINST(:query IN BOOLEAN MODE)
        OR EXISTS (
@@ -109,7 +110,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             )
             FROM Movie m
             LEFT JOIN m.reviews r
-            WHERE m.id IN :movieIds
+            WHERE m.id IN :movieIds AND r.disabled = false
             GROUP BY m.id, m.title, m.poster, m.released
             """)
     List<ReadUserCurationMovieResponse> findUserCurationMoviesByIds(@Param("movieIds") Set<Long> movieIds, @Param("memberId") UUID memberId);
@@ -134,7 +135,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
         )
         FROM Movie m
         LEFT JOIN m.reviews r
-        WHERE m.id IN :trendingMovieId
+        WHERE m.id IN :trendingMovieId AND r.disabled = false
         GROUP BY m.id, m.title, m.poster, m.released
         ORDER BY m.released DESC
         """)
