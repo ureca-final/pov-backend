@@ -2,6 +2,7 @@ package net.pointofviews.premiere.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.controller.specification.EntrySpecification;
@@ -26,22 +27,22 @@ public class EntryController implements EntrySpecification {
     @Override
     @PostMapping("/{premiereId}/entry")
     public ResponseEntity<BaseResponse<CreateEntryResponse>> createEntry(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto loginMember,
             @PathVariable Long premiereId,
             @RequestBody @Valid CreateEntryRequest request
     ) {
-        CreateEntryResponse response = entryService.saveEntry(loginMember, premiereId, request);
+        CreateEntryResponse response = entryService.saveEntry(loginMember.member(), premiereId, request);
 
         return BaseResponse.ok("시사회 응모가 성공적으로 완료되었습니다.", response);
     }
 
     @PostMapping("/{premiereId}/entry-2")
     public ResponseEntity<BaseResponse<CreateEntryResponse>> createEntry2(
-            @AuthenticationPrincipal(expression = "member") Member loginMember,
+            @AuthenticationPrincipal MemberDetailsDto loginMember,
             @PathVariable Long premiereId,
             @RequestBody @Valid CreateEntryRequest request
     ) {
-        CreateEntryResponse response = entryService.saveEntry2(loginMember, premiereId, request);
+        CreateEntryResponse response = entryService.saveEntry2(loginMember.member(), premiereId, request);
 
         return BaseResponse.ok("시사회 응모가 성공적으로 완료되었습니다.", response);
     }

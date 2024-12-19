@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import net.pointofviews.auth.dto.MemberDetailsDto;
 import net.pointofviews.common.dto.BaseResponse;
 import net.pointofviews.member.domain.Member;
 import net.pointofviews.premiere.dto.request.CreateEntryRequest;
@@ -75,7 +76,7 @@ public interface EntrySpecification {
             )
     })
     ResponseEntity<BaseResponse<CreateEntryResponse>> createEntry(
-            Member loginMember,
+            MemberDetailsDto loginMember,
             @Parameter(description = "응모할 시사회 ID", example = "123") Long premiereId,
             CreateEntryRequest request
     ) throws IllegalAccessException, InterruptedException;
@@ -137,7 +138,7 @@ public interface EntrySpecification {
             )
     })
     ResponseEntity<BaseResponse<CreateEntryResponse>> createEntry2(
-            Member loginMember,
+            MemberDetailsDto loginMember,
             @Parameter(description = "응모할 시사회 ID", example = "123") Long premiereId,
             CreateEntryRequest request
     ) throws IllegalAccessException, InterruptedException;
