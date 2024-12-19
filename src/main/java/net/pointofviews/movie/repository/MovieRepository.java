@@ -28,7 +28,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 COUNT(CASE WHEN r IS NOT NULL AND r.disabled = false THEN r.id ELSE NULL END)
             FROM Movie m
             LEFT JOIN m.reviews r
-            WHERE r.disabled = false
             GROUP BY m.id, m.title, m.poster, m.released
             ORDER BY m.released DESC
             """)
