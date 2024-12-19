@@ -153,8 +153,10 @@ class MemberClubServiceImplTest {
             Club club = mock(Club.class);
             UUID clubId = UUID.randomUUID();
 
-            when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
-            when(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).thenReturn(Optional.empty());
+            given(clubRepository.findById(clubId)).willReturn(Optional.of(club));
+            given(memberClubRepository.findByClubIdAndMemberId(clubId, member.getId())).willReturn(Optional.empty());
+            given(memberClubRepository.countByClub(club)).willReturn(2L);
+            given(club.getMaxParticipants()).willReturn(5);
 
             // when
             memberClubService.joinClub(clubId, member);

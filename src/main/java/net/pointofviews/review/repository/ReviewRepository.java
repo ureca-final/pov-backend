@@ -109,7 +109,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                     CAST(COALESCE(SUM(CASE WHEN r.preference = 'BAD' THEN 1 ELSE 0 END), 0) AS long)
                 )
                 FROM Review r
-                WHERE r.movie.id = :movieId
+                WHERE r.movie.id = :movieId AND r.deletedAt IS NULL AND r.disabled = false
             """)
     List<ReviewPreferenceCountDto> countReviewPreferenceByMovieId(@Param("movieId") Long movieId);
 
