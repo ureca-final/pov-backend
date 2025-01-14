@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: pov
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+      timeout: 3000ms
+    cache:
+      type: redis
+
+cloud:
+  aws:
+    credentials:
+      accessKey: test-access-key
+      secretKey: test-secret-key
+    s3:
+      bucketName: test-bucket-name
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+
+jwt:
+  token:
+    secretKey: "testaccesssecretkeytestaccesssecretkeytesta"
+
+TMDb:
+  access: "testAccessKey"

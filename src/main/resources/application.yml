@@ -2,12 +2,49 @@ spring:
   application:
     name: pov
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/test
-    username: root
-    password: root
+  profiles:
+    active: dev
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    baseline-version: 1
+    out-of-order: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 단일 파일 크기 제한
+      max-request-size: 50MB   # 전체 요청 크기 제한
+
+springdoc:
+  api-docs:
+    path: /api/v3/api-docs
+  swagger-ui:
+    path: /api/docs
+    groups-order: desc
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
+
+  show-actuator: true
+  default-consumes-media-type: application/json
+
+management:
+  endpoints:
+    web:
+      base-path: /api/actuator
+
+logging:
+  level:
+    root: info
+    net.pointofviews.batch.config: warn
+    net.pointofviews.batch.config.DailyMovieLikeBatchConfig: debug
+    org.springframework.batch.core.job.SimpleStepHandler: warn
+    org.springframework.batch.core.step.AbstractStep: warn
+    org.springframework.batch.core.launch.support.SimpleJobLauncher: warn
