@@ -9,6 +9,8 @@ import net.pointofviews.movie.domain.MovieCountry;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,7 @@ public class TMDbMovieCountryWriter implements ItemWriter<List<MovieCountry>> {
     private final CountryService countryService;
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void write(Chunk<? extends List<MovieCountry>> movieCountryChunk) {
         List<MovieCountry> movieCountryList = new ArrayList<>();
 

@@ -16,6 +16,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -27,6 +29,7 @@ import java.util.Objects;
 @StepScope
 @Component
 @RequiredArgsConstructor
+@Transactional(isolation = Isolation.READ_COMMITTED)
 public class TMDbMovieDiscoverWriter implements ItemWriter<List<BatchDiscoverMovieResponse>> {
 
     private final JdbcTemplate jdbcTemplate;
