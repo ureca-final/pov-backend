@@ -12,6 +12,7 @@ import net.pointofviews.people.domain.People;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class TMDbMovieCreditWriter implements ItemWriter<CreditProcessorResponse
     private EntityManager entityManager;
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void write(Chunk<? extends CreditProcessorResponse> items) {
         // 캐시를 위한 Map 사용
         Map<Integer, People> peopleCache = loadPeopleCache(items);
@@ -96,23 +97,23 @@ public class TMDbMovieCreditWriter implements ItemWriter<CreditProcessorResponse
     }
 
     // MovieCrew Batch 저장
-    private boolean batchSaveMovieCrew(MovieCrew crew, Map<Integer, MovieCrew> crewCache) {
-        if (!crewCache.containsKey(crew.hashCode())) {
-            entityManager.persist(crew);
-            crewCache.put(crew.hashCode(), crew);
-            return true;
+    private void batchSaveMovieCrew(MovieCrew crew, Map<Integer, MovieCrew> crewCache) {
+        if (crewCache.containsKey(crew.hashCode())) {
+            return;
         }
-        return false;
+
+        entityManager.persist(crew);
+        crewCache.put(crew.hashCode(), crew);
     }
 
     // MovieCast Batch 저장
-    private boolean batchSaveMovieCast(MovieCast cast, Map<Integer, MovieCast> castCache) {
-        if (!castCache.containsKey(cast.hashCode())) {
-            entityManager.persist(cast);
-            castCache.put(cast.hashCode(), cast);
-            return true;
+    private void batchSaveMovieCast(MovieCast cast, Map<Integer, MovieCast> castCache) {
+        if (castCache.containsKey(cast.hashCode())) {
+            return;
         }
-        return false;
+
+        entityManager.persist(cast);
+        castCache.put(cast.hashCode(), cast);
     }
 
     // EntityManager Batch Insert 처리

@@ -52,6 +52,10 @@ public class TMDbTrendingMovieWriter implements ItemWriter<Movie>, StepExecution
     @Override
     public void beforeStep(StepExecution stepExecution) {
         log.info("트렌딩 영화 삭제");
+        if (redisService.getKeys(TMDB_TRENDING_KEY).isEmpty()) {
+            return;
+        }
+
         boolean isDeleted = redisService.removeKey(TMDB_TRENDING_KEY);
         if (!isDeleted) {
             throw RedisException.redisServerError(TMDB_TRENDING_KEY);
