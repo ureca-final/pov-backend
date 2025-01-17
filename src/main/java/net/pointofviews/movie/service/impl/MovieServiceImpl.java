@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -134,6 +133,11 @@ public class MovieServiceImpl implements MovieService {
         List<Long> trendingMovieId = redisService.getSetMembers("trending").stream().map(Long::parseLong).toList();
 
         return new MovieTrendingListResponse(movieRepository.findAllTrendingMovie(trendingMovieId, memberId));
+    }
+
+    @Override
+    public void deleteAllMovies(List<Long> ids) {
+        movieRepository.deleteAllByIdInBatch(ids);
     }
 
     private List<MovieGenre> convertStringsToMovieGenre(List<String> stringGenres) {

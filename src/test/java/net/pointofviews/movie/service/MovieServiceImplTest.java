@@ -4,25 +4,18 @@ import net.pointofviews.common.domain.CodeGroupEnum;
 import net.pointofviews.common.service.CommonCodeService;
 import net.pointofviews.country.domain.Country;
 import net.pointofviews.member.domain.Member;
-import net.pointofviews.movie.domain.*;
+import net.pointofviews.movie.domain.KoreanFilmRating;
+import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.dto.request.PutMovieRequest;
 import net.pointofviews.movie.dto.request.PutMovieRequest.UpdateMoviePeopleRequest;
 import net.pointofviews.movie.dto.response.MovieListResponse;
 import net.pointofviews.movie.dto.response.MovieResponse;
-import net.pointofviews.movie.dto.response.ReadDetailMovieResponse;
-import net.pointofviews.movie.dto.response.SearchMovieResponse;
 import net.pointofviews.movie.exception.MovieException;
-import net.pointofviews.movie.repository.MovieContentRepository;
-import net.pointofviews.movie.repository.MovieLikeCountRepository;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.impl.MovieCountryServiceImpl;
 import net.pointofviews.movie.service.impl.MoviePeopleServiceImpl;
 import net.pointofviews.movie.service.impl.MovieServiceImpl;
 import net.pointofviews.people.domain.People;
-import net.pointofviews.review.domain.Review;
-import net.pointofviews.review.dto.ReviewDetailsWithLikeCountDto;
-import net.pointofviews.review.dto.ReviewPreferenceCountDto;
-import net.pointofviews.review.repository.ReviewRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,16 +23,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -141,7 +134,6 @@ public class MovieServiceImplTest {
         }
     }
 
-
     @Nested
     class ReadMovies {
         @Test
@@ -155,7 +147,7 @@ public class MovieServiceImplTest {
 
             // Mocking 데이터 생성
             List<Object[]> mockResults = new ArrayList<>();
-            mockResults.add(new Object[]{1L,"Inception", "https://example.com/poster.jpg", LocalDate.now(), true, 123, 10});
+            mockResults.add(new Object[]{1L, "Inception", "https://example.com/poster.jpg", LocalDate.now(), true, 123, 10});
 
 
             Slice<Object[]> mockSlice = new PageImpl<>(mockResults, pageable, mockResults.size());
@@ -175,6 +167,26 @@ public class MovieServiceImplTest {
             Assertions.assertThat(movie.poster()).isEqualTo("https://example.com/poster.jpg");
             Assertions.assertThat(movie.movieLikeCount()).isEqualTo(123);
             Assertions.assertThat(movie.movieReviewCount()).isEqualTo(10);
+        }
+    }
+
+    @Nested
+    class DeleteAllMovies {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 영화_배치_삭제_성공() {
+                // given
+                List<Long> ids = List.of(1L, 2L, 3L);
+
+                // when
+                movieService.deleteAllMovies(ids);
+
+                // then
+                verify(movieRepository).deleteAllByIdInBatch(ids);
+            }
         }
     }
 
