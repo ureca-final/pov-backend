@@ -6,6 +6,7 @@ import net.pointofviews.movie.dto.response.MovieListResponse;
 import net.pointofviews.movie.dto.response.MovieTrendingListResponse;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface MovieService {
@@ -18,4 +19,6 @@ public interface MovieService {
     MovieListResponse readMovies(UUID memberId, Pageable pageable);
 
     MovieTrendingListResponse getTrendingMovies(UUID memberId);
+
+    void deleteAllMovies(List<Long> ids);
 }

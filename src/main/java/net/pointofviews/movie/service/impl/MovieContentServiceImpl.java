@@ -8,7 +8,6 @@ import net.pointofviews.movie.domain.Movie;
 import net.pointofviews.movie.domain.MovieContent;
 import net.pointofviews.movie.domain.MovieContentType;
 import net.pointofviews.movie.exception.MovieContentException;
-import net.pointofviews.movie.exception.MovieException;
 import net.pointofviews.movie.repository.MovieContentRepository;
 import net.pointofviews.movie.repository.MovieRepository;
 import net.pointofviews.movie.service.MovieContentService;
@@ -17,13 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static net.pointofviews.movie.exception.MovieException.movieNotFound;
 
 @Service
 @RequiredArgsConstructor
-public class MovieContentServiceImpl implements MovieContentService{
+public class MovieContentServiceImpl implements MovieContentService {
 
     private final MovieRepository movieRepository;
     private final MovieContentRepository movieContentRepository;
@@ -72,7 +70,7 @@ public class MovieContentServiceImpl implements MovieContentService{
             throw MovieContentException.invalidMovieContentIds(ids.size(), contents.size());
         }
 
-        // S3에서 각 URL의 파일 삭제
+        // S3에서 각 URL 의 파일 삭제
         for (MovieContent content : contents) {
             s3Service.deleteImage(content.getContent());
         }
@@ -91,7 +89,7 @@ public class MovieContentServiceImpl implements MovieContentService{
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> movieNotFound(movieId));
 
-        for(String url : urls) {
+        for (String url : urls) {
             if (!ValidationUtils.isValidYouTubeUrl(url)) {
                 throw MovieContentException.invalidYouTubeURL();
             }

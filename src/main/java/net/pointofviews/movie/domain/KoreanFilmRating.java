@@ -23,8 +23,8 @@ public enum KoreanFilmRating {
             return KoreanFilmRating.NONE; // 기본값 처리
         }
 
-        return switch (tmdbCode) {
-            case "ALL" -> KoreanFilmRating.ALL;
+        return switch (tmdbCode.toLowerCase()) {
+            case "all" -> KoreanFilmRating.ALL;
             case "7" -> KoreanFilmRating.SEVEN;
             case "12" -> KoreanFilmRating.TWELVE;
             case "15" -> KoreanFilmRating.FIFTEEN;
